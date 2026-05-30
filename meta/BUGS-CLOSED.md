@@ -15,3 +15,5 @@
 15. In Prefs: When adding a predefined monitor the time is set to 0 minutes. It should be at least 60 secs. #closed/2026-05-30
 16. In Prefs: When I duplicate a monitor and then delete the duplicate, both monitors are deleted. Also: the duplicated monitor should have a " Copy" suffix. #closed/2026-05-30
 17. In Prefs: Add a way to manually sort the list of defined monitors. #closed/2026-05-30
+18. In Prefs: The CPU Frequency monitor calls awk etc. Could this be implemented in JavaScript, too? #closed/2026-05-30
+19. In Prefs: All predefined monitors are shell commands. Weren't they implemented as JavaScript? (I previously added and removed all predefined monitors.) #closed/2026-05-30

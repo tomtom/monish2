@@ -102,14 +102,10 @@ describe('PRESET_MONITORS', () => {
         }
     });
 
-    it('non-sampled presets have no type or shell type', () => {
-        const shellNames = ['CPU Frequency', 'CPU Temperature', 'RAM Used', 'RAM Free',
-            'Swap Usage', 'Thermal Zone 1', 'Battery Level',
-            'Top CPU Processes', 'Top MEM Processes'];
-        for (const name of shellNames) {
-            const preset = PRESET_MONITORS.find(p => p.name === name);
-            expect(preset).toBeDefined();
-            expect(preset.type === undefined || preset.type === MonitorType.SHELL).toBe(true);
+    it('all presets use javascript type', () => {
+        // All presets are now implemented in GJS so no external tools are needed.
+        for (const preset of PRESET_MONITORS) {
+            expect(preset.type).toBe(MonitorType.JAVASCRIPT);
         }
     });
 });
