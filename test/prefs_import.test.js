@@ -68,6 +68,16 @@ describe('prefs.js duplicate action', () => {
     it('inserts copy immediately after original (splice pattern)', () => {
         expect(prefsSource).toContain('all.splice(idx + 1, 0, copy)');
     });
+
+    it('excludes original id from duplicate so a fresh id is generated', () => {
+        // Spreading the original id caused both monitors to share the same id,
+        // making delete remove both. The fix destructures id out before spreading.
+        expect(prefsSource).toContain('id: _id');
+    });
+
+    it('appends Copy suffix to duplicated monitor name', () => {
+        expect(prefsSource).toContain('name: `${monitor.name} Copy`');
+    });
 });
 
 describe('extension.js startup grace period', () => {

@@ -348,7 +348,9 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         dupBtn.connect('clicked', () => {
             const all = deserializeMonitors(settings.get_string('monitors'));
             const idx  = all.findIndex(m => m.id === monitor.id);
-            const copy = createMonitor({...monitor}); // new id via createMonitor
+            // Exclude id from the spread so createMonitor() assigns a fresh one.
+            const {id: _id, ...rest} = monitor;
+            const copy = createMonitor({...rest, name: `${monitor.name} Copy`});
             all.splice(idx + 1, 0, copy);
             settings.set_string('monitors', serializeMonitors(all));
             refresh();
