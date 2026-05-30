@@ -32,3 +32,17 @@ describe('prefs.js ExtensionPreferences import', () => {
         expect(prefsSource).not.toContain(OLD_PREFS_PATH);
     });
 });
+
+describe('prefs.js refreshMonitorRows safety', () => {
+    it('does not use while(get_last_child()) to clear rows', () => {
+        // Adw.PreferencesGroup always has internal libadwaita children so
+        // that loop never terminates — it would hang the prefs window.
+        expect(prefsSource).not.toContain('get_last_child()');
+    });
+
+    it('buildMonitorRows returns the added rows (return added pattern)', () => {
+        // The function must return the rows it added so refreshMonitorRows
+        // can remove exactly those rows without touching internal children.
+        expect(prefsSource).toContain('return added');
+    });
+});

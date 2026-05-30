@@ -215,16 +215,15 @@ export default class MonishPreferences extends ExtensionPreferences {
         });
         page.add(monitorsGroup);
 
-        // Rebuilds the monitor list rows from GSettings
-        const refreshMonitorRows = () => {
-            // Remove existing dynamic rows (all but the Add button row)
-            while (monitorsGroup.get_last_child()) {
-                monitorsGroup.remove(monitorsGroup.get_last_child());
-            }
-            buildMonitorRows(monitorsGroup, settings, window, refreshMonitorRows);
-        };
+        // Track rows built by buildMonitorRows so refreshMonitorRows can
+        // remove exactly those rows without touching libadwaita's internal
+        // group children (which would cause an infinite removal loop).
+        let builtRows = buildMonitorRows(monitorsGroup, settings, window, () => refreshMonitorRows());
 
-        buildMonitorRows(monitorsGroup, settings, window, refreshMonitorRows);
+        const refreshMonitorRows = () => {
+            builtRows.forEach(row => monitorsGroup.remove(row));
+            builtRows = buildMonitorRows(monitorsGroup, settings, window, () => refreshMonitorRows());
+        };
 
         // Add Monitor button row
         const addRow = new Adw.ButtonRow({title: 'Add Monitor'});
@@ -278,13 +277,18 @@ export default class MonishPreferences extends ExtensionPreferences {
  * Populate a PreferencesGroup with one ActionRow per monitor.
  * Rows include Edit and Delete buttons.
  *
+ * Returns the array of widgets added so callers can remove exactly those
+ * rows later without touching libadwaita's internal group children.
+ *
  * @param {Adw.PreferencesGroup} group
  * @param {Gio.Settings} settings
  * @param {Gtk.Window} parentWindow
  * @param {function():void} refresh - Called after any mutation.
+ * @returns {Gtk.Widget[]} The rows added to group.
  */
 function buildMonitorRows(group, settings, parentWindow, refresh) {
     const monitors = deserializeMonitors(settings.get_string('monitors'));
+    const added = [];
 
     if (monitors.length === 0) {
         const emptyRow = new Adw.ActionRow({
@@ -293,7 +297,8 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             sensitive: false,
         });
         group.add(emptyRow);
-        return;
+        added.push(emptyRow);
+        return added;
     }
 
     for (const monitor of monitors) {
@@ -342,7 +347,10 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         row.add_suffix(editBtn);
         row.add_suffix(delBtn);
         group.add(row);
+        added.push(row);
     }
+
+    return added;
 }
 
 // ---------------------------------------------------------------------------
