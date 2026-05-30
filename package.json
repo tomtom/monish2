@@ -1,0 +1,22 @@
+{
+    "name": "monish",
+    "version": "1.0.0",
+    "description": "System monitor GNOME Shell extension",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "test":  "NODE_OPTIONS=--experimental-vm-modules jest",
+        "lint":  "eslint lib/ test/",
+        "audit": "npm audit --audit-level=moderate"
+    },
+    "devDependencies": {
+        "@jest/globals": "^29.0.0",
+        "eslint":        "^8.0.0",
+        "jest":          "^29.0.0"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "testMatch":       ["**/test/**/*.test.js"],
+        "transform":       {}
+    }
+}

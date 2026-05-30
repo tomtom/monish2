@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  GSettings schema for the Monish extension.
+
+  The entire monitor configuration is stored as a JSON string so that adding
+  fields to the monitor model does not require schema migrations.  The
+  path matches the extension UUID so that getSettings() works without args.
+-->
+<schemalist gettext-domain="monish2@thm.link">
+
+  <schema id="org.gnome.shell.extensions.monish"
+          path="/org/gnome/shell/extensions/monish/">
+
+    <!--
+      monitors: JSON-encoded array of monitor objects.
+      An empty array is the correct default — the user starts with no monitors
+      and can add custom ones or load presets from the preferences window.
+    -->
+    <key name="monitors" type="s">
+      <default>'[]'</default>
+      <summary>Monitor definitions (JSON)</summary>
+      <description>
+        JSON array of monitor objects.  Each object has the fields:
+        id, name, command, intervalSeconds, outputRegex,
+        cautionPatterns (array), dangerPatterns (array), enabled.
+      </description>
+    </key>
+
+  </schema>
+
+</schemalist>

@@ -1,0 +1,22 @@
+- a gnome shell extension that
+    - The extension installs a monitor-like icon menu in the toolbar. When the user clicks on the toolbar a menu opens: a list of monitor names + latest value, plus a "Settings" item to edit the list of monitors.
+    - lets the user define a set of monitors:
+        - a name
+        - a command/bash script/javascript
+        - an intervall in seconds/minutes/hours
+        - a regular expression to transform the command's output into a monitor value
+        - a list of value sets or regular expressions that label the value as "CAUTION", "DANGER" (indicated by an appropriate icon and a color, e.g., yellow and red background).
+            - when at least one value is labelled as CAUTION or DANGER then the menu icon is marked with the same icon/color.
+    - Make sure monitors are executed with a timeout.
+    - When the execution of a monitor fails or experiences a timeout, indicate that with a "!" (or an attention icon) next to the icon and before each monitor name.     
+    - Offer users a set of useful pre-defined monitors (if it is possible to ensure they work on all major linux distributions: fedora, debian, ubuntu, arch etc.) like:
+        - CPU(usage, clock, temp)
+        - RAM(free, used)
+        - NET (download, upload)
+        - Swap usage
+        - Thermal metrics
+        - Battery level
+        - 3 Processes with highest CPU usage
+        - 3 Processes with highest MEM usage
+
+

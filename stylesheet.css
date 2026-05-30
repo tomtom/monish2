@@ -1,0 +1,57 @@
+/* Monish extension stylesheet — loaded by GNOME Shell for the indicator. */
+
+/* ---- Panel indicator ---- */
+
+.monish-panel-box {
+    spacing: 2px;
+}
+
+/* Error badge ("!") shown beside the icon when any monitor fails */
+.monish-error-badge {
+    font-size: 0.8em;
+    font-weight: bold;
+    padding: 0 2px;
+}
+
+/* Indicator colour changes with worst monitor status */
+.monish-indicator-caution {
+    color: #e5a50a;
+}
+
+.monish-indicator-danger {
+    color: #e01b24;
+}
+
+.monish-indicator-error {
+    color: #c64600;
+}
+
+/* ---- Popup menu rows ---- */
+
+.monish-status-icon {
+    margin-right: 6px;
+}
+
+.monish-monitor-name {
+    font-weight: bold;
+}
+
+.monish-monitor-value {
+    font-family: monospace;
+    color: #9a9996;
+    margin-left: 8px;
+}
+
+/* Row background tints per status */
+.monish-status-caution .monish-monitor-value {
+    color: #e5a50a;
+}
+
+.monish-status-danger .monish-monitor-value {
+    color: #e01b24;
+}
+
+.monish-status-error .monish-monitor-value {
+    color: #c64600;
+    font-style: italic;
+}
