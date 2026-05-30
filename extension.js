@@ -74,8 +74,9 @@ class MonishIndicator extends PanelMenu.Button {
     /**
      * @param {Gio.Settings} settings - Extension GSettings instance.
      * @param {function():void} openPrefs - Callback to open the prefs window.
+     * @param {string} extensionPath - Filesystem path to the extension directory.
      */
-    _init(settings, openPrefs) {
+    _init(settings, openPrefs, extensionPath) {
         super._init(0.0, 'Monish System Monitor');
 
         this._settings   = settings;
@@ -88,7 +89,7 @@ class MonishIndicator extends PanelMenu.Button {
         // Panel icon + optional error badge
         this._panelBox = new St.BoxLayout({style_class: `${CSS_PREFIX}-panel-box`});
         this._panelIcon = new St.Icon({
-            icon_name: 'utilities-system-monitor-symbolic',
+            gicon: Gio.icon_new_for_string(`${extensionPath}/icons/monish-symbolic.svg`),
             style_class: 'system-status-icon',
         });
         this._errorBadge = new St.Label({
@@ -339,7 +340,8 @@ export default class MonishExtension extends Extension {
         this._settings  = this.getSettings();
         this._indicator = new MonishIndicator(
             this._settings,
-            () => this.openPreferences()
+            () => this.openPreferences(),
+            this.path
         );
         Main.panel.addToStatusArea(this.uuid, this._indicator);
     }
