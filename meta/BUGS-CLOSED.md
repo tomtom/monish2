@@ -18,3 +18,5 @@
 18. In Prefs: The CPU Frequency monitor calls awk etc. Could this be implemented in JavaScript, too? #closed/2026-05-30
 19. In Prefs: All predefined monitors are shell commands. Weren't they implemented as JavaScript? (I previously added and removed all predefined monitors.) #closed/2026-05-30
 20. Add on-demand monitors: instead of the value, display a "Update" button. When the user clicks the button, the button text is replaced with the value. The user can define how long the value is valid. When the time period is over, show "Update" again. #closed/2026-05-30
+21. Support monitors with multi-line output - the output is displayed below the monitor name. #closed/2026-05-30
+22. Change the default value for Schedule to 1 minute. When planning to run the command, convert the timeing to seconds and add +/-5% random time units. Add a jitter (default: 5%) option to prefs. When the jitter is 0, run exactly on time. #closed/2026-05-30
