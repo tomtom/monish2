@@ -30,6 +30,7 @@ import {
     evaluateStatus,
     worstStatus,
     intervalToMs,
+    formatError,
 } from './lib/monitor.js';
 import {executeCommand, executeJavaScript} from './lib/executor.js';
 
@@ -178,6 +179,8 @@ class MonishIndicator extends PanelMenu.Button {
             text: '…',
             style_class: `${CSS_PREFIX}-monitor-value`,
         });
+        // Allow multi-line values (e.g. top-process lists) to wrap vertically.
+        valueLabel.get_clutter_text().set_line_wrap(true);
 
         item.add_child(statusIcon);
         item.add_child(nameLabel);
@@ -224,8 +227,7 @@ class MonishIndicator extends PanelMenu.Button {
             const status = evaluateStatus(value, monitor.cautionPatterns, monitor.dangerPatterns);
             this._setMonitorResult(monitor.id, value, status);
         } catch (e) {
-            const msg = e.message === 'timeout' ? 'timeout' : 'error';
-            this._setMonitorResult(monitor.id, msg, MonitorStatus.ERROR);
+            this._setMonitorResult(monitor.id, formatError(e), MonitorStatus.ERROR);
         }
     }
 

@@ -8,3 +8,4 @@
 9. In Prefs: Predefined monitors should not run more frequent than every 60s. #closed/2026-05-30
 10. E.g., the CPU Temperature monitor is marked as CAUTION (yellow) but the icon in the GNOME top bar is unchanged. It should also be shown in yellow with an exclamation mark icon (as overlay or be replaced by it). #closed/2026-05-30
 6. In Prefs: Frequent "Extension not responding" warnings with the option to force quit the extension. #closed/2026-05-30
+11. Error with the CPU Usage, Net Download, and Net Upload presets. If an error occurs, an informative message should be displayed either in the menu or in prefs. #closed/2026-05-30

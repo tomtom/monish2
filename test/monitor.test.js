@@ -15,6 +15,7 @@ import {
     serializeMonitors,
     validateMonitor,
     createMonitor,
+    formatError,
 } from '../lib/monitor.js';
 
 import {describe, it, expect} from '@jest/globals';
@@ -229,6 +230,35 @@ describe('validateMonitor', () => {
 // ---------------------------------------------------------------------------
 // createMonitor
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// formatError
+// ---------------------------------------------------------------------------
+
+describe('formatError', () => {
+    it('returns "timeout" for timeout errors', () => {
+        expect(formatError(new Error('timeout'))).toBe('timeout');
+    });
+
+    it('returns the error message for regular errors', () => {
+        expect(formatError(new Error('gjs not found in PATH'))).toBe('gjs not found in PATH');
+    });
+
+    it('returns only the first line for multi-line messages', () => {
+        expect(formatError(new Error('line1\nline2\nline3'))).toBe('line1');
+    });
+
+    it('truncates messages longer than 80 chars with ellipsis', () => {
+        const msg = 'a'.repeat(100);
+        const result = formatError(new Error(msg));
+        expect(result.length).toBe(80);
+        expect(result.endsWith('...')).toBe(true);
+    });
+
+    it('returns "error" for empty message', () => {
+        expect(formatError(new Error(''))).toBe('error');
+    });
+});
 
 describe('MonitorType', () => {
     it('has SHELL and JAVASCRIPT values', () => {
