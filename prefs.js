@@ -338,6 +338,22 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             });
         });
 
+        // Duplicate button — inserts a copy immediately after this row
+        const dupBtn = new Gtk.Button({
+            icon_name:   'edit-copy-symbolic',
+            valign:      Gtk.Align.CENTER,
+            css_classes: ['flat'],
+            tooltip_text: 'Duplicate',
+        });
+        dupBtn.connect('clicked', () => {
+            const all = deserializeMonitors(settings.get_string('monitors'));
+            const idx  = all.findIndex(m => m.id === monitor.id);
+            const copy = createMonitor({...monitor}); // new id via createMonitor
+            all.splice(idx + 1, 0, copy);
+            settings.set_string('monitors', serializeMonitors(all));
+            refresh();
+        });
+
         // Delete button
         const delBtn = new Gtk.Button({
             icon_name:   'user-trash-symbolic',
@@ -353,6 +369,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
 
         row.add_suffix(toggle);
         row.add_suffix(editBtn);
+        row.add_suffix(dupBtn);
         row.add_suffix(delBtn);
         group.add(row);
         added.push(row);

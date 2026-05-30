@@ -57,3 +57,14 @@ describe('prefs.js preset hiding', () => {
         expect(prefsSource).toContain('addedNames.has(preset.name)');
     });
 });
+
+describe('prefs.js duplicate action', () => {
+    it('adds a duplicate button to monitor rows', () => {
+        expect(prefsSource).toContain('edit-copy-symbolic');
+        expect(prefsSource).toContain('Duplicate');
+    });
+
+    it('inserts copy immediately after original (splice pattern)', () => {
+        expect(prefsSource).toContain('all.splice(idx + 1, 0, copy)');
+    });
+});
