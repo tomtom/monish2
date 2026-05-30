@@ -12,8 +12,6 @@
 import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 import Adw from 'gi://Adw';
 import Gtk from 'gi://Gtk';
-import GObject from 'gi://GObject';
-import GLib from 'gi://GLib';
 
 import {
     deserializeMonitors,
@@ -155,6 +153,32 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     });
     content.append(labeledRow('Danger Patterns', dangerEntry));
 
+    // ---- On Demand toggle ----
+    const onDemandToggle = new Gtk.Switch({
+        active: data.onDemand ?? false,
+        valign: Gtk.Align.CENTER,
+    });
+    content.append(labeledRow('On Demand', onDemandToggle));
+
+    // ---- Valid for (seconds) — shown only when On Demand is active ----
+    const validSecSpin = new Gtk.SpinButton({
+        adjustment: new Gtk.Adjustment({
+            value:          data.onDemandValidSeconds ?? 60,
+            lower:          5,
+            upper:          3600,
+            step_increment: 5,
+        }),
+        numeric: true,
+        hexpand: true,
+    });
+    const validForRow = labeledRow('Valid for (s)', validSecSpin);
+    validForRow.visible = data.onDemand ?? false;
+    content.append(validForRow);
+
+    onDemandToggle.connect('notify::active', () => {
+        validForRow.visible = onDemandToggle.active;
+    });
+
     // ---- Error label ----
     const errorLabel = new Gtk.Label({
         label:     '',
@@ -177,13 +201,15 @@ function showMonitorEditDialog(parent, monitor, onSave) {
 
             const updated = {
                 ...data,
-                name:            nameEntry.get_text().trim(),
-                command:         cmd,
-                type:            MONITOR_TYPE_VALUES[typeDropDown.get_selected()] ?? MonitorType.SHELL,
-                intervalSeconds: totalSec,
-                outputRegex:     regexEntry.get_text().trim(),
-                cautionPatterns: splitPatterns(cautionEntry.get_text()),
-                dangerPatterns:  splitPatterns(dangerEntry.get_text()),
+                name:                 nameEntry.get_text().trim(),
+                command:              cmd,
+                type:                 MONITOR_TYPE_VALUES[typeDropDown.get_selected()] ?? MonitorType.SHELL,
+                intervalSeconds:      totalSec,
+                outputRegex:          regexEntry.get_text().trim(),
+                cautionPatterns:      splitPatterns(cautionEntry.get_text()),
+                dangerPatterns:       splitPatterns(dangerEntry.get_text()),
+                onDemand:             onDemandToggle.active,
+                onDemandValidSeconds: validSecSpin.get_value_as_int(),
             };
 
             const errors = validateMonitor(updated);
@@ -274,6 +300,33 @@ export default class MonishPreferences extends ExtensionPreferences {
             refreshMonitorRows();
             refreshPresetRows();
         };
+
+        // ---- Schedule Settings group ----
+        const scheduleGroup = new Adw.PreferencesGroup({
+            title:       'Schedule Settings',
+            description: 'Applied globally to all scheduled monitors.',
+        });
+        page.add(scheduleGroup);
+
+        const jitterRow = new Adw.ActionRow({
+            title:    'Schedule Jitter (%)',
+            subtitle: 'Random ±% offset on each poll interval — set to 0 for exact timing',
+        });
+        const jitterSpin = new Gtk.SpinButton({
+            adjustment: new Gtk.Adjustment({
+                value:          settings.get_int('jitter-percent'),
+                lower:          0,
+                upper:          50,
+                step_increment: 1,
+            }),
+            numeric: true,
+            valign:  Gtk.Align.CENTER,
+        });
+        jitterSpin.connect('value-changed', () => {
+            settings.set_int('jitter-percent', jitterSpin.get_value_as_int());
+        });
+        jitterRow.add_suffix(jitterSpin);
+        scheduleGroup.add(jitterRow);
     }
 }
 

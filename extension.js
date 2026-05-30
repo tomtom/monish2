@@ -30,6 +30,7 @@ import {
     evaluateStatus,
     worstStatus,
     intervalToMs,
+    jitteredInterval,
     formatError,
 } from './lib/monitor.js';
 import {executeCommand, executeJavaScript} from './lib/executor.js';
@@ -40,6 +41,9 @@ import {executeCommand, executeJavaScript} from './lib/executor.js';
 
 /** Settings key that holds the JSON-serialised monitor array. */
 const SETTINGS_KEY = 'monitors';
+
+/** Settings key that holds the global schedule jitter percentage. */
+const JITTER_KEY = 'jitter-percent';
 
 /** CSS class prefix applied to indicator and menu items for status colouring. */
 const CSS_PREFIX = 'monish';
@@ -85,12 +89,13 @@ class MonishIndicator extends PanelMenu.Button {
     _init(settings, openPrefs, extensionPath) {
         super._init(0.0, 'Monish System Monitor');
 
-        this._settings   = settings;
-        this._openPrefs  = openPrefs;
-        this._timers     = new Map();   // monitorId -> GLib source id
-        this._results    = new Map();   // monitorId -> {value, status}
-        this._monitors   = [];          // current monitor config array
-        this._menuItems  = new Map();   // monitorId -> {row, statusIcon, valueLabel}
+        this._settings      = settings;
+        this._openPrefs     = openPrefs;
+        this._timers        = new Map();   // monitorId -> GLib source id (scheduled monitors)
+        this._expiryTimers  = new Map();   // monitorId -> GLib source id (on-demand validity)
+        this._results       = new Map();   // monitorId -> {value, status}
+        this._monitors      = [];          // current monitor config array
+        this._menuItems     = new Map();   // monitorId -> {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, updateBtn?}
 
         // Panel icon + optional error badge
         this._panelBox = new St.BoxLayout({style_class: `${CSS_PREFIX}-panel-box`});
@@ -112,9 +117,13 @@ class MonishIndicator extends PanelMenu.Button {
         // Pass the startup grace period so monitors are not polled immediately.
         this._buildMenu(STARTUP_GRACE_MS);
 
-        // React to settings changes
+        // React to settings changes (monitors config or jitter percentage)
         this._settingsChangedId = this._settings.connect(
             `changed::${SETTINGS_KEY}`,
+            () => this._reloadMonitors()
+        );
+        this._jitterChangedId = this._settings.connect(
+            `changed::${JITTER_KEY}`,
             () => this._reloadMonitors()
         );
     }
@@ -132,7 +141,7 @@ class MonishIndicator extends PanelMenu.Button {
      *   triggered by settings changes so new values appear immediately.
      */
     _buildMenu(firstRunDelay = 0) {
-        this._stopAllTimers();
+        this._stopAllTimers();  // clears _timers and _expiryTimers
         this.menu.removeAll();
         this._menuItems.clear();
         this._results.clear();
@@ -168,7 +177,19 @@ class MonishIndicator extends PanelMenu.Button {
 
     /**
      * Add a single monitor row to the popup menu.
-     * Row layout: [status-icon] [name label ............ value label]
+     *
+     * Layout (non-on-demand, single-line value):
+     *   [statusIcon] [nameLabel …] [inlineValueLabel]
+     *
+     * Layout (non-on-demand, multi-line value):
+     *   [statusIcon] [nameLabel …]
+     *                [mlValueLabel spanning full width]
+     *
+     * Layout (on-demand, before click):
+     *   [statusIcon] [nameLabel …] [Update button]
+     *
+     * Layout (on-demand, after click, value shown):
+     *   Same as non-on-demand, then reverts after onDemandValidSeconds.
      *
      * @param {object} monitor - Monitor config object.
      */
@@ -184,22 +205,54 @@ class MonishIndicator extends PanelMenu.Button {
         const nameLabel = new St.Label({
             text: monitor.name,
             style_class: `${CSS_PREFIX}-monitor-name`,
-            x_expand: true,
         });
 
-        const valueLabel = new St.Label({
-            text: '…',
+        // Vertical box: header row (name + right-side widget) + optional multi-line label
+        const textBox = new St.BoxLayout({vertical: true, x_expand: true});
+        const headerBox = new St.BoxLayout({x_expand: true});
+        headerBox.add_child(nameLabel);
+
+        // On-demand: show an "Update" button instead of a polling value
+        let updateBtn = null;
+        if (monitor.onDemand) {
+            updateBtn = new St.Button({
+                label:       'Update',
+                style_class: `${CSS_PREFIX}-update-btn`,
+                reactive:    true,
+            });
+            updateBtn.connect('clicked', () => {
+                updateBtn.reactive = false;
+                updateBtn.label    = '…';
+                this._runMonitor(monitor);
+            });
+            headerBox.add_child(updateBtn);
+        }
+
+        // Inline value label — right side of header row; hidden while on-demand button shows
+        const inlineValueLabel = new St.Label({
+            text:        monitor.onDemand ? '' : '…',
             style_class: `${CSS_PREFIX}-monitor-value`,
+            visible:     !monitor.onDemand,
         });
-        // Allow multi-line values (e.g. top-process lists) to wrap vertically.
-        valueLabel.get_clutter_text().set_line_wrap(true);
+        headerBox.add_child(inlineValueLabel);
+
+        // Multi-line label — below the header row; hidden until value has newlines
+        const mlValueLabel = new St.Label({
+            text:        '',
+            style_class: `${CSS_PREFIX}-monitor-value-multiline`,
+            visible:     false,
+            x_expand:    true,
+        });
+        mlValueLabel.get_clutter_text().set_line_wrap(true);
+
+        textBox.add_child(headerBox);
+        textBox.add_child(mlValueLabel);
 
         item.add_child(statusIcon);
-        item.add_child(nameLabel);
-        item.add_child(valueLabel);
+        item.add_child(textBox);
 
         this.menu.addMenuItem(item);
-        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, valueLabel});
+        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, updateBtn});
     }
 
     // -----------------------------------------------------------------------
@@ -208,24 +261,35 @@ class MonishIndicator extends PanelMenu.Button {
 
     /**
      * Schedule a monitor for repeated execution.
-     * An optional first-run delay avoids polling during GNOME Shell startup.
-     * After the first run the monitor repeats at its configured interval.
+     * On-demand monitors are skipped — they run only when the user clicks Update.
+     * Each repeat interval is independently jittered so polls don't cluster.
      *
      * @param {object} monitor
      * @param {number} [firstRunDelay=0] - Milliseconds before the first poll.
      */
     _scheduleMonitor(monitor, firstRunDelay = 0) {
-        const intervalMs = Math.max(1000, intervalToMs(monitor.intervalSeconds, 'seconds'));
+        if (monitor.onDemand) return;
 
-        // One-shot timer for the first run; replaces itself with the repeating timer.
+        const intervalMs    = Math.max(1000, intervalToMs(monitor.intervalSeconds, 'seconds'));
+        const jitterPercent = this._settings.get_int(JITTER_KEY);
+
+        // Each run self-schedules the next one so jitter is resampled every interval.
+        const scheduleNext = () => {
+            const ms       = jitteredInterval(intervalMs, jitterPercent);
+            const sourceId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, ms, () => {
+                this._timers.delete(monitor.id);
+                this._runMonitor(monitor);
+                scheduleNext();
+                return GLib.SOURCE_REMOVE;
+            });
+            this._timers.set(monitor.id, sourceId);
+        };
+
+        // One-shot delay before the first run; then switches to self-scheduling.
         const firstId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, firstRunDelay, () => {
             this._timers.delete(monitor.id);
             this._runMonitor(monitor);
-            const sourceId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, intervalMs, () => {
-                this._runMonitor(monitor);
-                return GLib.SOURCE_CONTINUE;
-            });
-            this._timers.set(monitor.id, sourceId);
+            scheduleNext();
             return GLib.SOURCE_REMOVE;
         });
         this._timers.set(monitor.id, firstId);
@@ -252,6 +316,11 @@ class MonishIndicator extends PanelMenu.Button {
 
     /**
      * Update stored result and refresh the corresponding menu row + panel icon.
+     * For on-demand monitors: hides the Update button, shows the value, then
+     * schedules a one-shot timer to revert back to the button after the monitor's
+     * validity period expires.
+     * For all monitors: chooses inline (single-line) or below-name (multi-line)
+     * display based on whether the value contains newlines.
      *
      * @param {string} id     - Monitor id.
      * @param {string} value  - Extracted display value.
@@ -262,14 +331,58 @@ class MonishIndicator extends PanelMenu.Button {
 
         const entry = this._menuItems.get(id);
         if (entry) {
-            entry.valueLabel.text = value;
+            // On-demand: reveal value and arm expiry timer
+            if (entry.updateBtn) {
+                entry.updateBtn.visible = false;
+
+                const monitor  = this._monitors.find(m => m.id === id);
+                const validMs  = Math.max(1000, (monitor?.onDemandValidSeconds ?? 60) * 1000);
+                const existing = this._expiryTimers.get(id);
+                if (existing) GLib.source_remove(existing);
+                const timerId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, validMs, () => {
+                    this._resetOnDemandMonitor(id);
+                    this._expiryTimers.delete(id);
+                    return GLib.SOURCE_REMOVE;
+                });
+                this._expiryTimers.set(id, timerId);
+            }
+
+            // Choose inline vs below-name layout based on newlines in value
+            const isMulti = value.includes('\n');
+            entry.inlineValueLabel.visible = !isMulti;
+            entry.inlineValueLabel.text    = isMulti ? '' : value;
+            entry.mlValueLabel.visible     = isMulti;
+            entry.mlValueLabel.text        = isMulti ? value : '';
+
             entry.statusIcon.icon_name = STATUS_ICONS[status] ?? STATUS_ICONS[MonitorStatus.NORMAL];
-            // Remove all status CSS classes, then add the current one
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));
             entry.item.add_style_class_name(`${CSS_PREFIX}-status-${status}`);
         }
 
+        this._updatePanelIcon();
+    }
+
+    /**
+     * Revert an on-demand monitor back to its "Update" button state.
+     * Called when the validity timer fires.  Clears the stored result so the
+     * panel icon no longer reflects this monitor's last value.
+     *
+     * @param {string} id - Monitor id.
+     */
+    _resetOnDemandMonitor(id) {
+        this._results.delete(id);
+        const entry = this._menuItems.get(id);
+        if (entry?.updateBtn) {
+            entry.updateBtn.visible    = true;
+            entry.updateBtn.reactive   = true;
+            entry.updateBtn.label      = 'Update';
+            entry.inlineValueLabel.visible = false;
+            entry.mlValueLabel.visible     = false;
+            entry.statusIcon.icon_name = STATUS_ICONS[MonitorStatus.PENDING];
+            const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
+            styles.forEach(c => entry.item.remove_style_class_name(c));
+        }
         this._updatePanelIcon();
     }
 
@@ -325,14 +438,18 @@ class MonishIndicator extends PanelMenu.Button {
     // -----------------------------------------------------------------------
 
     /**
-     * Cancel every active GLib timer.  Must be called before destroying the
-     * indicator to avoid orphaned sources.
+     * Cancel every active GLib timer (scheduled polls and on-demand expiry).
+     * Must be called before destroying the indicator to avoid orphaned sources.
      */
     _stopAllTimers() {
         for (const sourceId of this._timers.values()) {
             GLib.source_remove(sourceId);
         }
         this._timers.clear();
+        for (const sourceId of this._expiryTimers.values()) {
+            GLib.source_remove(sourceId);
+        }
+        this._expiryTimers.clear();
     }
 
     /**
@@ -343,6 +460,10 @@ class MonishIndicator extends PanelMenu.Button {
         if (this._settingsChangedId) {
             this._settings.disconnect(this._settingsChangedId);
             this._settingsChangedId = null;
+        }
+        if (this._jitterChangedId) {
+            this._settings.disconnect(this._jitterChangedId);
+            this._jitterChangedId = null;
         }
         super.destroy();
     }

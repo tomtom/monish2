@@ -17,3 +17,4 @@
 17. In Prefs: Add a way to manually sort the list of defined monitors. #closed/2026-05-30
 18. In Prefs: The CPU Frequency monitor calls awk etc. Could this be implemented in JavaScript, too? #closed/2026-05-30
 19. In Prefs: All predefined monitors are shell commands. Weren't they implemented as JavaScript? (I previously added and removed all predefined monitors.) #closed/2026-05-30
+20. Add on-demand monitors: instead of the value, display a "Update" button. When the user clicks the button, the button text is replaced with the value. The user can define how long the value is valid. When the time period is over, show "Update" again. #closed/2026-05-30

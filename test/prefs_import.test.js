@@ -135,3 +135,57 @@ describe('extension.js panel icon alerting', () => {
         expect(extensionSource).toContain('STATUS_COLORS');
     });
 });
+
+describe('extension.js on-demand monitors', () => {
+    it('skips scheduling for on-demand monitors', () => {
+        expect(extensionSource).toContain('monitor.onDemand');
+    });
+
+    it('defines _expiryTimers map', () => {
+        expect(extensionSource).toContain('_expiryTimers');
+    });
+
+    it('defines _resetOnDemandMonitor method', () => {
+        expect(extensionSource).toContain('_resetOnDemandMonitor');
+    });
+
+    it('shows Update button label for on-demand monitors', () => {
+        expect(extensionSource).toContain('\'Update\'');
+    });
+});
+
+describe('extension.js multi-line output', () => {
+    it('checks for newlines in value', () => {
+        expect(extensionSource).toContain('value.includes(\'\\n\')');
+    });
+
+    it('defines mlValueLabel for below-name display', () => {
+        expect(extensionSource).toContain('mlValueLabel');
+    });
+});
+
+describe('extension.js jitter scheduling', () => {
+    it('reads jitter-percent from settings', () => {
+        expect(extensionSource).toContain('\'jitter-percent\'');
+    });
+
+    it('uses jitteredInterval for each poll', () => {
+        expect(extensionSource).toContain('jitteredInterval');
+    });
+});
+
+describe('prefs.js on-demand monitor UI', () => {
+    it('adds On Demand toggle to edit dialog', () => {
+        expect(prefsSource).toContain('On Demand');
+    });
+
+    it('adds Valid for seconds spinbutton', () => {
+        expect(prefsSource).toContain('onDemandValidSeconds');
+    });
+});
+
+describe('prefs.js jitter setting', () => {
+    it('shows jitter spinner in prefs', () => {
+        expect(prefsSource).toContain('jitter-percent');
+    });
+});

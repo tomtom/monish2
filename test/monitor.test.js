@@ -11,6 +11,7 @@ import {
     evaluateStatus,
     matchesPattern,
     intervalToMs,
+    jitteredInterval,
     deserializeMonitors,
     serializeMonitors,
     validateMonitor,
@@ -306,5 +307,56 @@ describe('createMonitor', () => {
         // Predefined monitors enforce PRESET_MIN_INTERVAL=60; the factory
         // default must match so new monitors also start at a sane interval.
         expect(createMonitor().intervalSeconds).toBeGreaterThanOrEqual(60);
+    });
+
+    it('defaults onDemand to false', () => {
+        expect(createMonitor().onDemand).toBe(false);
+    });
+
+    it('defaults onDemandValidSeconds to 60', () => {
+        expect(createMonitor().onDemandValidSeconds).toBe(60);
+    });
+
+    it('allows overriding onDemand to true', () => {
+        expect(createMonitor({onDemand: true}).onDemand).toBe(true);
+    });
+
+    it('allows overriding onDemandValidSeconds', () => {
+        expect(createMonitor({onDemandValidSeconds: 300}).onDemandValidSeconds).toBe(300);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// jitteredInterval
+// ---------------------------------------------------------------------------
+
+describe('jitteredInterval', () => {
+    it('returns exact interval when jitter is 0', () => {
+        expect(jitteredInterval(10000, 0)).toBe(10000);
+    });
+
+    it('returns exact interval when jitter is null', () => {
+        expect(jitteredInterval(10000, null)).toBe(10000);
+    });
+
+    it('returns exact interval when jitter is undefined', () => {
+        expect(jitteredInterval(10000, undefined)).toBe(10000);
+    });
+
+    it('returns value within ±jitter% of the base interval', () => {
+        const base = 10000;
+        const pct  = 10;
+        for (let i = 0; i < 200; i++) {
+            const result = jitteredInterval(base, pct);
+            expect(result).toBeGreaterThanOrEqual(base * (1 - pct / 100));
+            expect(result).toBeLessThanOrEqual(base * (1 + pct / 100));
+        }
+    });
+
+    it('never returns less than 1000 ms', () => {
+        // Even with a very short base interval + max jitter, minimum is 1s.
+        for (let i = 0; i < 200; i++) {
+            expect(jitteredInterval(500, 50)).toBeGreaterThanOrEqual(1000);
+        }
     });
 });

@@ -22,7 +22,23 @@
       <description>
         JSON array of monitor objects.  Each object has the fields:
         id, name, command, intervalSeconds, outputRegex,
-        cautionPatterns (array), dangerPatterns (array), enabled.
+        cautionPatterns (array), dangerPatterns (array), enabled,
+        onDemand, onDemandValidSeconds.
+      </description>
+    </key>
+
+    <!--
+      jitter-percent: random ±% offset applied to each monitor's poll interval.
+      Set to 0 to poll at exactly the configured interval.
+    -->
+    <key name="jitter-percent" type="i">
+      <default>5</default>
+      <range min="0" max="50"/>
+      <summary>Schedule jitter percentage</summary>
+      <description>
+        Random ±percentage offset added to each monitor poll interval.
+        Prevents multiple monitors from clustering their polls at the same moment.
+        Set to 0 for exact scheduling.
       </description>
     </key>
 
