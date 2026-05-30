@@ -70,6 +70,25 @@ describe('prefs.js duplicate action', () => {
     });
 });
 
+describe('extension.js startup grace period', () => {
+    it('defines STARTUP_GRACE_MS constant', () => {
+        expect(extensionSource).toContain('STARTUP_GRACE_MS');
+    });
+
+    it('passes STARTUP_GRACE_MS to _buildMenu on init', () => {
+        expect(extensionSource).toContain('_buildMenu(STARTUP_GRACE_MS)');
+    });
+
+    it('_scheduleMonitor accepts firstRunDelay parameter', () => {
+        expect(extensionSource).toContain('_scheduleMonitor(monitor, firstRunDelay');
+    });
+
+    it('_reloadMonitors calls _buildMenu without grace period', () => {
+        // Settings-change reloads must run monitors immediately (no delay argument).
+        expect(extensionSource).toContain('_buildMenu()');
+    });
+});
+
 describe('extension.js panel icon alerting', () => {
     it('shows badge for CAUTION (not just ERROR)', () => {
         // Badge must be visible for caution/danger states so the panel icon

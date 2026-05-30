@@ -11,3 +11,4 @@
 11. Error with the CPU Usage, Net Download, and Net Upload presets. If an error occurs, an informative message should be displayed either in the menu or in prefs. #closed/2026-05-30
 12. The display of the 3 top processes isn't useful this way. Would it be possible to display the processes with a line-break and to display just the app name, not the full file name? #closed/2026-05-30
 13. Change the icon: just display 5 vertical bars with varying height, some darker, some lighter. #closed/2026-05-30
+14. Loading the gnome shell takes a long time. Don't test the monitor values right at startup but only after some grace period. #closed/2026-05-30

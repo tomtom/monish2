@@ -44,6 +44,12 @@ const SETTINGS_KEY = 'monitors';
 /** CSS class prefix applied to indicator and menu items for status colouring. */
 const CSS_PREFIX = 'monish';
 
+/**
+ * Delay in milliseconds before monitors are first polled after the extension
+ * loads. Avoids hammering the system while GNOME Shell itself is still settling.
+ */
+const STARTUP_GRACE_MS = 10_000;
+
 /** Symbolic icon names for each monitor status in the popup menu rows. */
 const STATUS_ICONS = {
     [MonitorStatus.PENDING]: 'content-loading-symbolic',
@@ -102,8 +108,9 @@ class MonishIndicator extends PanelMenu.Button {
         this._panelBox.add_child(this._errorBadge);
         this.add_child(this._panelBox);
 
-        // Build initial menu (populates from settings)
-        this._buildMenu();
+        // Build initial menu (populates from settings).
+        // Pass the startup grace period so monitors are not polled immediately.
+        this._buildMenu(STARTUP_GRACE_MS);
 
         // React to settings changes
         this._settingsChangedId = this._settings.connect(
@@ -119,8 +126,12 @@ class MonishIndicator extends PanelMenu.Button {
     /**
      * (Re)build the popup menu from the current monitor configuration.
      * Destroys existing menu items and GLib timers first.
+     *
+     * @param {number} [firstRunDelay=0] - Milliseconds to wait before the first
+     *   monitor poll. Pass STARTUP_GRACE_MS on initial build; use 0 for reloads
+     *   triggered by settings changes so new values appear immediately.
      */
-    _buildMenu() {
+    _buildMenu(firstRunDelay = 0) {
         this._stopAllTimers();
         this.menu.removeAll();
         this._menuItems.clear();
@@ -149,7 +160,7 @@ class MonishIndicator extends PanelMenu.Button {
 
         // Start timers for all enabled monitors
         for (const monitor of enabled) {
-            this._scheduleMonitor(monitor);
+            this._scheduleMonitor(monitor, firstRunDelay);
         }
 
         this._updatePanelIcon();
@@ -197,20 +208,27 @@ class MonishIndicator extends PanelMenu.Button {
 
     /**
      * Schedule a monitor for repeated execution.
-     * Runs once immediately, then repeats at the configured interval.
+     * An optional first-run delay avoids polling during GNOME Shell startup.
+     * After the first run the monitor repeats at its configured interval.
      *
      * @param {object} monitor
+     * @param {number} [firstRunDelay=0] - Milliseconds before the first poll.
      */
-    _scheduleMonitor(monitor) {
-        // Run immediately on first load
-        this._runMonitor(monitor);
-
+    _scheduleMonitor(monitor, firstRunDelay = 0) {
         const intervalMs = Math.max(1000, intervalToMs(monitor.intervalSeconds, 'seconds'));
-        const sourceId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, intervalMs, () => {
+
+        // One-shot timer for the first run; replaces itself with the repeating timer.
+        const firstId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, firstRunDelay, () => {
+            this._timers.delete(monitor.id);
             this._runMonitor(monitor);
-            return GLib.SOURCE_CONTINUE;
+            const sourceId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, intervalMs, () => {
+                this._runMonitor(monitor);
+                return GLib.SOURCE_CONTINUE;
+            });
+            this._timers.set(monitor.id, sourceId);
+            return GLib.SOURCE_REMOVE;
         });
-        this._timers.set(monitor.id, sourceId);
+        this._timers.set(monitor.id, firstId);
     }
 
     /**
