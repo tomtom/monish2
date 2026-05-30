@@ -425,14 +425,17 @@ function splitPatterns(raw) {
 }
 
 /**
- * Build a one-line summary string for a preset row subtitle.
+ * Build a subtitle string for a preset row.
+ * Leads with the preset's human-readable description (if present), then
+ * appends the interval and any configured thresholds.
  *
  * @param {object} preset
  * @returns {string}
  */
 function summarisePreset(preset) {
-    const parts = [`every ${preset.intervalSeconds}s`];
-    if (preset.cautionPatterns?.length > 0) parts.push(`caution: ${preset.cautionPatterns[0]}`);
-    if (preset.dangerPatterns?.length  > 0) parts.push(`danger: ${preset.dangerPatterns[0]}`);
-    return parts.join(' · ');
+    const meta = [`every ${preset.intervalSeconds}s`];
+    if (preset.cautionPatterns?.length > 0) meta.push(`caution: ${preset.cautionPatterns[0]}`);
+    if (preset.dangerPatterns?.length  > 0) meta.push(`danger: ${preset.dangerPatterns[0]}`);
+    const metaStr = meta.join(' · ');
+    return preset.description ? `${preset.description}\n${metaStr}` : metaStr;
 }

@@ -63,4 +63,11 @@ describe('PRESET_MONITORS', () => {
         expect(names.some(n => n.includes('battery'))).toBe(true);
         expect(names.some(n => n.includes('swap'))).toBe(true);
     });
+
+    it('every preset has a non-empty description string', () => {
+        for (const preset of PRESET_MONITORS) {
+            expect(typeof preset.description).toBe('string');
+            expect(preset.description.trim().length).toBeGreaterThan(0);
+        }
+    });
 });
