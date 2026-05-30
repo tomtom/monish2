@@ -1,0 +1,10 @@
+{
+    "name": "monish",
+    "description": "User-configurable system monitor GNOME Shell extension",
+    "uuid": "monish2@thm.link",
+    "version": 1,
+    "shell-version": ["45", "46", "47", "48", "49", "50"],
+    "url": "https://github.com/anomalyco/monish",
+    "settings-schema": "org.gnome.shell.extensions.monish",
+    "gettext-domain": "monish2@thm.link"
+}
