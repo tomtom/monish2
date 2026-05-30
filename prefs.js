@@ -309,7 +309,11 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         return added;
     }
 
-    for (const monitor of monitors) {
+    for (let i = 0; i < monitors.length; i++) {
+        const monitor = monitors[i];
+        const isFirst = i === 0;
+        const isLast  = i === monitors.length - 1;
+
         const row = new Adw.ActionRow({
             title:    monitor.name,
             subtitle: `every ${monitor.intervalSeconds}s — ${monitor.command.slice(0, 60)}${monitor.command.length > 60 ? '…' : ''}`,
@@ -322,6 +326,42 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         });
         toggle.connect('notify::active', () => {
             mutateMonitor(settings, monitor.id, m => ({...m, enabled: toggle.active}));
+        });
+
+        // Move-up button — disabled for the first row
+        const upBtn = new Gtk.Button({
+            icon_name:    'go-up-symbolic',
+            valign:       Gtk.Align.CENTER,
+            css_classes:  ['flat'],
+            tooltip_text: 'Move up',
+            sensitive:    !isFirst,
+        });
+        upBtn.connect('clicked', () => {
+            const all = deserializeMonitors(settings.get_string('monitors'));
+            const idx  = all.findIndex(m => m.id === monitor.id);
+            if (idx > 0) {
+                [all[idx - 1], all[idx]] = [all[idx], all[idx - 1]];
+                settings.set_string('monitors', serializeMonitors(all));
+                refresh();
+            }
+        });
+
+        // Move-down button — disabled for the last row
+        const downBtn = new Gtk.Button({
+            icon_name:    'go-down-symbolic',
+            valign:       Gtk.Align.CENTER,
+            css_classes:  ['flat'],
+            tooltip_text: 'Move down',
+            sensitive:    !isLast,
+        });
+        downBtn.connect('clicked', () => {
+            const all = deserializeMonitors(settings.get_string('monitors'));
+            const idx  = all.findIndex(m => m.id === monitor.id);
+            if (idx < all.length - 1) {
+                [all[idx], all[idx + 1]] = [all[idx + 1], all[idx]];
+                settings.set_string('monitors', serializeMonitors(all));
+                refresh();
+            }
         });
 
         // Edit button
@@ -370,6 +410,8 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         });
 
         row.add_suffix(toggle);
+        row.add_suffix(upBtn);
+        row.add_suffix(downBtn);
         row.add_suffix(editBtn);
         row.add_suffix(dupBtn);
         row.add_suffix(delBtn);

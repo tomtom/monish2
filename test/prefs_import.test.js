@@ -59,6 +59,29 @@ describe('prefs.js preset hiding', () => {
     });
 });
 
+describe('prefs.js manual sort', () => {
+    it('adds move-up and move-down buttons to monitor rows', () => {
+        expect(prefsSource).toContain('go-up-symbolic');
+        expect(prefsSource).toContain('go-down-symbolic');
+    });
+
+    it('disables move-up on the first row', () => {
+        expect(prefsSource).toContain('sensitive:    !isFirst');
+    });
+
+    it('disables move-down on the last row', () => {
+        expect(prefsSource).toContain('sensitive:    !isLast');
+    });
+
+    it('swaps adjacent elements for move-up', () => {
+        expect(prefsSource).toContain('[all[idx - 1], all[idx]] = [all[idx], all[idx - 1]]');
+    });
+
+    it('swaps adjacent elements for move-down', () => {
+        expect(prefsSource).toContain('[all[idx], all[idx + 1]] = [all[idx + 1], all[idx]]');
+    });
+});
+
 describe('prefs.js duplicate action', () => {
     it('adds a duplicate button to monitor rows', () => {
         expect(prefsSource).toContain('edit-copy-symbolic');

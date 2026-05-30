@@ -14,3 +14,4 @@
 14. Loading the gnome shell takes a long time. Don't test the monitor values right at startup but only after some grace period. #closed/2026-05-30
 15. In Prefs: When adding a predefined monitor the time is set to 0 minutes. It should be at least 60 secs. #closed/2026-05-30
 16. In Prefs: When I duplicate a monitor and then delete the duplicate, both monitors are deleted. Also: the duplicated monitor should have a " Copy" suffix. #closed/2026-05-30
+17. In Prefs: Add a way to manually sort the list of defined monitors. #closed/2026-05-30
