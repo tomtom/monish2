@@ -15,7 +15,8 @@ import {dirname, join} from 'path';
 import {describe, it, expect} from '@jest/globals';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const prefsSource = readFileSync(join(__dirname, '..', 'prefs.js'), 'utf8');
+const prefsSource      = readFileSync(join(__dirname, '..', 'prefs.js'), 'utf8');
+const extensionSource  = readFileSync(join(__dirname, '..', 'extension.js'), 'utf8');
 
 const GNOME50_PREFS_PATH =
     'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
@@ -66,5 +67,19 @@ describe('prefs.js duplicate action', () => {
 
     it('inserts copy immediately after original (splice pattern)', () => {
         expect(prefsSource).toContain('all.splice(idx + 1, 0, copy)');
+    });
+});
+
+describe('extension.js panel icon alerting', () => {
+    it('shows badge for CAUTION (not just ERROR)', () => {
+        // Badge must be visible for caution/danger states so the panel icon
+        // communicates alerting states even when colour alone is unreliable.
+        expect(extensionSource).toContain('MonitorStatus.CAUTION');
+        expect(extensionSource).toContain('alerting');
+    });
+
+    it('applies inline style colour to bypass panel theme specificity', () => {
+        expect(extensionSource).toContain('_panelIcon.style');
+        expect(extensionSource).toContain('STATUS_COLORS');
     });
 });

@@ -52,13 +52,11 @@ const STATUS_ICONS = {
     [MonitorStatus.ERROR]:   'dialog-warning-symbolic',
 };
 
-/** Panel icon to use at each overall severity level. */
-const PANEL_ICONS = {
-    [MonitorStatus.PENDING]: 'utilities-system-monitor-symbolic',
-    [MonitorStatus.NORMAL]:  'utilities-system-monitor-symbolic',
-    [MonitorStatus.CAUTION]: 'utilities-system-monitor-symbolic',
-    [MonitorStatus.DANGER]:  'utilities-system-monitor-symbolic',
-    [MonitorStatus.ERROR]:   'utilities-system-monitor-symbolic',
+/** Icon colour per status; applied as inline style to bypass panel theme specificity. */
+const STATUS_COLORS = {
+    [MonitorStatus.CAUTION]: '#e5a50a',
+    [MonitorStatus.DANGER]:  '#e01b24',
+    [MonitorStatus.ERROR]:   '#c64600',
 };
 
 // ---------------------------------------------------------------------------
@@ -260,20 +258,33 @@ class MonishIndicator extends PanelMenu.Button {
 
     /**
      * Recompute the worst status across all monitors and update the panel icon
-     * CSS class and error badge visibility accordingly.
+     * colour and badge visibility accordingly.
+     *
+     * Colour is applied via inline style in addition to a CSS class because the
+     * GNOME Shell panel theme may have higher-specificity rules that override
+     * extension stylesheet colour properties.
      */
     _updatePanelIcon() {
         const statuses = [...this._results.values()].map(r => r.status);
         const worst    = worstStatus(statuses);
 
-        // Remove all status CSS classes, then apply current one
+        // CSS class for stylesheet-based theming
         const classes = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-indicator-${s}`);
         classes.forEach(c => this._panelIcon.remove_style_class_name(c));
         this._panelIcon.add_style_class_name(`${CSS_PREFIX}-indicator-${worst}`);
 
-        // Show "!" badge if any monitor errored
-        const hasError = statuses.some(s => s === MonitorStatus.ERROR);
-        this._errorBadge.visible = hasError;
+        // Inline style overrides panel theme; cleared for normal/pending
+        const color = STATUS_COLORS[worst] ?? null;
+        this._panelIcon.style = color ? `color: ${color};` : '';
+
+        // Show badge for any alerting state (caution, danger, or error)
+        const alerting = worst === MonitorStatus.CAUTION
+                      || worst === MonitorStatus.DANGER
+                      || worst === MonitorStatus.ERROR;
+        this._errorBadge.visible = alerting;
+        if (alerting && color) {
+            this._errorBadge.style = `color: ${color};`;
+        }
     }
 
     // -----------------------------------------------------------------------
