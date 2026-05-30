@@ -3,7 +3,7 @@
  * Verifies that every preset has the required shape and sane defaults.
  */
 
-import {PRESET_MONITORS} from '../lib/presets.js';
+import {PRESET_MONITORS, PRESET_MIN_INTERVAL} from '../lib/presets.js';
 import {validateMonitor, MonitorType} from '../lib/monitor.js';
 
 import {describe, it, expect} from '@jest/globals';
@@ -32,6 +32,12 @@ describe('PRESET_MONITORS', () => {
         for (const preset of PRESET_MONITORS) {
             expect(typeof preset.intervalSeconds).toBe('number');
             expect(preset.intervalSeconds).toBeGreaterThanOrEqual(1);
+        }
+    });
+
+    it(`every preset interval is at least PRESET_MIN_INTERVAL (${PRESET_MIN_INTERVAL}s)`, () => {
+        for (const preset of PRESET_MONITORS) {
+            expect(preset.intervalSeconds).toBeGreaterThanOrEqual(PRESET_MIN_INTERVAL);
         }
     });
 
