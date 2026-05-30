@@ -9,3 +9,4 @@
 10. E.g., the CPU Temperature monitor is marked as CAUTION (yellow) but the icon in the GNOME top bar is unchanged. It should also be shown in yellow with an exclamation mark icon (as overlay or be replaced by it). #closed/2026-05-30
 6. In Prefs: Frequent "Extension not responding" warnings with the option to force quit the extension. #closed/2026-05-30
 11. Error with the CPU Usage, Net Download, and Net Upload presets. If an error occurs, an informative message should be displayed either in the menu or in prefs. #closed/2026-05-30
+12. The display of the 3 top processes isn't useful this way. Would it be possible to display the processes with a line-break and to display just the app name, not the full file name? #closed/2026-05-30

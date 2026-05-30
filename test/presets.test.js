@@ -77,6 +77,22 @@ describe('PRESET_MONITORS', () => {
         }
     });
 
+    it('Top CPU/MEM Processes commands separate entries with newlines', () => {
+        const cpuPreset = PRESET_MONITORS.find(p => p.name === 'Top CPU Processes');
+        const memPreset = PRESET_MONITORS.find(p => p.name === 'Top MEM Processes');
+        // Each process should be on its own line (\n in the awk printf format)
+        expect(cpuPreset.command).toContain('\\n');
+        expect(memPreset.command).toContain('\\n');
+    });
+
+    it('Top CPU/MEM Processes commands extract basename, not substr of full path', () => {
+        const cpuPreset = PRESET_MONITORS.find(p => p.name === 'Top CPU Processes');
+        const memPreset = PRESET_MONITORS.find(p => p.name === 'Top MEM Processes');
+        // Must not use substr($11,...) which truncates but keeps directory prefix
+        expect(cpuPreset.command).not.toContain('substr($11');
+        expect(memPreset.command).not.toContain('substr($11');
+    });
+
     it('CPU Usage, Net Download, Net Upload use javascript type', () => {
         const jsPresets = ['CPU Usage', 'Net Download', 'Net Upload'];
         for (const name of jsPresets) {
