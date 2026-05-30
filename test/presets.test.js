@@ -4,7 +4,7 @@
  */
 
 import {PRESET_MONITORS} from '../lib/presets.js';
-import {validateMonitor} from '../lib/monitor.js';
+import {validateMonitor, MonitorType} from '../lib/monitor.js';
 
 import {describe, it, expect} from '@jest/globals';
 
@@ -68,6 +68,26 @@ describe('PRESET_MONITORS', () => {
         for (const preset of PRESET_MONITORS) {
             expect(typeof preset.description).toBe('string');
             expect(preset.description.trim().length).toBeGreaterThan(0);
+        }
+    });
+
+    it('CPU Usage, Net Download, Net Upload use javascript type', () => {
+        const jsPresets = ['CPU Usage', 'Net Download', 'Net Upload'];
+        for (const name of jsPresets) {
+            const preset = PRESET_MONITORS.find(p => p.name === name);
+            expect(preset).toBeDefined();
+            expect(preset.type).toBe(MonitorType.JAVASCRIPT);
+        }
+    });
+
+    it('non-sampled presets have no type or shell type', () => {
+        const shellNames = ['CPU Frequency', 'CPU Temperature', 'RAM Used', 'RAM Free',
+            'Swap Usage', 'Thermal Zone 1', 'Battery Level',
+            'Top CPU Processes', 'Top MEM Processes'];
+        for (const name of shellNames) {
+            const preset = PRESET_MONITORS.find(p => p.name === name);
+            expect(preset).toBeDefined();
+            expect(preset.type === undefined || preset.type === MonitorType.SHELL).toBe(true);
         }
     });
 });

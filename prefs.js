@@ -20,6 +20,7 @@ import {
     serializeMonitors,
     createMonitor,
     validateMonitor,
+    MonitorType,
 } from './lib/monitor.js';
 import {PRESET_MONITORS} from './lib/presets.js';
 
@@ -29,6 +30,10 @@ import {PRESET_MONITORS} from './lib/presets.js';
 
 /** Interval units presented to the user. */
 const INTERVAL_UNITS = ['seconds', 'minutes', 'hours'];
+
+/** Monitor type labels shown in the Type dropdown (index matches MonitorType values). */
+const MONITOR_TYPE_LABELS = ['Shell', 'JavaScript'];
+const MONITOR_TYPE_VALUES = [MonitorType.SHELL, MonitorType.JAVASCRIPT];
 
 // ---------------------------------------------------------------------------
 // Monitor edit dialog
@@ -93,6 +98,14 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     const cmdFrame = new Gtk.Frame();
     cmdFrame.set_child(cmdScroll);
     content.append(labeledRow('Command / Script', cmdFrame));
+
+    // ---- Type ----
+    const typeDropDown = new Gtk.DropDown({
+        model: Gtk.StringList.new(MONITOR_TYPE_LABELS),
+    });
+    const typeIdx = MONITOR_TYPE_VALUES.indexOf(data.type ?? MonitorType.SHELL);
+    typeDropDown.set_selected(typeIdx >= 0 ? typeIdx : 0);
+    content.append(labeledRow('Type', typeDropDown));
 
     // ---- Interval ----
     // Store internally in seconds; let the user pick a magnitude + unit.
@@ -166,6 +179,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
                 ...data,
                 name:            nameEntry.get_text().trim(),
                 command:         cmd,
+                type:            MONITOR_TYPE_VALUES[typeDropDown.get_selected()] ?? MonitorType.SHELL,
                 intervalSeconds: totalSec,
                 outputRegex:     regexEntry.get_text().trim(),
                 cautionPatterns: splitPatterns(cautionEntry.get_text()),

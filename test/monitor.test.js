@@ -6,6 +6,7 @@
 
 import {
     MonitorStatus,
+    MonitorType,
     parseValue,
     evaluateStatus,
     matchesPattern,
@@ -229,6 +230,17 @@ describe('validateMonitor', () => {
 // createMonitor
 // ---------------------------------------------------------------------------
 
+describe('MonitorType', () => {
+    it('has SHELL and JAVASCRIPT values', () => {
+        expect(MonitorType.SHELL).toBe('shell');
+        expect(MonitorType.JAVASCRIPT).toBe('javascript');
+    });
+
+    it('is frozen', () => {
+        expect(Object.isFrozen(MonitorType)).toBe(true);
+    });
+});
+
 describe('createMonitor', () => {
     it('creates a monitor with required defaults', () => {
         const m = createMonitor({name: 'Test', command: 'echo hi'});
@@ -238,6 +250,15 @@ describe('createMonitor', () => {
         expect(m.enabled).toBe(true);
         expect(typeof m.id).toBe('string');
         expect(m.id.length).toBeGreaterThan(0);
+    });
+
+    it('defaults type to shell', () => {
+        expect(createMonitor().type).toBe(MonitorType.SHELL);
+    });
+
+    it('allows overriding type to javascript', () => {
+        const m = createMonitor({type: MonitorType.JAVASCRIPT});
+        expect(m.type).toBe(MonitorType.JAVASCRIPT);
     });
 
     it('generates unique IDs', () => {
