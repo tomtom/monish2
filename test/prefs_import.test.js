@@ -46,3 +46,14 @@ describe('prefs.js refreshMonitorRows safety', () => {
         expect(prefsSource).toContain('return added');
     });
 });
+
+describe('prefs.js preset hiding', () => {
+    it('defines buildPresetRows function', () => {
+        expect(prefsSource).toContain('function buildPresetRows(');
+    });
+
+    it('filters presets by already-added names', () => {
+        // The hide-added-preset logic matches monitors by name
+        expect(prefsSource).toContain('addedNames.has(preset.name)');
+    });
+});

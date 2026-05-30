@@ -229,14 +229,18 @@ export default class MonishPreferences extends ExtensionPreferences {
         });
         page.add(monitorsGroup);
 
+        // refreshAll is set after both refresh functions are defined so that
+        // arrow-function closures can capture it by reference.
+        let refreshAll;
+
         // Track rows built by buildMonitorRows so refreshMonitorRows can
         // remove exactly those rows without touching libadwaita's internal
         // group children (which would cause an infinite removal loop).
-        let builtRows = buildMonitorRows(monitorsGroup, settings, window, () => refreshMonitorRows());
+        let builtRows = buildMonitorRows(monitorsGroup, settings, window, () => refreshAll());
 
         const refreshMonitorRows = () => {
             builtRows.forEach(row => monitorsGroup.remove(row));
-            builtRows = buildMonitorRows(monitorsGroup, settings, window, () => refreshMonitorRows());
+            builtRows = buildMonitorRows(monitorsGroup, settings, window, () => refreshAll());
         };
 
         // Add Monitor button row
@@ -247,7 +251,7 @@ export default class MonishPreferences extends ExtensionPreferences {
                 const monitors = deserializeMonitors(settings.get_string('monitors'));
                 monitors.push(newMonitor);
                 settings.set_string('monitors', serializeMonitors(monitors));
-                refreshMonitorRows();
+                refreshAll();
             });
         });
         monitorsGroup.add(addRow);
@@ -259,27 +263,17 @@ export default class MonishPreferences extends ExtensionPreferences {
         });
         page.add(presetsGroup);
 
-        for (const preset of PRESET_MONITORS) {
-            const row = new Adw.ActionRow({
-                title:    preset.name,
-                subtitle: summarisePreset(preset),
-            });
-            const addBtn = new Gtk.Button({
-                icon_name:  'list-add-symbolic',
-                valign:     Gtk.Align.CENTER,
-                css_classes: ['flat'],
-                tooltip_text: 'Add to my monitors',
-            });
-            addBtn.connect('clicked', () => {
-                const monitors = deserializeMonitors(settings.get_string('monitors'));
-                monitors.push(createMonitor(preset));
-                settings.set_string('monitors', serializeMonitors(monitors));
-                refreshMonitorRows();
-            });
-            row.add_suffix(addBtn);
-            row.activatable_widget = addBtn;
-            presetsGroup.add(row);
-        }
+        let builtPresetRows = buildPresetRows(presetsGroup, settings, () => refreshAll());
+
+        const refreshPresetRows = () => {
+            builtPresetRows.forEach(row => presetsGroup.remove(row));
+            builtPresetRows = buildPresetRows(presetsGroup, settings, () => refreshAll());
+        };
+
+        refreshAll = () => {
+            refreshMonitorRows();
+            refreshPresetRows();
+        };
     }
 }
 
@@ -362,6 +356,64 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         row.add_suffix(delBtn);
         group.add(row);
         added.push(row);
+    }
+
+    return added;
+}
+
+// ---------------------------------------------------------------------------
+// Helper: build preset rows
+// ---------------------------------------------------------------------------
+
+/**
+ * Populate a PreferencesGroup with one ActionRow per preset that has not yet
+ * been added to the monitor list (matched by name).
+ *
+ * Returns the array of widgets added so callers can remove them on refresh.
+ *
+ * @param {Adw.PreferencesGroup} group
+ * @param {Gio.Settings} settings
+ * @param {function():void} refresh - Called after a preset is added.
+ * @returns {Gtk.Widget[]} The rows added to group.
+ */
+function buildPresetRows(group, settings, refresh) {
+    const monitors   = deserializeMonitors(settings.get_string('monitors'));
+    const addedNames = new Set(monitors.map(m => m.name));
+    const added      = [];
+
+    for (const preset of PRESET_MONITORS) {
+        if (addedNames.has(preset.name)) continue;
+
+        const row = new Adw.ActionRow({
+            title:    preset.name,
+            subtitle: summarisePreset(preset),
+        });
+        const addBtn = new Gtk.Button({
+            icon_name:    'list-add-symbolic',
+            valign:       Gtk.Align.CENTER,
+            css_classes:  ['flat'],
+            tooltip_text: 'Add to my monitors',
+        });
+        addBtn.connect('clicked', () => {
+            const current = deserializeMonitors(settings.get_string('monitors'));
+            current.push(createMonitor(preset));
+            settings.set_string('monitors', serializeMonitors(current));
+            refresh();
+        });
+        row.add_suffix(addBtn);
+        row.activatable_widget = addBtn;
+        group.add(row);
+        added.push(row);
+    }
+
+    if (added.length === 0) {
+        const emptyRow = new Adw.ActionRow({
+            title:     'All presets added',
+            subtitle:  'Every available preset is already in your monitors.',
+            sensitive: false,
+        });
+        group.add(emptyRow);
+        added.push(emptyRow);
     }
 
     return added;
