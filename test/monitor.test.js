@@ -276,7 +276,7 @@ describe('createMonitor', () => {
         const m = createMonitor({name: 'Test', command: 'echo hi'});
         expect(m.name).toBe('Test');
         expect(m.command).toBe('echo hi');
-        expect(m.intervalSeconds).toBe(10);
+        expect(m.intervalSeconds).toBe(60);
         expect(m.enabled).toBe(true);
         expect(typeof m.id).toBe('string');
         expect(m.id.length).toBeGreaterThan(0);
@@ -300,5 +300,11 @@ describe('createMonitor', () => {
         const m = createMonitor({intervalSeconds: 60, enabled: false});
         expect(m.intervalSeconds).toBe(60);
         expect(m.enabled).toBe(false);
+    });
+
+    it('defaults intervalSeconds to at least 60 seconds', () => {
+        // Predefined monitors enforce PRESET_MIN_INTERVAL=60; the factory
+        // default must match so new monitors also start at a sane interval.
+        expect(createMonitor().intervalSeconds).toBeGreaterThanOrEqual(60);
     });
 });
