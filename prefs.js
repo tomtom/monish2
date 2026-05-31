@@ -107,14 +107,14 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     content.append(labeledRow('Type', typeDropDown));
 
     // ---- Interval ----
-    // Stored and edited in seconds; upper bound is 86400 (one day).
+    // Stored and edited in seconds; 0 = disabled; upper bound is 86400 (one day).
     // Initialise adjustment at lower bound first, then call set_value() so
     // GTK clamps correctly — a GJS GObject init-ordering issue leaves the
     // value unclamped when value is set before lower in the constructor.
     const intervalSpin = new Gtk.SpinButton({
         adjustment: new Gtk.Adjustment({
-            value:          1,
-            lower:          1,
+            value:          0,
+            lower:          0,
             upper:          86400,
             step_increment: 1,
         }),
@@ -123,6 +123,14 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     });
     intervalSpin.set_value(data.intervalSeconds);
     content.append(labeledRow('Interval (s)', intervalSpin));
+
+    const intervalHint = new Gtk.Label({
+        label:       'Set to 0 to disable this monitor.',
+        xalign:      0,
+        wrap:        true,
+        css_classes: ['caption', 'dim-label'],
+    });
+    content.append(intervalHint);
 
     // ---- Output regex ----
     const regexEntry = new Gtk.Entry({
@@ -459,12 +467,21 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         const isFirst = i === 0;
         const isLast  = i === monitors.length - 1;
 
-        const {magnitude, unit} = splitInterval(monitor.intervalSeconds);
-        const unitLabel = magnitude === 1 ? unit.slice(0, -1) : unit;
+        const cmdPreview = monitor.command.slice(0, 60) + (monitor.command.length > 60 ? '…' : '');
+        let intervalStr;
+        if (monitor.intervalSeconds === 0) {
+            intervalStr = 'disabled';
+        } else {
+            const {magnitude, unit} = splitInterval(monitor.intervalSeconds);
+            const unitLabel = magnitude === 1 ? unit.slice(0, -1) : unit;
+            intervalStr = `every ${magnitude} ${unitLabel}`;
+        }
         const row = new Adw.ActionRow({
             title:    monitor.name,
-            subtitle: `every ${magnitude} ${unitLabel} — ${monitor.command.slice(0, 60)}${monitor.command.length > 60 ? '…' : ''}`,
+            subtitle: `${intervalStr} — ${cmdPreview}`,
         });
+        if (!monitor.enabled || monitor.intervalSeconds === 0)
+            row.opacity = 0.5;
 
         // Enable/disable toggle
         const toggle = new Gtk.Switch({

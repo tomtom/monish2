@@ -151,7 +151,8 @@ class MonishIndicator extends PanelMenu.Button {
         this._results.clear();
 
         this._monitors = deserializeMonitors(this._settings.get_string(SETTINGS_KEY));
-        const enabled  = this._monitors.filter(m => m.enabled);
+        // intervalSeconds === 0 means disabled (same as enabled: false).
+        const enabled  = this._monitors.filter(m => m.enabled && m.intervalSeconds !== 0);
 
         if (enabled.length === 0) {
             const empty = new PopupMenu.PopupMenuItem('No monitors configured', {reactive: false});

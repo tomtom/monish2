@@ -223,9 +223,20 @@ describe('validateMonitor', () => {
         expect(validateMonitor({...valid, command: ''})).toContain('Command is required');
     });
 
-    it('errors on interval below 1', () => {
-        expect(validateMonitor({...valid, intervalSeconds: 0})).toContain(
-            'Interval must be at least 1 second',
+    it('accepts interval of 0 (disabled monitor)', () => {
+        // 0 is valid: it means the monitor is intentionally deactivated.
+        expect(validateMonitor({...valid, intervalSeconds: 0})).toEqual([]);
+    });
+
+    it('errors on negative interval', () => {
+        expect(validateMonitor({...valid, intervalSeconds: -1})).toContain(
+            'Interval must be 0 (disabled) or a positive number of seconds',
+        );
+    });
+
+    it('errors on null interval', () => {
+        expect(validateMonitor({...valid, intervalSeconds: null})).toContain(
+            'Interval must be 0 (disabled) or a positive number of seconds',
         );
     });
 });

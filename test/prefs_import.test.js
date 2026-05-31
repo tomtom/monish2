@@ -264,6 +264,28 @@ describe('prefs.js interval spinner safe init — ISSUE 29 re-open', () => {
     });
 });
 
+describe('interval 0 = disabled — ISSUE 31', () => {
+    it('interval Adjustment lower bound is 0 (allows disabled monitors)', () => {
+        expect(prefsSource).toContain('lower:          0,');
+    });
+
+    it('edit dialog shows a hint that 0 disables the monitor', () => {
+        expect(prefsSource).toContain('Set to 0 to disable this monitor.');
+    });
+
+    it('buildMonitorRows shows "disabled" subtitle for intervalSeconds === 0', () => {
+        expect(prefsSource).toContain("intervalStr = 'disabled'"); // eslint-disable-line quotes
+    });
+
+    it('buildMonitorRows sets opacity to 0.5 for disabled or inactive monitors', () => {
+        expect(prefsSource).toContain('row.opacity = 0.5');
+    });
+
+    it('extension skips monitors with intervalSeconds === 0', () => {
+        expect(extensionSource).toContain('m.intervalSeconds !== 0');
+    });
+});
+
 describe('debug logging — ISSUE 30', () => {
     it('schema defines a debug-logging boolean key', () => {
         expect(schemaSource).toContain('name="debug-logging" type="b"');
