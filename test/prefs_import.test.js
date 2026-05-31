@@ -178,13 +178,22 @@ describe('extension.js jitter scheduling', () => {
     });
 });
 
-describe('prefs.js on-demand monitor UI', () => {
-    it('adds On Demand toggle to edit dialog', () => {
-        expect(prefsSource).toContain('On Demand');
+describe('prefs.js on-demand monitor UI — ISSUE 45', () => {
+    it('does not add an On Demand toggle (removed; 0s interval is the signal)', () => {
+        // The explicit On Demand switch was replaced by setting interval=0.
+        expect(prefsSource).not.toContain("labeledRow('On Demand'");
     });
 
-    it('adds Valid for seconds spinbutton', () => {
+    it('interval hint documents 0 as on-demand', () => {
+        expect(prefsSource).toContain('on-demand');
+    });
+
+    it('adds Valid for seconds spinbutton (shown when interval=0)', () => {
         expect(prefsSource).toContain('onDemandValidSeconds');
+    });
+
+    it('validForRow visibility tracks intervalSpin value', () => {
+        expect(prefsSource).toContain('intervalSpin.get_value_as_int() === 0');
     });
 });
 
@@ -265,25 +274,29 @@ describe('prefs.js interval spinner safe init — ISSUE 29 re-open', () => {
     });
 });
 
-describe('interval 0 = disabled — ISSUE 31', () => {
-    it('interval Adjustment lower bound is 0 (allows disabled monitors)', () => {
+describe('interval 0 = on-demand — ISSUE 31 / ISSUE 45', () => {
+    it('interval Adjustment lower bound is 0 (allows on-demand monitors)', () => {
         expect(prefsSource).toContain('lower:          0,');
     });
 
-    it('edit dialog shows a hint that 0 disables the monitor', () => {
-        expect(prefsSource).toContain('Set to 0 to disable this monitor.');
+    it('edit dialog shows a hint that 0 means on-demand', () => {
+        expect(prefsSource).toContain('Set to 0 for on-demand');
     });
 
-    it('buildMonitorRows shows "disabled" subtitle for intervalSeconds === 0', () => {
-        expect(prefsSource).toContain("intervalStr = 'disabled'"); // eslint-disable-line quotes
+    it('buildMonitorRows shows "on-demand" subtitle for intervalSeconds === 0', () => {
+        expect(prefsSource).toContain("intervalStr = 'on-demand'"); // eslint-disable-line quotes
     });
 
-    it('buildMonitorRows sets opacity to 0.5 for disabled or inactive monitors', () => {
+    it('buildMonitorRows sets opacity to 0.5 for disabled (not-enabled) monitors only', () => {
+        // Opacity must depend solely on enabled flag; interval=0 is on-demand, not disabled.
+        expect(prefsSource).toContain('!monitor.enabled');
         expect(prefsSource).toContain('row.opacity = 0.5');
     });
 
-    it('extension skips monitors with intervalSeconds === 0', () => {
-        expect(extensionSource).toContain('m.intervalSeconds !== 0');
+    it('extension includes interval=0 monitors in the menu (on-demand, not skipped)', () => {
+        // interval=0 is on-demand: monitor is shown in menu but not scheduled.
+        // Derived onDemand flag normalised in _buildMenu.
+        expect(extensionSource).toContain('m.intervalSeconds === 0');
     });
 });
 

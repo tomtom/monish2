@@ -5,7 +5,6 @@ Next number: 50
 
 ## Current
 
-45. Change the logic of how interval=0s vs on-demand is handled. When the interval=0s, then it is an on-demand monitor. Replace the on-demand switch with an "activated" switch. When a monitor is not activated, strike the name through in the monitor list in Prefs and hide the monitor from the monitor-value menu.
 46. In Top CPU/MEM Processes: Would it be possible to also retain the latest 20 values per app and to display sparklines (per app) next to the app's usage number?
 47. All sparklines should be right-aligned.
 48. Change the default value for the argument for the Top CPU Processes to ^(gjs)$

@@ -270,7 +270,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     });
 
     // ---- Interval ----
-    // Stored and edited in seconds; 0 = disabled; upper bound is 86400 (one day).
+    // Stored and edited in seconds; 0 = on-demand (no timer, click name to refresh); upper bound is 86400 (one day).
     // Initialise adjustment at lower bound first, then call set_value() so
     // GTK clamps correctly — a GJS GObject init-ordering issue leaves the
     // value unclamped when value is set before lower in the constructor.
@@ -288,7 +288,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     content.append(labeledRow('Interval (s)', intervalSpin));
 
     const intervalHint = new Gtk.Label({
-        label:       'Set to 0 to disable this monitor.',
+        label:       'Set to 0 for on-demand (click the monitor name to refresh manually).',
         xalign:      0,
         wrap:        true,
         css_classes: ['caption', 'dim-label'],
@@ -319,14 +319,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     });
     content.append(labeledRow('Danger Patterns', dangerEntry));
 
-    // ---- On Demand toggle ----
-    const onDemandToggle = new Gtk.Switch({
-        active: data.onDemand ?? false,
-        valign: Gtk.Align.CENTER,
-    });
-    content.append(labeledRow('On Demand', onDemandToggle));
-
-    // ---- Valid for (seconds) — shown only when On Demand is active ----
+    // ---- Valid for (seconds) — shown only when interval=0 (on-demand) ----
     const validSecSpin = new Gtk.SpinButton({
         adjustment: new Gtk.Adjustment({
             value:          data.onDemandValidSeconds ?? 60,
@@ -338,11 +331,11 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         hexpand: true,
     });
     const validForRow = labeledRow('Valid for (s)', validSecSpin);
-    validForRow.visible = data.onDemand ?? false;
+    validForRow.visible = data.intervalSeconds === 0;
     content.append(validForRow);
 
-    onDemandToggle.connect('notify::active', () => {
-        validForRow.visible = onDemandToggle.active;
+    intervalSpin.connect('value-changed', () => {
+        validForRow.visible = intervalSpin.get_value_as_int() === 0;
     });
 
     // ---- Error label ----
@@ -372,7 +365,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
                 outputRegex:          regexEntry.get_text().trim(),
                 cautionPatterns:      splitPatterns(cautionEntry.get_text()),
                 dangerPatterns:       splitPatterns(dangerEntry.get_text()),
-                onDemand:             onDemandToggle.active,
+                onDemand:             totalSec === 0,
                 onDemandValidSeconds: validSecSpin.get_value_as_int(),
             };
 
@@ -637,7 +630,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         const cmdPreview = monitor.command.slice(0, 60) + (monitor.command.length > 60 ? '…' : '');
         let intervalStr;
         if (monitor.intervalSeconds === 0) {
-            intervalStr = 'disabled';
+            intervalStr = 'on-demand';
         } else {
             const {magnitude, unit} = splitInterval(monitor.intervalSeconds);
             const unitLabel = magnitude === 1 ? unit.slice(0, -1) : unit;
@@ -647,7 +640,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             title:    monitor.name,
             subtitle: `${intervalStr} — ${cmdPreview}`,
         });
-        if (!monitor.enabled || monitor.intervalSeconds === 0)
+        if (!monitor.enabled)
             row.opacity = 0.5;
 
         // Enable/disable toggle
