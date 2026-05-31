@@ -78,6 +78,20 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('who');
     });
 
+    it('Gnome RDP preset exists with correct properties — ISSUE 51', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Gnome RDP');
+        expect(preset).toBeDefined();
+        expect(preset.type).toBe(MonitorType.JAVASCRIPT);
+        expect(preset.command).toContain('grdctl');
+        expect(preset.cautionPatterns).toContain('enabled');
+        const enable  = (preset.actions ?? []).find(a => a.label === 'Enable');
+        const disable = (preset.actions ?? []).find(a => a.label === 'Disable');
+        expect(enable).toBeDefined();
+        expect(disable).toBeDefined();
+        expect(enable.command).toContain('grdctl rdp enable');
+        expect(disable.command).toContain('grdctl rdp disable');
+    });
+
     it('Logged-in Users output is multiline NAME: HOW format — ISSUE 49', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Logged-in Users');
         // Groups login methods per user: "tom: seat0, tty2" one line per user
