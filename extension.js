@@ -106,6 +106,10 @@ class MonishIndicator extends PanelMenu.Button {
         this._history       = new Map();   // monitorId -> number[] ring buffer (max SPARKLINE_MAX_VALUES)
         this._debugLogPath  = GLib.build_filenamev([extensionPath, 'debug.log']);
 
+        // Floating tooltip widget shown when hovering over a monitor value
+        this._tooltip = new St.Label({style_class: `${CSS_PREFIX}-tooltip`, visible: false});
+        Main.layoutManager.addTopChrome(this._tooltip);
+
         // Panel icon + optional error badge
         this._panelBox = new St.BoxLayout({style_class: `${CSS_PREFIX}-panel-box`});
         this._panelIcon = new St.Icon({
@@ -187,6 +191,25 @@ class MonishIndicator extends PanelMenu.Button {
     }
 
     /**
+     * Position and show the shared tooltip label near the current pointer.
+     * No-ops when text is empty so monitors without descriptions stay silent.
+     *
+     * @param {string} text - Description text to display.
+     */
+    _showTooltip(text) {
+        if (!text) return;
+        this._tooltip.text = text;
+        const [px, py] = global.get_pointer();
+        this._tooltip.set_position(px + 12, py + 12);
+        this._tooltip.visible = true;
+    }
+
+    /** Hide the shared tooltip label. */
+    _hideTooltip() {
+        this._tooltip.visible = false;
+    }
+
+    /**
      * Add a single monitor row to the popup menu.
      *
      * Layout (single-line value):
@@ -240,6 +263,16 @@ class MonishIndicator extends PanelMenu.Button {
             x_expand:    true,
         });
         mlValueLabel.get_clutter_text().set_line_wrap(true);
+
+        // Show description as a tooltip when hovering over value labels.
+        if (monitor.description) {
+            const desc = monitor.description;
+            for (const lbl of [inlineValueLabel, mlValueLabel]) {
+                lbl.reactive = true;
+                lbl.connect('enter-event', () => this._showTooltip(desc));
+                lbl.connect('leave-event', () => this._hideTooltip());
+            }
+        }
 
         textBox.add_child(headerBox);
         textBox.add_child(mlValueLabel);
@@ -535,6 +568,11 @@ class MonishIndicator extends PanelMenu.Button {
         if (this._jitterChangedId) {
             this._settings.disconnect(this._jitterChangedId);
             this._jitterChangedId = null;
+        }
+        if (this._tooltip) {
+            Main.layoutManager.removeChrome(this._tooltip);
+            this._tooltip.destroy();
+            this._tooltip = null;
         }
         super.destroy();
     }

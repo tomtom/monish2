@@ -342,6 +342,15 @@ describe('createMonitor', () => {
     it('allows overriding onDemandValidSeconds', () => {
         expect(createMonitor({onDemandValidSeconds: 300}).onDemandValidSeconds).toBe(300);
     });
+
+    it('defaults description to empty string — ISSUE 43', () => {
+        expect(createMonitor().description).toBe('');
+    });
+
+    it('preserves description when set via override — ISSUE 43', () => {
+        const m = createMonitor({description: 'CPU usage across all cores'});
+        expect(m.description).toBe('CPU usage across all cores');
+    });
 });
 
 // ---------------------------------------------------------------------------

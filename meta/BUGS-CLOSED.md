@@ -41,3 +41,4 @@
 40. Debug log changed from pipe-separated to tab-separated (TSV) format. #closed/2026-05-31
 41. Added Logged-in Users preset — GJS script calls who via GLib.spawn_command_line_sync, deduplicates with Set, prints comma-separated sorted names. #closed/2026-05-31
 42. Add predefined monitor for Thermal Zone 0 in the Thermal section of PRESET_MONITORS. #closed/2026-05-31
+43. Hover tooltip on monitor value: shows monitor description when hovering over value labels. #closed/2026-05-31

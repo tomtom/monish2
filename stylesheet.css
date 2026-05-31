@@ -50,6 +50,16 @@
     margin-left: 8px;
 }
 
+/* Floating tooltip shown when hovering over a monitor's value */
+.monish-tooltip {
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.9em;
+    max-width: 300px;
+}
+
 /* Row background tints per status */
 .monish-status-caution .monish-monitor-value {
     color: #e5a50a;
