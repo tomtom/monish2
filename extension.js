@@ -104,6 +104,7 @@ class MonishIndicator extends PanelMenu.Button {
         this._monitors      = [];          // current monitor config array
         this._menuItems     = new Map();   // monitorId -> {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel}
         this._history       = new Map();   // monitorId -> number[] ring buffer (max SPARKLINE_MAX_VALUES)
+        this._appHistory    = new Map();   // monitorId -> Map<appName, number[]> for multi-line per-app sparklines
         this._debugLogPath  = GLib.build_filenamev([extensionPath, 'debug.log']);
 
         // Floating tooltip widget shown when hovering over a monitor value
@@ -159,6 +160,7 @@ class MonishIndicator extends PanelMenu.Button {
         this._menuItems.clear();
         this._results.clear();
         this._history.clear();
+        this._appHistory.clear();
 
         // Normalise: intervalSeconds === 0 means on-demand; derive onDemand so all
         // downstream code uses monitor.onDemand regardless of how old data was stored.
@@ -237,10 +239,12 @@ class MonishIndicator extends PanelMenu.Button {
         });
 
         // Name is a button so it receives clicks, changes cursor, and handles hover.
+        // x_expand pushes the value and sparkline labels to the right edge of the row.
         const nameLabel = new St.Button({
             label:       monitor.name,
             style_class: `${CSS_PREFIX}-monitor-name`,
             x_align:     Clutter.ActorAlign.START,
+            x_expand:    true,
         });
         nameLabel.connect('clicked', () => this._triggerMonitor(monitor));
 
@@ -256,6 +260,13 @@ class MonishIndicator extends PanelMenu.Button {
             visible:     !monitor.onDemand,
         });
         headerBox.add_child(inlineValueLabel);
+
+        // Sparkline sits at the right edge, updated separately from the value text.
+        const sparklineLabel = new St.Label({
+            text:        '',
+            style_class: `${CSS_PREFIX}-monitor-sparkline`,
+        });
+        headerBox.add_child(sparklineLabel);
 
         // Multi-line value — below name; shown only when value contains newlines
         const mlValueLabel = new St.Label({
@@ -283,7 +294,7 @@ class MonishIndicator extends PanelMenu.Button {
         item.add_child(textBox);
 
         this.menu.addMenuItem(item);
-        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel});
+        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, sparklineLabel});
     }
 
     // -----------------------------------------------------------------------
@@ -351,6 +362,7 @@ class MonishIndicator extends PanelMenu.Button {
         if (entry) {
             entry.inlineValueLabel.visible = true;
             entry.inlineValueLabel.text    = '…';
+            entry.sparklineLabel.text      = '';
             entry.mlValueLabel.visible     = false;
         }
 
@@ -452,15 +464,40 @@ class MonishIndicator extends PanelMenu.Button {
                 this._expiryTimers.set(id, timerId);
             }
 
-            // Sparkline is appended inline; not shown for multi-line output.
             const sparkline = buildSparkline(this._history.get(id) ?? []);
             const isMulti   = value.includes('\n');
-            const inlineText = (sparkline && !isMulti) ? `${value}  ${sparkline}` : value;
 
-            entry.inlineValueLabel.visible = !isMulti;
-            entry.inlineValueLabel.text    = isMulti ? '' : inlineText;
-            entry.mlValueLabel.visible     = isMulti;
-            entry.mlValueLabel.text        = isMulti ? value : '';
+            if (isMulti) {
+                // Per-app sparklines: each line is "appName value"; update per-app ring buffer.
+                const perApp = this._appHistory.get(id) ?? new Map();
+                const lines  = value.split('\n').map(line => {
+                    const parts   = line.trim().split(/\s+/);
+                    const appName = parts[0] ?? '';
+                    const appVal  = parts.slice(1).join(' ');
+                    const num     = extractNumber(appVal);
+                    if (appName && !isNaN(num)) {
+                        const hist = perApp.get(appName) ?? [];
+                        hist.push(num);
+                        if (hist.length > SPARKLINE_MAX_VALUES) hist.shift();
+                        perApp.set(appName, hist);
+                    }
+                    const spark = buildSparkline(perApp.get(appName) ?? []);
+                    return spark ? `${line}  ${spark}` : line;
+                });
+                this._appHistory.set(id, perApp);
+                entry.inlineValueLabel.visible  = false;
+                entry.inlineValueLabel.text     = '';
+                entry.sparklineLabel.text       = '';
+                entry.mlValueLabel.visible      = true;
+                entry.mlValueLabel.text         = lines.join('\n');
+            } else {
+                // Sparkline goes into the dedicated right-aligned sparklineLabel widget.
+                entry.inlineValueLabel.visible  = true;
+                entry.inlineValueLabel.text     = value;
+                entry.sparklineLabel.text       = sparkline;
+                entry.mlValueLabel.visible      = false;
+                entry.mlValueLabel.text         = '';
+            }
 
             entry.statusIcon.icon_name = STATUS_ICONS[status] ?? STATUS_ICONS[MonitorStatus.NORMAL];
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
@@ -484,6 +521,7 @@ class MonishIndicator extends PanelMenu.Button {
         if (entry) {
             entry.inlineValueLabel.visible = false;
             entry.inlineValueLabel.text    = '';
+            entry.sparklineLabel.text      = '';
             entry.mlValueLabel.visible     = false;
             entry.statusIcon.icon_name     = STATUS_ICONS[MonitorStatus.PENDING];
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);

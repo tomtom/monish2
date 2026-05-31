@@ -300,6 +300,38 @@ describe('interval 0 = on-demand — ISSUE 31 / ISSUE 45', () => {
     });
 });
 
+describe('extension.js per-app sparklines — ISSUE 46', () => {
+    it('defines _appHistory for per-app value ring buffers', () => {
+        expect(extensionSource).toContain('_appHistory');
+    });
+
+    it('clears _appHistory on menu rebuild', () => {
+        expect(extensionSource).toContain('_appHistory.clear()');
+    });
+
+    it('builds per-app sparkline for each line of multi-line output', () => {
+        expect(extensionSource).toContain('_appHistory.get(id)');
+    });
+});
+
+describe('extension.js right-aligned sparklines — ISSUE 47', () => {
+    it('defines sparklineLabel as a separate widget', () => {
+        expect(extensionSource).toContain('sparklineLabel');
+    });
+
+    it('nameLabel has x_expand so sparklineLabel is pushed to the right edge', () => {
+        expect(extensionSource).toContain('x_expand:    true');
+    });
+
+    it('sparklineLabel is tracked in _menuItems entry', () => {
+        expect(extensionSource).toContain('sparklineLabel');
+    });
+
+    it('_setMonitorResult sets sparklineLabel.text separately from value label', () => {
+        expect(extensionSource).toContain('entry.sparklineLabel.text');
+    });
+});
+
 describe('extension.js sparkline — ISSUE 35', () => {
     it('imports buildSparkline and extractNumber from lib/monitor.js', () => {
         expect(extensionSource).toContain('buildSparkline');
@@ -320,9 +352,9 @@ describe('extension.js sparkline — ISSUE 35', () => {
         expect(extensionSource).toContain('extractNumber');
     });
 
-    it('appends sparkline inline after value', () => {
+    it('computes sparkline and displays it (now via dedicated sparklineLabel — ISSUE 47)', () => {
         expect(extensionSource).toContain('sparkline');
-        expect(extensionSource).toContain('inlineText');
+        expect(extensionSource).toContain('sparklineLabel');
     });
 });
 

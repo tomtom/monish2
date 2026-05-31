@@ -50,6 +50,13 @@
     margin-left: 8px;
 }
 
+/* Right-aligned sparkline widget beside the value label */
+.monish-monitor-sparkline {
+    font-family: monospace;
+    color: #9a9996;
+    margin-left: 6px;
+}
+
 /* Floating tooltip shown when hovering over a monitor's value */
 .monish-tooltip {
     background-color: rgba(0, 0, 0, 0.75);

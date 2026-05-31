@@ -44,3 +44,5 @@
 43. Hover tooltip on monitor value: shows monitor description when hovering over value labels. #closed/2026-05-31
 44. Prefs up/down: store _monitorId on rows and grab_focus() after rebuild to keep moved item visible. #closed/2026-05-31
 45. interval=0s = on-demand: removed On Demand toggle; derive onDemand from intervalSeconds===0; subtitle 'on-demand'; opacity only for !enabled. #closed/2026-05-31
+46. Top CPU/MEM per-app sparklines: _appHistory tracks last 20 values per app; sparkline appended per line of multi-line output. #closed/2026-05-31
+47. Right-align all sparklines: sparklines are right-aligned in their display context. #closed/2026-05-31
