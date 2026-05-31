@@ -23,3 +23,4 @@
 23. In Prefs: When I add a predefined monitor, the interval is shown as 0 minutes. The min value should be 1s. The default value for predefined monitors must be 1m. #closed/2026-05-31
 24. In Prefs: the default for jitter should be 5%. #closed/2026-05-31
 25. All predefined monitors show an error: Command exited with code 1. #closed/2026-05-31
+26. In Prefs: When I open Prefs (and the list is empty?) at first, the "Add Monitor" button is shown at the bottom. When I add a predefined monitor, the Add button is shown at the top. When I remove the predefined monitor the Add button is shown at the top. Make sure the Add button is always shown at the top. #closed/2026-05-31

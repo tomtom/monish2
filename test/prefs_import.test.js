@@ -193,6 +193,16 @@ describe('prefs.js jitter setting', () => {
     });
 });
 
+describe('prefs.js Add Monitor button position', () => {
+    it('monitorsGroup.add(addRow) appears before buildMonitorRows so the button is always at the top', () => {
+        const addIdx   = prefsSource.indexOf('monitorsGroup.add(addRow)');
+        const buildIdx = prefsSource.indexOf('buildMonitorRows(monitorsGroup');
+        expect(addIdx).toBeGreaterThan(-1);
+        expect(buildIdx).toBeGreaterThan(-1);
+        expect(addIdx).toBeLessThan(buildIdx);
+    });
+});
+
 describe('GSettings schema defaults', () => {
     it('jitter-percent defaults to 5 so new installs get a sensible schedule spread', () => {
         // Guard against accidental reversion to 0 (exact timing / no jitter).

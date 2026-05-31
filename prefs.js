@@ -257,6 +257,14 @@ export default class MonishPreferences extends ExtensionPreferences {
         });
         page.add(monitorsGroup);
 
+        // Add Monitor button is added first so it is always pinned to the top
+        // of the group regardless of whether the list is empty or populated.
+        // (buildMonitorRows appends rows after it; refresh removes/re-appends
+        // those rows, leaving addRow permanently at position 0.)
+        const addRow = new Adw.ButtonRow({title: 'Add Monitor'});
+        addRow.add_css_class('suggested-action');
+        monitorsGroup.add(addRow);
+
         // refreshAll is set after both refresh functions are defined so that
         // arrow-function closures can capture it by reference.
         let refreshAll;
@@ -271,9 +279,6 @@ export default class MonishPreferences extends ExtensionPreferences {
             builtRows = buildMonitorRows(monitorsGroup, settings, window, () => refreshAll());
         };
 
-        // Add Monitor button row
-        const addRow = new Adw.ButtonRow({title: 'Add Monitor'});
-        addRow.add_css_class('suggested-action');
         addRow.connect('activated', () => {
             showMonitorEditDialog(window, null, (newMonitor) => {
                 const monitors = deserializeMonitors(settings.get_string('monitors'));
@@ -282,7 +287,6 @@ export default class MonishPreferences extends ExtensionPreferences {
                 refreshAll();
             });
         });
-        monitorsGroup.add(addRow);
 
         // ---- Presets group ----
         const presetsGroup = new Adw.PreferencesGroup({
