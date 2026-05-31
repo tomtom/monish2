@@ -352,6 +352,14 @@ describe('extension.js name-click update — ISSUE 34', () => {
     });
 });
 
+describe('extension.js debug log format — ISSUE 40', () => {
+    it('debug log uses tab separator, not pipe', () => {
+        // TSV format: each field separated by \t so the file is directly parseable.
+        expect(extensionSource).toContain('\\t${monitor.name}\\t${monitor.type}\\t');
+        expect(extensionSource).not.toContain('| ${monitor.name} |');
+    });
+});
+
 describe('extension.js multiline icon alignment — ISSUE 39', () => {
     it('statusIcon has y_align START so it stays at the top for multiline values', () => {
         expect(extensionSource).toContain('Clutter.ActorAlign.START');

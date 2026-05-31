@@ -366,7 +366,7 @@ class MonishIndicator extends PanelMenu.Button {
         if (!this._settings.get_boolean(DEBUG_LOG_KEY)) return;
         try {
             const ts     = new Date().toISOString();
-            const line   = `${ts} | ${monitor.name} | ${monitor.type} | ${value}\n`;
+            const line   = `${ts}\t${monitor.name}\t${monitor.type}\t${value}\n`;
             const file   = Gio.File.new_for_path(this._debugLogPath);
             const stream = file.append_to(Gio.FileCreateFlags.NONE, null);
             stream.write_all(new TextEncoder().encode(line), null);
