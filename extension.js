@@ -287,14 +287,41 @@ class MonishIndicator extends PanelMenu.Button {
             }
         }
 
+        // Actions drop-down: shown when the status icon is clicked.
+        // One St.Button per action, hidden by default.
+        const actionsBox = new St.BoxLayout({
+            vertical:    true,
+            style_class: `${CSS_PREFIX}-actions-box`,
+            visible:     false,
+        });
+        for (const action of (monitor.actions ?? [])) {
+            const actionBtn = new St.Button({
+                label:       action.label || action.command,
+                style_class: `${CSS_PREFIX}-action-button`,
+                x_align:     Clutter.ActorAlign.START,
+            });
+            actionBtn.connect('clicked', () => this._runAction(monitor, action));
+            actionsBox.add_child(actionBtn);
+        }
+
+        // Make the status icon a toggle for the actions panel when actions exist.
+        if ((monitor.actions ?? []).length > 0) {
+            statusIcon.reactive = true;
+            statusIcon.connect('button-press-event', () => {
+                actionsBox.visible = !actionsBox.visible;
+                return true; // stop propagation so the menu item doesn't close
+            });
+        }
+
         textBox.add_child(headerBox);
         textBox.add_child(mlValueLabel);
+        textBox.add_child(actionsBox);
 
         item.add_child(statusIcon);
         item.add_child(textBox);
 
         this.menu.addMenuItem(item);
-        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, sparklineLabel});
+        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, sparklineLabel, actionsBox});
     }
 
     // -----------------------------------------------------------------------
@@ -400,6 +427,23 @@ class MonishIndicator extends PanelMenu.Button {
             this._setMonitorResult(monitor.id, errStr, MonitorStatus.ERROR);
             this._appendDebugLog(monitor, `error: ${errStr}`);
         }
+    }
+
+    /**
+     * Execute one action command for a monitor, then refresh the monitor value.
+     * Action errors are silently swallowed so a failing action doesn't block the update.
+     *
+     * @param {object} monitor - Monitor config object.
+     * @param {object} action  - Action definition: {label, command, type}.
+     */
+    async _runAction(monitor, action) {
+        try {
+            const execute = action.type === MonitorType.JAVASCRIPT
+                ? executeJavaScript
+                : executeCommand;
+            await execute(action.command, 30);
+        } catch (_) {}
+        await this._runMonitor(monitor);
     }
 
     /**

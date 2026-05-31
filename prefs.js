@@ -54,6 +54,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
             ...monitor,
             args:      [...(monitor.args ?? [])],
             argValues: {...(monitor.argValues ?? {})},
+            actions:   [...(monitor.actions ?? [])],
         }
         : createMonitor();
 
@@ -269,6 +270,114 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         addDlg.present();
     });
 
+    // ---- Actions ----
+    const actionsHeaderBox = new Gtk.Box({spacing: 8, hexpand: true});
+    const actionsTitle = new Gtk.Label({
+        label:       'Actions',
+        xalign:      0,
+        hexpand:     true,
+        css_classes: ['heading'],
+    });
+    const addActionBtn = new Gtk.Button({
+        label:       '+ Add',
+        css_classes: ['flat'],
+        valign:      Gtk.Align.CENTER,
+    });
+    actionsHeaderBox.append(actionsTitle);
+    actionsHeaderBox.append(addActionBtn);
+    content.append(actionsHeaderBox);
+
+    const actionsHint = new Gtk.Label({
+        label:       'Commands run on demand from the monitor icon in the menu.',
+        xalign:      0,
+        wrap:        true,
+        css_classes: ['caption', 'dim-label'],
+    });
+    content.append(actionsHint);
+
+    const actionsListBox = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing:     4,
+    });
+    content.append(actionsListBox);
+
+    /** Build one action row: label entry + command entry + type dropdown + delete. */
+    function buildActionRow(action) {
+        const row = new Gtk.Box({
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing:     4,
+            hexpand:     true,
+        });
+
+        const topRow = new Gtk.Box({spacing: 8, hexpand: true});
+        const labelEntry = new Gtk.Entry({
+            text:             action.label ?? '',
+            placeholder_text: 'Action label',
+            hexpand:          true,
+        });
+        labelEntry.connect('changed', () => {
+            action.label = labelEntry.get_text();
+        });
+
+        const actionTypeDropDown = new Gtk.DropDown({
+            model: Gtk.StringList.new(MONITOR_TYPE_LABELS),
+        });
+        const actionTypeIdx = MONITOR_TYPE_VALUES.indexOf(action.type ?? MonitorType.SHELL);
+        actionTypeDropDown.set_selected(actionTypeIdx >= 0 ? actionTypeIdx : 0);
+        actionTypeDropDown.connect('notify::selected', () => {
+            action.type = MONITOR_TYPE_VALUES[actionTypeDropDown.get_selected()] ?? MonitorType.SHELL;
+        });
+
+        const delBtn = new Gtk.Button({
+            icon_name:   'user-trash-symbolic',
+            css_classes: ['flat'],
+            valign:      Gtk.Align.CENTER,
+        });
+        delBtn.connect('clicked', () => {
+            data.actions = (data.actions ?? []).filter(a => a !== action);
+            rebuildActionRows();
+        });
+
+        topRow.append(labelEntry);
+        topRow.append(actionTypeDropDown);
+        topRow.append(delBtn);
+
+        const cmdEntry = new Gtk.Entry({
+            text:             action.command ?? '',
+            placeholder_text: 'Command or script',
+            hexpand:          true,
+            monospace:        true,
+        });
+        cmdEntry.connect('changed', () => {
+            action.command = cmdEntry.get_text();
+        });
+
+        row.append(topRow);
+        row.append(cmdEntry);
+        return row;
+    }
+
+    /** Remove and recreate all action rows from data.actions. */
+    function rebuildActionRows() {
+        let child = actionsListBox.get_first_child();
+        while (child) {
+            const next = child.get_next_sibling();
+            actionsListBox.remove(child);
+            child = next;
+        }
+        for (const action of (data.actions ?? [])) {
+            actionsListBox.append(buildActionRow(action));
+        }
+    }
+
+    rebuildActionRows();
+
+    addActionBtn.connect('clicked', () => {
+        if (!data.actions) data.actions = [];
+        data.actions.push({label: '', command: '', type: MonitorType.SHELL});
+        rebuildActionRows();
+    });
+
     // ---- Interval ----
     // Stored and edited in seconds; 0 = on-demand (no timer, click name to refresh); upper bound is 86400 (one day).
     // Initialise adjustment at lower bound first, then call set_value() so
@@ -367,6 +476,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
                 dangerPatterns:       splitPatterns(dangerEntry.get_text()),
                 onDemand:             totalSec === 0,
                 onDemandValidSeconds: validSecSpin.get_value_as_int(),
+                actions:              data.actions ?? [],
             };
 
             const errors = validateMonitor(updated);

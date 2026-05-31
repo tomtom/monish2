@@ -351,6 +351,15 @@ describe('createMonitor', () => {
         const m = createMonitor({description: 'CPU usage across all cores'});
         expect(m.description).toBe('CPU usage across all cores');
     });
+
+    it('defaults actions to empty array — ISSUE 50', () => {
+        expect(createMonitor().actions).toEqual([]);
+    });
+
+    it('preserves actions when set via override — ISSUE 50', () => {
+        const actions = [{label: 'Enable', command: 'cmd enable', type: 'shell'}];
+        expect(createMonitor({actions}).actions).toEqual(actions);
+    });
 });
 
 // ---------------------------------------------------------------------------

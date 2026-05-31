@@ -57,6 +57,23 @@
     margin-left: 6px;
 }
 
+/* Action buttons panel — shown when the status icon is clicked */
+.monish-actions-box {
+    padding-top: 4px;
+}
+
+.monish-action-button {
+    background: none;
+    border: none;
+    padding: 2px 0;
+    color: #729fcf;
+    text-decoration: underline;
+}
+
+.monish-action-button:hover {
+    color: #3465a4;
+}
+
 /* Floating tooltip shown when hovering over a monitor's value */
 .monish-tooltip {
     background-color: rgba(0, 0, 0, 0.75);

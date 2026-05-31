@@ -475,3 +475,30 @@ describe('debug logging — ISSUE 30', () => {
         expect(prefsSource).toContain('showDebugLogWindow');
     });
 });
+
+describe('action commands — ISSUE 50', () => {
+    it('prefs edit dialog has an Actions section', () => {
+        expect(prefsSource).toContain("'Actions'");
+    });
+
+    it('prefs deep-copies actions on dialog open', () => {
+        expect(prefsSource).toContain('[...(monitor.actions');
+    });
+
+    it('prefs save handler includes actions from data', () => {
+        expect(prefsSource).toContain('actions:');
+        expect(prefsSource).toContain('data.actions');
+    });
+
+    it('extension defines _runAction method', () => {
+        expect(extensionSource).toContain('_runAction');
+    });
+
+    it('extension adds actionsBox to menu item when monitor has actions', () => {
+        expect(extensionSource).toContain('actionsBox');
+    });
+
+    it('extension tracks actionsBox in _menuItems entry', () => {
+        expect(extensionSource).toContain('actionsBox');
+    });
+});

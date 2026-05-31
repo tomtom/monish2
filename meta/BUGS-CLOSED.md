@@ -48,3 +48,4 @@
 47. Right-align all sparklines: sparklines are right-aligned in their display context. #closed/2026-05-31
 48. Top CPU Processes EXCLUDE default changed from 'gjs' to '^(gjs)$' for exact name matching. #closed/2026-05-31
 49. Logged-in Users: multiline output 'NAME: seat0, tty2' — groups login methods per user via who. #closed/2026-05-31
+50. Monitor action commands: Actions section in edit dialog; status icon toggles actionsBox with per-action buttons; _runAction executes and refreshes value. #closed/2026-05-31
