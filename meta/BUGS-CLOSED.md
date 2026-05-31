@@ -22,3 +22,4 @@
 22. Change the default value for Schedule to 1 minute. When planning to run the command, convert the timeing to seconds and add +/-5% random time units. Add a jitter (default: 5%) option to prefs. When the jitter is 0, run exactly on time. #closed/2026-05-30
 23. In Prefs: When I add a predefined monitor, the interval is shown as 0 minutes. The min value should be 1s. The default value for predefined monitors must be 1m. #closed/2026-05-31
 24. In Prefs: the default for jitter should be 5%. #closed/2026-05-31
+25. All predefined monitors show an error: Command exited with code 1. #closed/2026-05-31
