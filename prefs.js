@@ -28,9 +28,6 @@ import {PRESET_MONITORS} from './lib/presets.js';
 // Constants
 // ---------------------------------------------------------------------------
 
-/** Interval units presented to the user. */
-const INTERVAL_UNITS = ['seconds', 'minutes', 'hours'];
-
 /** Monitor type labels shown in the Type dropdown (index matches MonitorType values). */
 const MONITOR_TYPE_LABELS = ['Shell', 'JavaScript'];
 const MONITOR_TYPE_VALUES = [MonitorType.SHELL, MonitorType.JAVASCRIPT];
@@ -108,28 +105,18 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     content.append(labeledRow('Type', typeDropDown));
 
     // ---- Interval ----
-    // Store internally in seconds; let the user pick a magnitude + unit.
-    const {magnitude, unit} = splitInterval(data.intervalSeconds);
-
+    // Stored and edited in seconds; upper bound is 86400 (one day).
     const intervalSpin = new Gtk.SpinButton({
         adjustment: new Gtk.Adjustment({
-            value:       magnitude,
-            lower:       1,
-            upper:       9999,
+            value:          data.intervalSeconds,
+            lower:          1,
+            upper:          86400,
             step_increment: 1,
         }),
         numeric:  true,
         hexpand:  true,
     });
-    const unitDropDown = new Gtk.DropDown({
-        model: Gtk.StringList.new(INTERVAL_UNITS),
-    });
-    unitDropDown.set_selected(INTERVAL_UNITS.indexOf(unit));
-
-    const intervalBox = new Gtk.Box({spacing: 8, hexpand: true});
-    intervalBox.append(intervalSpin);
-    intervalBox.append(unitDropDown);
-    content.append(labeledRow('Interval', intervalBox));
+    content.append(labeledRow('Interval (s)', intervalSpin));
 
     // ---- Output regex ----
     const regexEntry = new Gtk.Entry({
@@ -197,9 +184,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
             const buf = cmdView.get_buffer();
             const cmd = buf.get_text(buf.get_start_iter(), buf.get_end_iter(), false).trim();
 
-            const selUnit  = INTERVAL_UNITS[unitDropDown.get_selected()] ?? 'seconds';
-            const selMag   = intervalSpin.get_value_as_int();
-            const totalSec = toSeconds(selMag, selUnit);
+            const totalSec = toSeconds(intervalSpin.get_value_as_int(), 'seconds');
 
             const updated = {
                 ...data,
@@ -320,7 +305,7 @@ export default class MonishPreferences extends ExtensionPreferences {
         });
         const jitterSpin = new Gtk.SpinButton({
             adjustment: new Gtk.Adjustment({
-                value:          settings.get_int('jitter-percent'),
+                value:          0,
                 lower:          0,
                 upper:          50,
                 step_increment: 1,
@@ -328,9 +313,12 @@ export default class MonishPreferences extends ExtensionPreferences {
             numeric: true,
             valign:  Gtk.Align.CENTER,
         });
+        // Connect before set_value so the handler is registered before the
+        // first value-changed fires, guaranteeing the stored setting is written.
         jitterSpin.connect('value-changed', () => {
             settings.set_int('jitter-percent', jitterSpin.get_value_as_int());
         });
+        jitterSpin.set_value(settings.get_int('jitter-percent'));
         jitterRow.add_suffix(jitterSpin);
         scheduleGroup.add(jitterRow);
     }
@@ -373,9 +361,11 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         const isFirst = i === 0;
         const isLast  = i === monitors.length - 1;
 
+        const {magnitude, unit} = splitInterval(monitor.intervalSeconds);
+        const unitLabel = magnitude === 1 ? unit.slice(0, -1) : unit;
         const row = new Adw.ActionRow({
             title:    monitor.name,
-            subtitle: `every ${monitor.intervalSeconds}s — ${monitor.command.slice(0, 60)}${monitor.command.length > 60 ? '…' : ''}`,
+            subtitle: `every ${magnitude} ${unitLabel} — ${monitor.command.slice(0, 60)}${monitor.command.length > 60 ? '…' : ''}`,
         });
 
         // Enable/disable toggle
@@ -594,7 +584,9 @@ function splitPatterns(raw) {
  * @returns {string}
  */
 function summarisePreset(preset) {
-    const meta = [`every ${preset.intervalSeconds}s`];
+    const {magnitude, unit} = splitInterval(preset.intervalSeconds);
+    const unitLabel = magnitude === 1 ? unit.slice(0, -1) : unit;
+    const meta = [`every ${magnitude} ${unitLabel}`];
     if (preset.cautionPatterns?.length > 0) meta.push(`caution: ${preset.cautionPatterns[0]}`);
     if (preset.dangerPatterns?.length  > 0) meta.push(`danger: ${preset.dangerPatterns[0]}`);
     const metaStr = meta.join(' · ');

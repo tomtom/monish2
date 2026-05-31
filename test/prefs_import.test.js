@@ -216,3 +216,37 @@ describe('GSettings schema defaults', () => {
         expect(prefsSource).toContain('toSeconds');
     });
 });
+
+describe('prefs.js interval UI (seconds-only) — ISSUE 27', () => {
+    it('does not define INTERVAL_UNITS (unit dropdown removed)', () => {
+        // Bug 27: the unit dropdown was showing intervals in minutes; all
+        // interval input is now in seconds only.
+        expect(prefsSource).not.toContain('INTERVAL_UNITS');
+    });
+
+    it('does not define unitDropDown (unit selector removed)', () => {
+        expect(prefsSource).not.toContain('unitDropDown');
+    });
+
+    it('labels the interval field with (s) to indicate seconds', () => {
+        expect(prefsSource).toContain('\'Interval (s)\'');
+    });
+});
+
+describe('prefs.js interval spinner init — ISSUE 28', () => {
+    it('interval spinner is initialised from data.intervalSeconds directly', () => {
+        // Bug 28: using splitInterval magnitude (e.g. 1 for "1 minute") instead
+        // of the raw intervalSeconds (60) caused preset intervals to show wrong
+        // values and be silently overwritten on save.
+        expect(prefsSource).not.toContain('value:       magnitude');
+    });
+});
+
+describe('prefs.js jitter persistence — ISSUE 29', () => {
+    it('jitter spinner sets its value explicitly after the change handler is connected', () => {
+        // Bug 29: initialising the SpinButton with settings.get_int() in the
+        // constructor can fire value-changed before the handler is registered,
+        // losing the stored value.  The fix calls set_value() after connect().
+        expect(prefsSource).toContain('jitterSpin.set_value(settings.get_int(\'jitter-percent\'))');
+    });
+});
