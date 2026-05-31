@@ -5,7 +5,6 @@ Next number: 50
 
 ## Current
 
-49. For the logged-in users: Multiline output with the format "NAME: HOW..." where HOW is a list of login methods (e.g., seat0, tty2 etc.).
 
 
 ## Open

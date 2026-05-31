@@ -75,9 +75,16 @@ describe('PRESET_MONITORS', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Logged-in Users');
         expect(preset).toBeDefined();
         expect(preset.type).toBe(MonitorType.JAVASCRIPT);
-        // Must use who command and deduplicate
         expect(preset.command).toContain('who');
-        expect(preset.command).toContain('new Set(');
+    });
+
+    it('Logged-in Users output is multiline NAME: HOW format — ISSUE 49', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Logged-in Users');
+        // Groups login methods per user: "tom: seat0, tty2" one line per user
+        expect(preset.command).toContain('byUser');
+        // Login methods joined with ", " and users joined with newline
+        expect(preset.command).toContain("join(', ')");
+        expect(preset.command).toContain("join('\\n')");
     });
 
     it('every preset has a non-empty description string', () => {
