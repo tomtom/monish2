@@ -145,6 +145,14 @@ describe('preset GJS scripts: GLib.file_get_contents error handling', () => {
         }
     });
 
+    it('Top MEM Processes formats memory as MB/GB, not percentage — ISSUE 38', () => {
+        const mem = PRESET_MONITORS.find(p => p.name === 'Top MEM Processes');
+        // Must use _fmtMem helper that produces MB/GB strings
+        expect(mem.command).toContain('_fmtMem');
+        // Must NOT use the old percentage formula
+        expect(mem.command).not.toContain('memTotal * 100');
+    });
+
     it('Top CPU/MEM Processes commands check EXCLUDE variable for filtering', () => {
         const cpu = PRESET_MONITORS.find(p => p.name === 'Top CPU Processes');
         const mem = PRESET_MONITORS.find(p => p.name === 'Top MEM Processes');

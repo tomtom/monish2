@@ -36,3 +36,4 @@
 35. Remember latest 20 values and display a sparkline — extractNumber/buildSparkline added to lib/monitor.js; extension keeps per-monitor ring buffer (max 20); sparkline appended inline after the value using Unicode block chars ▁▂▃▄▅▆▇█; error values excluded from history. #closed/2026-05-31
 36. Monitor user-defined arguments — injectArgs() in lib/monitor.js prepends const NAME=value for JS monitors and export NAME=value for shell monitors; prefs edit dialog has Arguments section with Add/delete UI and type-aware tooltips; createMonitor populates argValues from arg defaults. #closed/2026-05-31
 37. Top CPU/MEM Processes: EXCLUDE arg (default: gjs) added to both presets; scripts check _exclude regexp against comm before including a process. #closed/2026-05-31
+38. Top MEM Processes displayed % of total RAM instead of actual usage; replaced with _fmtMem() outputting MB/GB. #closed/2026-05-31
