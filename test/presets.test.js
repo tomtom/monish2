@@ -154,14 +154,18 @@ describe('preset GJS scripts: GLib.file_get_contents error handling', () => {
         }
     });
 
-    it('Top CPU/MEM Processes define EXCLUDE arg with default gjs — ISSUE 37', () => {
+    it('Top CPU Processes EXCLUDE arg defaults to ^(gjs)$ — ISSUE 48', () => {
         const cpu = PRESET_MONITORS.find(p => p.name === 'Top CPU Processes');
+        const excludeArg = (cpu.args ?? []).find(a => a.name === 'EXCLUDE');
+        expect(excludeArg).toBeDefined();
+        expect(excludeArg.default).toBe('^(gjs)$');
+    });
+
+    it('Top MEM Processes EXCLUDE arg defaults to gjs (unchanged)', () => {
         const mem = PRESET_MONITORS.find(p => p.name === 'Top MEM Processes');
-        for (const preset of [cpu, mem]) {
-            const excludeArg = (preset.args ?? []).find(a => a.name === 'EXCLUDE');
-            expect(excludeArg).toBeDefined();
-            expect(excludeArg.default).toBe('gjs');
-        }
+        const excludeArg = (mem.args ?? []).find(a => a.name === 'EXCLUDE');
+        expect(excludeArg).toBeDefined();
+        expect(excludeArg.default).toBe('gjs');
     });
 
     it('Top MEM Processes formats memory as MB/GB, not percentage — ISSUE 38', () => {
