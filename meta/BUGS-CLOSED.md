@@ -31,3 +31,4 @@
 30. In Prefs: Add a debug option that logs command execution: timestamp, monitor name, execution type, result. The log can be viewed in extra window. #closed/2026-05-31
 31. intervalSeconds=0 means monitor is deactivated; edit dialog shows note; disabled monitors greyed out in prefs list; extension skips interval=0 monitors. #closed/2026-05-31
 32. Thermal Zone 1 fails (thermal_zone1 absent on many machines) and Top MEM/CPU Processes fail intermittently (proc entry vanishes mid-scan) — GLib.file_get_contents throws in GJS, fixed with try/catch. #closed/2026-05-31
+33. Battery Level preset shows N/A — outer try/catch swallowed the throw from AC's missing capacity file before BAT0 was reached; fixed with per-entry inner try/catch. #closed/2026-05-31

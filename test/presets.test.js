@@ -134,4 +134,14 @@ describe('preset GJS scripts: GLib.file_get_contents error handling', () => {
             expect(preset.command).toContain('} catch (_)');
         }
     });
+
+    it('Battery Level guards each per-entry read with inner try/catch (AC has no capacity file)', () => {
+        // The outer try/catch alone was swallowing the error before BAT0 was reached.
+        // The inner try/catch must be present so non-battery entries are skipped.
+        const batteryPreset = PRESET_MONITORS.find(p => p.name === 'Battery Level');
+        // Two independent try blocks: outer (enumerate) + inner (per-entry read)
+        const tryCount = (batteryPreset.command.match(/\btry\s*\{/g) ?? []).length;
+        expect(tryCount).toBeGreaterThanOrEqual(2);
+        expect(batteryPreset.command).not.toMatch(/const \[ok,/);
+    });
 });
