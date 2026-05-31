@@ -34,6 +34,14 @@
 
 .monish-monitor-name {
     font-weight: bold;
+    /* Name acts as a click target to trigger an immediate update */
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.monish-monitor-name:hover {
+    text-decoration: underline;
 }
 
 .monish-monitor-value {

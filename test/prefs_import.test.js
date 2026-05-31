@@ -152,8 +152,9 @@ describe('extension.js on-demand monitors', () => {
         expect(extensionSource).toContain('_resetOnDemandMonitor');
     });
 
-    it('shows Update button label for on-demand monitors', () => {
-        expect(extensionSource).toContain('\'Update\'');
+    it('defines _resetOnDemandMonitor to clear expired on-demand values', () => {
+        // Update button removed (ISSUE 34); on-demand now triggered by name click.
+        expect(extensionSource).toContain('_resetOnDemandMonitor');
     });
 });
 
@@ -283,6 +284,45 @@ describe('interval 0 = disabled — ISSUE 31', () => {
 
     it('extension skips monitors with intervalSeconds === 0', () => {
         expect(extensionSource).toContain('m.intervalSeconds !== 0');
+    });
+});
+
+describe('extension.js name-click update — ISSUE 34', () => {
+    it('defines _triggerMonitor method', () => {
+        expect(extensionSource).toContain('_triggerMonitor');
+    });
+
+    it('defines _scheduleNextRun method (timer reset after name-click)', () => {
+        expect(extensionSource).toContain('_scheduleNextRun');
+    });
+
+    it('name label is an St.Button so it receives clicks', () => {
+        // St.Button handles cursor change, hover, and clicked signal natively.
+        expect(extensionSource).toContain('new St.Button(');
+        expect(extensionSource).toContain('monitor-name');
+    });
+
+    it('name click connects to _triggerMonitor', () => {
+        expect(extensionSource).toContain('_triggerMonitor(monitor)');
+    });
+
+    it('_triggerMonitor cancels existing timer before running', () => {
+        // Timer must be cancelled so the next scheduled poll resets from now.
+        expect(extensionSource).toContain('this._timers.get(monitor.id)');
+        expect(extensionSource).toContain('GLib.source_remove(existingId)');
+    });
+
+    it('_triggerMonitor shows loading indicator while command runs', () => {
+        expect(extensionSource).toContain('\'…\'');
+    });
+
+    it('_triggerMonitor calls _scheduleNextRun for non-on-demand monitors', () => {
+        expect(extensionSource).toContain('this._scheduleNextRun(monitor)');
+    });
+
+    it('does not contain the removed Update button', () => {
+        // The Update button was replaced by the clickable name label (ISSUE 34).
+        expect(extensionSource).not.toContain('update-btn');
     });
 });
 
