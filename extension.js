@@ -205,9 +205,10 @@ class MonishIndicator extends PanelMenu.Button {
         const item = new PopupMenu.PopupBaseMenuItem({reactive: false});
 
         const statusIcon = new St.Icon({
-            icon_name: STATUS_ICONS[MonitorStatus.PENDING],
+            icon_name:  STATUS_ICONS[MonitorStatus.PENDING],
             style_class: `${CSS_PREFIX}-status-icon`,
-            icon_size: 16,
+            icon_size:  16,
+            y_align:    Clutter.ActorAlign.START,
         });
 
         // Name is a button so it receives clicks, changes cursor, and handles hover.

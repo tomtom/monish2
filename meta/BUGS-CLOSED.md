@@ -37,3 +37,4 @@
 36. Monitor user-defined arguments — injectArgs() in lib/monitor.js prepends const NAME=value for JS monitors and export NAME=value for shell monitors; prefs edit dialog has Arguments section with Add/delete UI and type-aware tooltips; createMonitor populates argValues from arg defaults. #closed/2026-05-31
 37. Top CPU/MEM Processes: EXCLUDE arg (default: gjs) added to both presets; scripts check _exclude regexp against comm before including a process. #closed/2026-05-31
 38. Top MEM Processes displayed % of total RAM instead of actual usage; replaced with _fmtMem() outputting MB/GB. #closed/2026-05-31
+39. Multiline monitor status icon was vertically centered; set y_align: Clutter.ActorAlign.START so it aligns with the name label. #closed/2026-05-31

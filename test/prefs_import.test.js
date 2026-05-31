@@ -352,6 +352,12 @@ describe('extension.js name-click update — ISSUE 34', () => {
     });
 });
 
+describe('extension.js multiline icon alignment — ISSUE 39', () => {
+    it('statusIcon has y_align START so it stays at the top for multiline values', () => {
+        expect(extensionSource).toContain('Clutter.ActorAlign.START');
+    });
+});
+
 describe('argument injection — ISSUE 36', () => {
     it('extension imports injectArgs', () => {
         expect(extensionSource).toContain('injectArgs');
