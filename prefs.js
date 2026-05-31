@@ -434,11 +434,15 @@ export default class MonishPreferences extends ExtensionPreferences {
         // Track rows built by buildMonitorRows so refreshMonitorRows can
         // remove exactly those rows without touching libadwaita's internal
         // group children (which would cause an infinite removal loop).
-        let builtRows = buildMonitorRows(monitorsGroup, settings, window, () => refreshAll());
+        let builtRows = buildMonitorRows(monitorsGroup, settings, window, fId => refreshAll(fId));
 
-        const refreshMonitorRows = () => {
+        const refreshMonitorRows = (focusId) => {
             builtRows.forEach(row => monitorsGroup.remove(row));
-            builtRows = buildMonitorRows(monitorsGroup, settings, window, () => refreshAll());
+            builtRows = buildMonitorRows(monitorsGroup, settings, window, fId => refreshAll(fId));
+            if (focusId) {
+                const target = builtRows.find(r => r._monitorId === focusId);
+                target?.grab_focus();
+            }
         };
 
         addRow.connect('activated', () => {
@@ -464,8 +468,8 @@ export default class MonishPreferences extends ExtensionPreferences {
             builtPresetRows = buildPresetRows(presetsGroup, settings, () => refreshAll());
         };
 
-        refreshAll = () => {
-            refreshMonitorRows();
+        refreshAll = (focusId) => {
+            refreshMonitorRows(focusId);
             refreshPresetRows();
         };
 
@@ -669,7 +673,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             if (idx > 0) {
                 [all[idx - 1], all[idx]] = [all[idx], all[idx - 1]];
                 settings.set_string('monitors', serializeMonitors(all));
-                refresh();
+                refresh(monitor.id);
             }
         });
 
@@ -687,7 +691,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             if (idx < all.length - 1) {
                 [all[idx], all[idx + 1]] = [all[idx + 1], all[idx]];
                 settings.set_string('monitors', serializeMonitors(all));
-                refresh();
+                refresh(monitor.id);
             }
         });
 
@@ -742,6 +746,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         row.add_suffix(editBtn);
         row.add_suffix(dupBtn);
         row.add_suffix(delBtn);
+        row._monitorId = monitor.id;
         group.add(row);
         added.push(row);
     }

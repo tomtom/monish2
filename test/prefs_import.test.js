@@ -395,6 +395,20 @@ describe('argument injection — ISSUE 36', () => {
     });
 });
 
+describe('prefs.js move up/down scroll preservation — ISSUE 44', () => {
+    it('sets _monitorId on each built row for post-rebuild focus lookup', () => {
+        expect(prefsSource).toContain('row._monitorId = monitor.id');
+    });
+
+    it('up/down refresh passes monitor.id so the moved row is focused after rebuild', () => {
+        expect(prefsSource).toContain('refresh(monitor.id)');
+    });
+
+    it('refreshMonitorRows calls grab_focus() on the target row after rebuild', () => {
+        expect(prefsSource).toContain('grab_focus()');
+    });
+});
+
 describe('debug logging — ISSUE 30', () => {
     it('schema defines a debug-logging boolean key', () => {
         expect(schemaSource).toContain('name="debug-logging" type="b"');
