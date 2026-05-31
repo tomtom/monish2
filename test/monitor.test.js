@@ -19,6 +19,10 @@ import {
     formatError,
     splitInterval,
     toSeconds,
+    extractNumber,
+    buildSparkline,
+    SPARKLINE_CHARS,
+    SPARKLINE_MAX_VALUES,
 } from '../lib/monitor.js';
 
 import {describe, it, expect} from '@jest/globals';
@@ -452,5 +456,87 @@ describe('toSeconds', () => {
 
     it('defaults to seconds for unknown unit', () => {
         expect(toSeconds(5, 'unknown')).toBe(5);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// extractNumber
+// ---------------------------------------------------------------------------
+
+describe('extractNumber', () => {
+    it('extracts integer from plain number string', () => {
+        expect(extractNumber('42')).toBe(42);
+    });
+
+    it('extracts decimal from value with unit', () => {
+        expect(extractNumber('3.14 GHz')).toBeCloseTo(3.14);
+    });
+
+    it('extracts first number from mixed string', () => {
+        expect(extractNumber('CPU 87% idle')).toBe(87);
+    });
+
+    it('extracts negative number', () => {
+        expect(extractNumber('-5.2')).toBeCloseTo(-5.2);
+    });
+
+    it('returns NaN for strings with no number', () => {
+        expect(extractNumber('idle')).toBeNaN();
+        expect(extractNumber('')).toBeNaN();
+    });
+
+    it('returns NaN for null/undefined', () => {
+        expect(extractNumber(null)).toBeNaN();
+        expect(extractNumber(undefined)).toBeNaN();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// buildSparkline
+// ---------------------------------------------------------------------------
+
+describe('buildSparkline', () => {
+    it('returns empty string for empty array', () => {
+        expect(buildSparkline([])).toBe('');
+    });
+
+    it('returns single char for single value', () => {
+        const spark = buildSparkline([50]);
+        expect(spark).toHaveLength(1);
+        expect(SPARKLINE_CHARS).toContain(spark);
+    });
+
+    it('min value maps to first char (▁)', () => {
+        const spark = buildSparkline([0, 50, 100]);
+        expect(spark[0]).toBe(SPARKLINE_CHARS[0]);
+    });
+
+    it('max value maps to last char (█)', () => {
+        const spark = buildSparkline([0, 50, 100]);
+        expect(spark[2]).toBe(SPARKLINE_CHARS[7]);
+    });
+
+    it('all-equal values produce mid-height bars', () => {
+        const spark = buildSparkline([42, 42, 42]);
+        // All bars must be the same character at mid level (index 3 = ▄)
+        expect(spark).toBe(SPARKLINE_CHARS[3].repeat(3));
+    });
+
+    it('length equals number of input values', () => {
+        expect(buildSparkline([1, 2, 3, 4, 5])).toHaveLength(5);
+    });
+
+    it('all characters are valid sparkline chars', () => {
+        const values = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+        const spark = buildSparkline(values);
+        for (const ch of spark) {
+            expect(SPARKLINE_CHARS).toContain(ch);
+        }
+    });
+});
+
+describe('SPARKLINE_MAX_VALUES', () => {
+    it('is 20', () => {
+        expect(SPARKLINE_MAX_VALUES).toBe(20);
     });
 });

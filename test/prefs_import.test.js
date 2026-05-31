@@ -287,6 +287,32 @@ describe('interval 0 = disabled — ISSUE 31', () => {
     });
 });
 
+describe('extension.js sparkline — ISSUE 35', () => {
+    it('imports buildSparkline and extractNumber from lib/monitor.js', () => {
+        expect(extensionSource).toContain('buildSparkline');
+        expect(extensionSource).toContain('extractNumber');
+    });
+
+    it('defines _history map for ring-buffer storage', () => {
+        expect(extensionSource).toContain('_history');
+    });
+
+    it('clears _history on menu rebuild', () => {
+        expect(extensionSource).toContain('_history.clear()');
+    });
+
+    it('skips adding error-status values to history', () => {
+        // Error strings (e.g. "exit code 1") must not pollute the ring buffer.
+        expect(extensionSource).toContain('MonitorStatus.ERROR');
+        expect(extensionSource).toContain('extractNumber');
+    });
+
+    it('appends sparkline inline after value', () => {
+        expect(extensionSource).toContain('sparkline');
+        expect(extensionSource).toContain('inlineText');
+    });
+});
+
 describe('extension.js name-click update — ISSUE 34', () => {
     it('defines _triggerMonitor method', () => {
         expect(extensionSource).toContain('_triggerMonitor');

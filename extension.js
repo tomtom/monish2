@@ -32,6 +32,9 @@ import {
     intervalToMs,
     jitteredInterval,
     formatError,
+    extractNumber,
+    buildSparkline,
+    SPARKLINE_MAX_VALUES,
 } from './lib/monitor.js';
 import {executeCommand, executeJavaScript} from './lib/executor.js';
 
@@ -99,6 +102,7 @@ class MonishIndicator extends PanelMenu.Button {
         this._results       = new Map();   // monitorId -> {value, status}
         this._monitors      = [];          // current monitor config array
         this._menuItems     = new Map();   // monitorId -> {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel}
+        this._history       = new Map();   // monitorId -> number[] ring buffer (max SPARKLINE_MAX_VALUES)
         this._debugLogPath  = GLib.build_filenamev([extensionPath, 'debug.log']);
 
         // Panel icon + optional error badge
@@ -149,6 +153,7 @@ class MonishIndicator extends PanelMenu.Button {
         this.menu.removeAll();
         this._menuItems.clear();
         this._results.clear();
+        this._history.clear();
 
         this._monitors = deserializeMonitors(this._settings.get_string(SETTINGS_KEY));
         // intervalSeconds === 0 means disabled (same as enabled: false).
@@ -374,6 +379,18 @@ class MonishIndicator extends PanelMenu.Button {
      * @param {string} status - One of MonitorStatus values.
      */
     _setMonitorResult(id, value, status) {
+        // Update sparkline history with the numeric component of this value.
+        // Error states are excluded so spurious numbers in error messages don't skew the graph.
+        if (status !== MonitorStatus.ERROR) {
+            const num = extractNumber(value);
+            if (!isNaN(num)) {
+                const hist = this._history.get(id) ?? [];
+                hist.push(num);
+                if (hist.length > SPARKLINE_MAX_VALUES) hist.shift();
+                this._history.set(id, hist);
+            }
+        }
+
         this._results.set(id, {value, status});
 
         const entry = this._menuItems.get(id);
@@ -392,10 +409,13 @@ class MonishIndicator extends PanelMenu.Button {
                 this._expiryTimers.set(id, timerId);
             }
 
-            // Choose inline vs below-name layout based on newlines in value
-            const isMulti = value.includes('\n');
+            // Sparkline is appended inline; not shown for multi-line output.
+            const sparkline = buildSparkline(this._history.get(id) ?? []);
+            const isMulti   = value.includes('\n');
+            const inlineText = (sparkline && !isMulti) ? `${value}  ${sparkline}` : value;
+
             entry.inlineValueLabel.visible = !isMulti;
-            entry.inlineValueLabel.text    = isMulti ? '' : value;
+            entry.inlineValueLabel.text    = isMulti ? '' : inlineText;
             entry.mlValueLabel.visible     = isMulti;
             entry.mlValueLabel.text        = isMulti ? value : '';
 
