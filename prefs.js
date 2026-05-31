@@ -11,6 +11,8 @@
 
 import {ExtensionPreferences} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 import Adw from 'gi://Adw';
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 
 import {
@@ -321,7 +323,99 @@ export default class MonishPreferences extends ExtensionPreferences {
         jitterSpin.set_value(settings.get_int('jitter-percent'));
         jitterRow.add_suffix(jitterSpin);
         scheduleGroup.add(jitterRow);
+
+        // ---- Debug logging toggle ----
+        const debugRow = new Adw.ActionRow({
+            title:    'Debug Logging',
+            subtitle: 'Log each command execution to debug.log in the extension directory',
+        });
+        const debugToggle = new Gtk.Switch({
+            active: settings.get_boolean('debug-logging'),
+            valign: Gtk.Align.CENTER,
+        });
+        debugToggle.connect('notify::active', () => {
+            settings.set_boolean('debug-logging', debugToggle.active);
+        });
+        debugRow.add_suffix(debugToggle);
+        scheduleGroup.add(debugRow);
+
+        // ---- View log button ----
+        const logRow = new Adw.ActionRow({
+            title:    'Debug Log',
+            subtitle: 'View the debug log file',
+        });
+        const viewLogBtn = new Gtk.Button({
+            label:       'View Log',
+            valign:      Gtk.Align.CENTER,
+            css_classes: ['flat'],
+        });
+        const logPath = GLib.build_filenamev([this.path, 'debug.log']);
+        viewLogBtn.connect('clicked', () => {
+            showDebugLogWindow(window, logPath);
+        });
+        logRow.add_suffix(viewLogBtn);
+        scheduleGroup.add(logRow);
     }
+}
+
+// ---------------------------------------------------------------------------
+// Debug log viewer
+// ---------------------------------------------------------------------------
+
+/**
+ * Open a non-modal window showing the contents of the debug log file.
+ * A "Clear Log" button in the header bar truncates the file.
+ *
+ * @param {Gtk.Window} parent  - Transient parent (the prefs window).
+ * @param {string}     logPath - Absolute path to the debug log file.
+ */
+function showDebugLogWindow(parent, logPath) {
+    const [ok, bytes] = GLib.file_get_contents(logPath);
+    const content = ok ? new TextDecoder().decode(bytes) : '(no log entries yet)';
+
+    const view = new Gtk.TextView({
+        editable:      false,
+        monospace:     true,
+        left_margin:   8,
+        right_margin:  8,
+        top_margin:    8,
+        bottom_margin: 8,
+    });
+    view.get_buffer().set_text(content, -1);
+
+    const scroll = new Gtk.ScrolledWindow({vexpand: true, hexpand: true});
+    scroll.set_child(view);
+
+    const clearBtn = new Gtk.Button({
+        label:       'Clear Log',
+        css_classes: ['destructive-action'],
+    });
+    clearBtn.connect('clicked', () => {
+        try {
+            // Truncate the file by opening it for writing without writing anything.
+            Gio.File.new_for_path(logPath)
+                .replace(null, false, Gio.FileCreateFlags.NONE, null)
+                .close(null);
+        } catch (_) {}
+        view.get_buffer().set_text('', -1);
+    });
+
+    const headerBar = new Adw.HeaderBar();
+    headerBar.pack_start(clearBtn);
+
+    const toolbarView = new Adw.ToolbarView();
+    toolbarView.add_top_bar(headerBar);
+    toolbarView.set_content(scroll);
+
+    const win = new Adw.Window({
+        title:          'Debug Log',
+        transient_for:  parent,
+        modal:          false,
+        default_width:  720,
+        default_height: 500,
+    });
+    win.set_content(toolbarView);
+    win.present();
 }
 
 // ---------------------------------------------------------------------------

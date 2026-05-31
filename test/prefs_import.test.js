@@ -250,3 +250,25 @@ describe('prefs.js jitter persistence — ISSUE 29', () => {
         expect(prefsSource).toContain('jitterSpin.set_value(settings.get_int(\'jitter-percent\'))');
     });
 });
+
+describe('debug logging — ISSUE 30', () => {
+    it('schema defines a debug-logging boolean key', () => {
+        expect(schemaSource).toContain('name="debug-logging" type="b"');
+    });
+
+    it('extension reads the debug-logging setting', () => {
+        expect(extensionSource).toContain('debug-logging');
+    });
+
+    it('extension defines _appendDebugLog to write log entries', () => {
+        expect(extensionSource).toContain('_appendDebugLog');
+    });
+
+    it('prefs shows a debug-logging toggle', () => {
+        expect(prefsSource).toContain('debug-logging');
+    });
+
+    it('prefs opens a log viewer via showDebugLogWindow', () => {
+        expect(prefsSource).toContain('showDebugLogWindow');
+    });
+});

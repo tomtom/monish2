@@ -45,6 +45,9 @@ const SETTINGS_KEY = 'monitors';
 /** Settings key that holds the global schedule jitter percentage. */
 const JITTER_KEY = 'jitter-percent';
 
+/** Settings key for the debug-logging toggle. */
+const DEBUG_LOG_KEY = 'debug-logging';
+
 /** CSS class prefix applied to indicator and menu items for status colouring. */
 const CSS_PREFIX = 'monish';
 
@@ -96,6 +99,7 @@ class MonishIndicator extends PanelMenu.Button {
         this._results       = new Map();   // monitorId -> {value, status}
         this._monitors      = [];          // current monitor config array
         this._menuItems     = new Map();   // monitorId -> {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, updateBtn?}
+        this._debugLogPath  = GLib.build_filenamev([extensionPath, 'debug.log']);
 
         // Panel icon + optional error badge
         this._panelBox = new St.BoxLayout({style_class: `${CSS_PREFIX}-panel-box`});
@@ -309,9 +313,31 @@ class MonishIndicator extends PanelMenu.Button {
             const value  = parseValue(stdout, monitor.outputRegex);
             const status = evaluateStatus(value, monitor.cautionPatterns, monitor.dangerPatterns);
             this._setMonitorResult(monitor.id, value, status);
+            this._appendDebugLog(monitor, value);
         } catch (e) {
-            this._setMonitorResult(monitor.id, formatError(e), MonitorStatus.ERROR);
+            const errStr = formatError(e);
+            this._setMonitorResult(monitor.id, errStr, MonitorStatus.ERROR);
+            this._appendDebugLog(monitor, `error: ${errStr}`);
         }
+    }
+
+    /**
+     * Append one log entry to the debug log file when debug logging is enabled.
+     * No-ops when the setting is off or on any write failure.
+     *
+     * @param {object} monitor - Monitor config object (name and type fields used).
+     * @param {string} value   - Display value or 'error: …' string from the run.
+     */
+    _appendDebugLog(monitor, value) {
+        if (!this._settings.get_boolean(DEBUG_LOG_KEY)) return;
+        try {
+            const ts     = new Date().toISOString();
+            const line   = `${ts} | ${monitor.name} | ${monitor.type} | ${value}\n`;
+            const file   = Gio.File.new_for_path(this._debugLogPath);
+            const stream = file.append_to(Gio.FileCreateFlags.NONE, null);
+            stream.write_all(new TextEncoder().encode(line), null);
+            stream.close(null);
+        } catch (_) {}
     }
 
     /**

@@ -42,6 +42,20 @@
       </description>
     </key>
 
+    <!--
+      debug-logging: when true each monitor execution is appended to debug.log
+      in the extension directory so the user can inspect timing and results.
+    -->
+    <key name="debug-logging" type="b">
+      <default>false</default>
+      <summary>Debug logging</summary>
+      <description>
+        When enabled, each monitor execution is logged to debug.log in the
+        extension directory with timestamp, monitor name, execution type,
+        and result.
+      </description>
+    </key>
+
   </schema>
 
 </schemalist>
