@@ -35,6 +35,7 @@ import {
     extractNumber,
     buildSparkline,
     SPARKLINE_MAX_VALUES,
+    injectArgs,
 } from './lib/monitor.js';
 import {executeCommand, executeJavaScript} from './lib/executor.js';
 
@@ -332,10 +333,16 @@ class MonishIndicator extends PanelMenu.Button {
      */
     async _runMonitor(monitor) {
         try {
+            const command = injectArgs(
+                monitor.command,
+                monitor.type,
+                monitor.args ?? [],
+                monitor.argValues ?? {},
+            );
             const execute = monitor.type === MonitorType.JAVASCRIPT
                 ? executeJavaScript
                 : executeCommand;
-            const stdout = await execute(monitor.command, 30);
+            const stdout = await execute(command, 30);
             const value  = parseValue(stdout, monitor.outputRegex);
             const status = evaluateStatus(value, monitor.cautionPatterns, monitor.dangerPatterns);
             this._setMonitorResult(monitor.id, value, status);

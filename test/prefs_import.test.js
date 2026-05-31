@@ -352,6 +352,35 @@ describe('extension.js name-click update — ISSUE 34', () => {
     });
 });
 
+describe('argument injection — ISSUE 36', () => {
+    it('extension imports injectArgs', () => {
+        expect(extensionSource).toContain('injectArgs');
+    });
+
+    it('extension calls injectArgs before executing', () => {
+        expect(extensionSource).toContain('injectArgs(');
+    });
+
+    it('prefs edit dialog has Add Argument button', () => {
+        expect(prefsSource).toContain('Add Argument');
+    });
+
+    it('prefs edit dialog builds arg rows', () => {
+        expect(prefsSource).toContain('buildArgRow');
+        expect(prefsSource).toContain('rebuildArgRows');
+    });
+
+    it('prefs updates arg tooltips when type changes', () => {
+        expect(prefsSource).toContain('currentArgTooltip');
+    });
+
+    it('prefs deep-copies args and argValues on dialog open', () => {
+        // Prevents edits from mutating the original monitor object on cancel.
+        expect(prefsSource).toContain('[...(monitor.args');
+        expect(prefsSource).toContain('{...(monitor.argValues');
+    });
+});
+
 describe('debug logging — ISSUE 30', () => {
     it('schema defines a debug-logging boolean key', () => {
         expect(schemaSource).toContain('name="debug-logging" type="b"');

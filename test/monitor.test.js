@@ -23,6 +23,7 @@ import {
     buildSparkline,
     SPARKLINE_CHARS,
     SPARKLINE_MAX_VALUES,
+    injectArgs,
 } from '../lib/monitor.js';
 
 import {describe, it, expect} from '@jest/globals';
@@ -538,5 +539,91 @@ describe('buildSparkline', () => {
 describe('SPARKLINE_MAX_VALUES', () => {
     it('is 20', () => {
         expect(SPARKLINE_MAX_VALUES).toBe(20);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// injectArgs
+// ---------------------------------------------------------------------------
+
+describe('injectArgs', () => {
+    const JS   = MonitorType.JAVASCRIPT;
+    const SH   = MonitorType.SHELL;
+    const arg  = (name, label = name) => ({name, label});
+
+    it('returns command unchanged when args is empty', () => {
+        expect(injectArgs('echo hi', SH, [], {})).toBe('echo hi');
+    });
+
+    it('returns command unchanged when args is null', () => {
+        expect(injectArgs('echo hi', SH, null, {})).toBe('echo hi');
+    });
+
+    it('prepends export for shell type', () => {
+        const out = injectArgs('echo $FOO', SH, [arg('FOO')], {FOO: 'bar'});
+        expect(out).toContain('export FOO=\'bar\';');
+        expect(out.indexOf('export FOO=\'bar\'')).toBeLessThan(out.indexOf('echo $FOO'));
+    });
+
+    it('prepends const declaration for JS type', () => {
+        const out = injectArgs('print(FOO)', JS, [arg('FOO')], {FOO: 'bar'});
+        expect(out).toContain('const FOO = "bar";');
+        expect(out.indexOf('const FOO')).toBeLessThan(out.indexOf('print(FOO)'));
+    });
+
+    it('uses JSON.stringify for JS (escapes quotes)', () => {
+        const out = injectArgs('x', JS, [arg('V')], {V: 'say "hi"'});
+        expect(out).toContain('const V = "say \\"hi\\"";');
+    });
+
+    it('escapes single quotes in shell values', () => {
+        const out = injectArgs('x', SH, [arg('V')], {V: 'it\'s'});
+        expect(out).toContain('export V=\'it\'\\\'\'s\';');
+    });
+
+    it('uses empty string when argValues is missing the key', () => {
+        const out = injectArgs('x', SH, [arg('V')], {});
+        expect(out).toContain('export V=\'\';');
+    });
+
+    it('uses empty string when argValues is null', () => {
+        const out = injectArgs('x', SH, [arg('V')], null);
+        expect(out).toContain('export V=\'\';');
+    });
+
+    it('injects multiple args in order', () => {
+        const out = injectArgs('cmd', SH, [arg('A'), arg('B')], {A: '1', B: '2'});
+        expect(out).toContain('export A=\'1\';');
+        expect(out).toContain('export B=\'2\';');
+        expect(out.indexOf('export A=\'1\'')).toBeLessThan(out.indexOf('export B=\'2\''));
+    });
+});
+
+// ---------------------------------------------------------------------------
+// createMonitor args defaults
+// ---------------------------------------------------------------------------
+
+describe('createMonitor args / argValues defaults', () => {
+    it('initialises args to empty array', () => {
+        expect(createMonitor().args).toEqual([]);
+    });
+
+    it('initialises argValues to empty object', () => {
+        expect(createMonitor().argValues).toEqual({});
+    });
+
+    it('populates argValues from arg defaults when creating from preset', () => {
+        const monitor = createMonitor({
+            args: [{name: 'EXCLUDE', label: 'Exclude', default: 'gjs'}],
+        });
+        expect(monitor.argValues.EXCLUDE).toBe('gjs');
+    });
+
+    it('does not overwrite existing argValues with defaults', () => {
+        const monitor = createMonitor({
+            args:      [{name: 'X', label: 'X', default: 'preset'}],
+            argValues: {X: 'custom'},
+        });
+        expect(monitor.argValues.X).toBe('custom');
     });
 });

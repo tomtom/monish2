@@ -47,8 +47,14 @@ const MONITOR_TYPE_VALUES = [MonitorType.SHELL, MonitorType.JAVASCRIPT];
  */
 function showMonitorEditDialog(parent, monitor, onSave) {
     const isNew = !monitor;
+    // Deep-copy mutable fields so edits don't affect the caller's object if
+    // the dialog is cancelled.
     const data  = monitor
-        ? {...monitor}
+        ? {
+            ...monitor,
+            args:      [...(monitor.args ?? [])],
+            argValues: {...(monitor.argValues ?? {})},
+        }
         : createMonitor();
 
     const dialog = new Gtk.Dialog({
@@ -105,6 +111,163 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     const typeIdx = MONITOR_TYPE_VALUES.indexOf(data.type ?? MonitorType.SHELL);
     typeDropDown.set_selected(typeIdx >= 0 ? typeIdx : 0);
     content.append(labeledRow('Type', typeDropDown));
+
+    // ---- Arguments ----
+    const argsHeaderBox = new Gtk.Box({spacing: 8, hexpand: true});
+    const argsTitle = new Gtk.Label({
+        label:       'Arguments',
+        xalign:      0,
+        hexpand:     true,
+        css_classes: ['heading'],
+    });
+    const addArgBtn = new Gtk.Button({
+        label:       '+ Add',
+        css_classes: ['flat'],
+        valign:      Gtk.Align.CENTER,
+    });
+    argsHeaderBox.append(argsTitle);
+    argsHeaderBox.append(addArgBtn);
+    content.append(argsHeaderBox);
+
+    const argsHint = new Gtk.Label({
+        label:       'JS: injected as const NAME = value  ·  Shell: injected as export NAME=value',
+        xalign:      0,
+        wrap:        true,
+        css_classes: ['caption', 'dim-label'],
+    });
+    content.append(argsHint);
+
+    // Vertical container for live arg rows
+    const argsListBox = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing:     4,
+    });
+    content.append(argsListBox);
+
+    // Per-row label references updated when the type dropdown changes
+    let argRowRefs = [];
+
+    /** Return tooltip text for an argument, based on the currently selected type. */
+    function currentArgTooltip(argName) {
+        const type = MONITOR_TYPE_VALUES[typeDropDown.get_selected()] ?? MonitorType.SHELL;
+        return type === MonitorType.JAVASCRIPT
+            ? `In your script: const ${argName} = "value";  (auto-injected)`
+            : `In your command: $${argName}  (injected as environment variable)`;
+    }
+
+    /** Build one arg row widget; also registers its label in argRowRefs. */
+    function buildArgRow(arg) {
+        const row = new Gtk.Box({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing:     8,
+            hexpand:     true,
+        });
+        const lbl = new Gtk.Label({
+            label:        arg.label || arg.name,
+            xalign:       0,
+            width_chars:  14,
+            tooltip_text: currentArgTooltip(arg.name),
+        });
+        const valueEntry = new Gtk.Entry({
+            text:             (data.argValues ?? {})[arg.name] ?? '',
+            hexpand:          true,
+            placeholder_text: 'value',
+        });
+        valueEntry.connect('changed', () => {
+            if (!data.argValues) data.argValues = {};
+            data.argValues[arg.name] = valueEntry.get_text();
+        });
+        const delBtn = new Gtk.Button({
+            icon_name:   'user-trash-symbolic',
+            css_classes: ['flat'],
+            valign:      Gtk.Align.CENTER,
+        });
+        delBtn.connect('clicked', () => {
+            data.args = (data.args ?? []).filter(a => a.name !== arg.name);
+            if (data.argValues) delete data.argValues[arg.name];
+            rebuildArgRows();
+        });
+        row.append(lbl);
+        row.append(valueEntry);
+        row.append(delBtn);
+        argRowRefs.push({lbl, arg});
+        return row;
+    }
+
+    /** Remove and recreate all arg rows from data.args. */
+    function rebuildArgRows() {
+        let child = argsListBox.get_first_child();
+        while (child) {
+            const next = child.get_next_sibling();
+            argsListBox.remove(child);
+            child = next;
+        }
+        argRowRefs = [];
+        for (const arg of (data.args ?? [])) {
+            argsListBox.append(buildArgRow(arg));
+        }
+    }
+
+    rebuildArgRows();
+
+    // Refresh tooltips whenever the type selection changes
+    typeDropDown.connect('notify::selected', () => {
+        for (const {lbl, arg} of argRowRefs) {
+            lbl.tooltip_text = currentArgTooltip(arg.name);
+        }
+    });
+
+    // "Add Argument" — opens a small modal dialog for name + label
+    addArgBtn.connect('clicked', () => {
+        const addDlg = new Gtk.Dialog({
+            title:         'Add Argument',
+            transient_for: parent,
+            modal:         true,
+            default_width: 360,
+            resizable:     false,
+        });
+        addDlg.add_button('Cancel', Gtk.ResponseType.CANCEL);
+        addDlg.add_button('Add', Gtk.ResponseType.OK).add_css_class('suggested-action');
+
+        const dlgContent = addDlg.get_content_area();
+        dlgContent.margin_top    = 12;
+        dlgContent.margin_bottom = 12;
+        dlgContent.margin_start  = 16;
+        dlgContent.margin_end    = 16;
+        dlgContent.spacing       = 8;
+
+        const argNameEntry = new Gtk.Entry({
+            placeholder_text: 'Identifier, e.g. EXCLUDE (no spaces)',
+            hexpand:          true,
+        });
+        const argLabelEntry = new Gtk.Entry({
+            placeholder_text: 'Display label, e.g. Exclude processes',
+            hexpand:          true,
+        });
+        dlgContent.append(labeledRow('Name', argNameEntry));
+        dlgContent.append(labeledRow('Label', argLabelEntry));
+
+        addDlg.connect('response', (_d, resp) => {
+            if (resp === Gtk.ResponseType.OK) {
+                // Normalise to valid identifier: uppercase, spaces → underscores,
+                // strip anything that isn't alphanumeric or underscore.
+                const rawName = argNameEntry.get_text().trim()
+                    .toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '');
+                if (rawName && !(data.args ?? []).find(a => a.name === rawName)) {
+                    if (!data.args) data.args = [];
+                    if (!data.argValues) data.argValues = {};
+                    data.args.push({
+                        name:  rawName,
+                        label: argLabelEntry.get_text().trim() || rawName,
+                    });
+                    data.argValues[rawName] = '';
+                    rebuildArgRows();
+                }
+            }
+            addDlg.destroy();
+        });
+        addDlg.present();
+    });
 
     // ---- Interval ----
     // Stored and edited in seconds; 0 = disabled; upper bound is 86400 (one day).
