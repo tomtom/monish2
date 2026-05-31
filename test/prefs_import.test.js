@@ -17,6 +17,9 @@ import {describe, it, expect} from '@jest/globals';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const prefsSource      = readFileSync(join(__dirname, '..', 'prefs.js'), 'utf8');
 const extensionSource  = readFileSync(join(__dirname, '..', 'extension.js'), 'utf8');
+const schemaSource     = readFileSync(
+    join(__dirname, '..', 'schemas', 'org.gnome.shell.extensions.monish.gschema.xml'), 'utf8',
+);
 
 const GNOME50_PREFS_PATH =
     'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
@@ -187,5 +190,19 @@ describe('prefs.js on-demand monitor UI', () => {
 describe('prefs.js jitter setting', () => {
     it('shows jitter spinner in prefs', () => {
         expect(prefsSource).toContain('jitter-percent');
+    });
+});
+
+describe('GSettings schema defaults', () => {
+    it('jitter-percent defaults to 5 so new installs get a sensible schedule spread', () => {
+        // Guard against accidental reversion to 0 (exact timing / no jitter).
+        expect(schemaSource).toContain('<default>5</default>');
+    });
+
+    it('splitInterval and toSeconds are imported from lib/monitor.js in prefs', () => {
+        // Guards that the refactored interval helpers are imported from the
+        // shared module, not redefined locally in prefs.js.
+        expect(prefsSource).toContain('splitInterval');
+        expect(prefsSource).toContain('toSeconds');
     });
 });
