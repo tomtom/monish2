@@ -109,3 +109,29 @@ describe('PRESET_MONITORS', () => {
         }
     });
 });
+
+// ---------------------------------------------------------------------------
+// Source-level regression tests (ISSUE 32)
+// GLib.file_get_contents throws on missing files in GJS — verify that
+// all preset scripts guard reads with try/catch, not the broken [ok, b] pattern.
+// ---------------------------------------------------------------------------
+describe('preset GJS scripts: GLib.file_get_contents error handling', () => {
+    it('thermalJS guards the file read with try/catch (thermal_zone may not exist)', () => {
+        // If [ok, b] + if (!ok) were used instead, missing thermal_zone1 exits 1.
+        const thermalPreset = PRESET_MONITORS.find(p => p.name === 'Thermal Zone 1');
+        expect(thermalPreset.command).toContain('try {');
+        expect(thermalPreset.command).toContain('} catch (_)');
+        expect(thermalPreset.command).not.toMatch(/const \[ok,/);
+    });
+
+    it('_readFile in process presets guards reads with try/catch (proc entries race)', () => {
+        // Processes exit between _listPids() and reading their /proc entries.
+        // The [ok, b] + null-return pattern does not protect against a throw.
+        const memPreset = PRESET_MONITORS.find(p => p.name === 'Top MEM Processes');
+        const cpuPreset = PRESET_MONITORS.find(p => p.name === 'Top CPU Processes');
+        for (const preset of [memPreset, cpuPreset]) {
+            expect(preset.command).toContain('try {');
+            expect(preset.command).toContain('} catch (_)');
+        }
+    });
+});
