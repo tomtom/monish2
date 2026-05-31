@@ -27,4 +27,5 @@
 27. In Prefs: The execution intervalls are given in minutes. They should be defined in seconds. #closed/2026-05-31
 28. In Prefs: The execution intervalls for predefined monitors is set to 0 minutes. The default value should be 60s. The value is not persisted and is reset to 0 evertime the monitor is edited. #closed/2026-05-31
 29. In Prefs: The default value for the jitter preset should be 5%. It is (always reset to) 0 when (re-) opening the Prefs dialog. The value is not persisted. #closed/2026-05-31
+29b. In Prefs (re-open): interval SpinButton shows 0 for monitors with old stored data (intervalSeconds:0); edited interval is reset to 0 on re-open. Root cause: GJS GObject property init ordering leaves Gtk.Adjustment unclamped when value is set before lower. #closed/2026-05-31
 30. In Prefs: Add a debug option that logs command execution: timestamp, monitor name, execution type, result. The log can be viewed in extra window. #closed/2026-05-31

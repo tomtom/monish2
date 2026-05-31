@@ -251,6 +251,19 @@ describe('prefs.js jitter persistence — ISSUE 29', () => {
     });
 });
 
+describe('prefs.js interval spinner safe init — ISSUE 29 re-open', () => {
+    it('interval spinner Adjustment starts at lower bound (1), not data.intervalSeconds', () => {
+        // GJS GObject property init sets value before lower; if intervalSeconds
+        // is 0 (old stored data) the Adjustment is left unclamped (value=0 with
+        // lower=1).  Fix: start at 1 then call set_value() so GTK clamps correctly.
+        expect(prefsSource).not.toContain('value:          data.intervalSeconds');
+    });
+
+    it('interval spinner calls set_value(data.intervalSeconds) after construction', () => {
+        expect(prefsSource).toContain('intervalSpin.set_value(data.intervalSeconds)');
+    });
+});
+
 describe('debug logging — ISSUE 30', () => {
     it('schema defines a debug-logging boolean key', () => {
         expect(schemaSource).toContain('name="debug-logging" type="b"');

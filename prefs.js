@@ -108,9 +108,12 @@ function showMonitorEditDialog(parent, monitor, onSave) {
 
     // ---- Interval ----
     // Stored and edited in seconds; upper bound is 86400 (one day).
+    // Initialise adjustment at lower bound first, then call set_value() so
+    // GTK clamps correctly — a GJS GObject init-ordering issue leaves the
+    // value unclamped when value is set before lower in the constructor.
     const intervalSpin = new Gtk.SpinButton({
         adjustment: new Gtk.Adjustment({
-            value:          data.intervalSeconds,
+            value:          1,
             lower:          1,
             upper:          86400,
             step_increment: 1,
@@ -118,6 +121,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         numeric:  true,
         hexpand:  true,
     });
+    intervalSpin.set_value(data.intervalSeconds);
     content.append(labeledRow('Interval (s)', intervalSpin));
 
     // ---- Output regex ----
