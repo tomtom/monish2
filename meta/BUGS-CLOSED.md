@@ -26,3 +26,4 @@
 26. In Prefs: When I open Prefs (and the list is empty?) at first, the "Add Monitor" button is shown at the bottom. When I add a predefined monitor, the Add button is shown at the top. When I remove the predefined monitor the Add button is shown at the top. Make sure the Add button is always shown at the top. #closed/2026-05-31
 27. In Prefs: The execution intervalls are given in minutes. They should be defined in seconds. #closed/2026-05-31
 28. In Prefs: The execution intervalls for predefined monitors is set to 0 minutes. The default value should be 60s. The value is not persisted and is reset to 0 evertime the monitor is edited. #closed/2026-05-31
+29. In Prefs: The default value for the jitter preset should be 5%. It is (always reset to) 0 when (re-) opening the Prefs dialog. The value is not persisted. #closed/2026-05-31
