@@ -40,3 +40,4 @@
 39. Multiline monitor status icon was vertically centered; set y_align: Clutter.ActorAlign.START so it aligns with the name label. #closed/2026-05-31
 40. Debug log changed from pipe-separated to tab-separated (TSV) format. #closed/2026-05-31
 41. Added Logged-in Users preset — GJS script calls who via GLib.spawn_command_line_sync, deduplicates with Set, prints comma-separated sorted names. #closed/2026-05-31
+42. Add predefined monitor for Thermal Zone 0 in the Thermal section of PRESET_MONITORS. #closed/2026-05-31

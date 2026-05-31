@@ -134,6 +134,15 @@ describe('preset GJS scripts: GLib.file_get_contents error handling', () => {
         expect(thermalPreset.command).not.toMatch(/const \[ok,/);
     });
 
+    it('Thermal Zone 0 preset exists with correct command and error guard — ISSUE 42', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Thermal Zone 0');
+        expect(preset).toBeDefined();
+        expect(preset.type).toBe(MonitorType.JAVASCRIPT);
+        expect(preset.command).toContain('thermal_zone0');
+        expect(preset.command).toContain('try {');
+        expect(preset.command).toContain('} catch (_)');
+    });
+
     it('_readFile in process presets guards reads with try/catch (proc entries race)', () => {
         // Processes exit between _listPids() and reading their /proc entries.
         // The [ok, b] + null-return pattern does not protect against a throw.
