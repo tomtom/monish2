@@ -135,6 +135,25 @@ describe('preset GJS scripts: GLib.file_get_contents error handling', () => {
         }
     });
 
+    it('Top CPU/MEM Processes define EXCLUDE arg with default gjs — ISSUE 37', () => {
+        const cpu = PRESET_MONITORS.find(p => p.name === 'Top CPU Processes');
+        const mem = PRESET_MONITORS.find(p => p.name === 'Top MEM Processes');
+        for (const preset of [cpu, mem]) {
+            const excludeArg = (preset.args ?? []).find(a => a.name === 'EXCLUDE');
+            expect(excludeArg).toBeDefined();
+            expect(excludeArg.default).toBe('gjs');
+        }
+    });
+
+    it('Top CPU/MEM Processes commands check EXCLUDE variable for filtering', () => {
+        const cpu = PRESET_MONITORS.find(p => p.name === 'Top CPU Processes');
+        const mem = PRESET_MONITORS.find(p => p.name === 'Top MEM Processes');
+        for (const preset of [cpu, mem]) {
+            expect(preset.command).toContain('EXCLUDE');
+            expect(preset.command).toContain('_exclude');
+        }
+    });
+
     it('Battery Level guards each per-entry read with inner try/catch (AC has no capacity file)', () => {
         // The outer try/catch alone was swallowing the error before BAT0 was reached.
         // The inner try/catch must be present so non-battery entries are skipped.
