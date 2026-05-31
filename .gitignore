@@ -1,4 +1,5 @@
 node_modules/
 .agents/
+graphify-out/
 AGENTS.md
 BUGS.md
