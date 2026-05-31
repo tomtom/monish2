@@ -39,3 +39,4 @@
 38. Top MEM Processes displayed % of total RAM instead of actual usage; replaced with _fmtMem() outputting MB/GB. #closed/2026-05-31
 39. Multiline monitor status icon was vertically centered; set y_align: Clutter.ActorAlign.START so it aligns with the name label. #closed/2026-05-31
 40. Debug log changed from pipe-separated to tab-separated (TSV) format. #closed/2026-05-31
+41. Added Logged-in Users preset — GJS script calls who via GLib.spawn_command_line_sync, deduplicates with Set, prints comma-separated sorted names. #closed/2026-05-31

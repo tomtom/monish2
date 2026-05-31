@@ -63,11 +63,21 @@ describe('PRESET_MONITORS', () => {
 
     it('contains expected categories', () => {
         const names = PRESET_MONITORS.map(p => p.name.toLowerCase());
-        // Must include CPU, RAM/memory, battery, swap
+        // Must include CPU, RAM/memory, battery, swap, users
         expect(names.some(n => n.includes('cpu'))).toBe(true);
         expect(names.some(n => n.includes('ram') || n.includes('mem'))).toBe(true);
         expect(names.some(n => n.includes('battery'))).toBe(true);
         expect(names.some(n => n.includes('swap'))).toBe(true);
+        expect(names.some(n => n.includes('user'))).toBe(true);
+    });
+
+    it('Logged-in Users preset exists and uses javascript type', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Logged-in Users');
+        expect(preset).toBeDefined();
+        expect(preset.type).toBe(MonitorType.JAVASCRIPT);
+        // Must use who command and deduplicate
+        expect(preset.command).toContain('who');
+        expect(preset.command).toContain('new Set(');
     });
 
     it('every preset has a non-empty description string', () => {
