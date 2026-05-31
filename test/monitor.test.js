@@ -17,6 +17,8 @@ import {
     validateMonitor,
     createMonitor,
     formatError,
+    splitInterval,
+    toSeconds,
 } from '../lib/monitor.js';
 
 import {describe, it, expect} from '@jest/globals';
@@ -358,5 +360,86 @@ describe('jitteredInterval', () => {
         for (let i = 0; i < 200; i++) {
             expect(jitteredInterval(500, 50)).toBeGreaterThanOrEqual(1000);
         }
+    });
+});
+
+// ---------------------------------------------------------------------------
+// splitInterval
+// ---------------------------------------------------------------------------
+
+describe('splitInterval', () => {
+    it('splits 1 second as seconds', () => {
+        expect(splitInterval(1)).toEqual({magnitude: 1, unit: 'seconds'});
+    });
+
+    it('splits 30 seconds as seconds', () => {
+        expect(splitInterval(30)).toEqual({magnitude: 30, unit: 'seconds'});
+    });
+
+    it('splits 60 seconds as 1 minute', () => {
+        expect(splitInterval(60)).toEqual({magnitude: 1, unit: 'minutes'});
+    });
+
+    it('splits 120 seconds as 2 minutes', () => {
+        expect(splitInterval(120)).toEqual({magnitude: 2, unit: 'minutes'});
+    });
+
+    it('splits 3600 seconds as 1 hour', () => {
+        expect(splitInterval(3600)).toEqual({magnitude: 1, unit: 'hours'});
+    });
+
+    it('splits 7200 seconds as 2 hours', () => {
+        expect(splitInterval(7200)).toEqual({magnitude: 2, unit: 'hours'});
+    });
+
+    it('falls back to seconds when not evenly divisible by 60', () => {
+        expect(splitInterval(90)).toEqual({magnitude: 90, unit: 'seconds'});
+    });
+
+    it('defaults to 1 minute for 0 — prevents showing "0 minutes"', () => {
+        expect(splitInterval(0)).toEqual({magnitude: 1, unit: 'minutes'});
+    });
+
+    it('defaults to 1 minute for null', () => {
+        expect(splitInterval(null)).toEqual({magnitude: 1, unit: 'minutes'});
+    });
+
+    it('defaults to 1 minute for undefined', () => {
+        expect(splitInterval(undefined)).toEqual({magnitude: 1, unit: 'minutes'});
+    });
+
+    it('defaults to 1 minute for NaN', () => {
+        expect(splitInterval(NaN)).toEqual({magnitude: 1, unit: 'minutes'});
+    });
+
+    it('defaults to 1 minute for negative values', () => {
+        expect(splitInterval(-60)).toEqual({magnitude: 1, unit: 'minutes'});
+    });
+});
+
+// ---------------------------------------------------------------------------
+// toSeconds
+// ---------------------------------------------------------------------------
+
+describe('toSeconds', () => {
+    it('converts seconds', () => {
+        expect(toSeconds(5, 'seconds')).toBe(5);
+    });
+
+    it('converts minutes', () => {
+        expect(toSeconds(2, 'minutes')).toBe(120);
+    });
+
+    it('converts hours', () => {
+        expect(toSeconds(1, 'hours')).toBe(3600);
+    });
+
+    it('is the inverse of splitInterval for round values', () => {
+        expect(toSeconds(1, 'minutes')).toBe(60);
+        expect(toSeconds(1, 'hours')).toBe(3600);
+    });
+
+    it('defaults to seconds for unknown unit', () => {
+        expect(toSeconds(5, 'unknown')).toBe(5);
     });
 });

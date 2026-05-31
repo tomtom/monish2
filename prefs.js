@@ -19,6 +19,8 @@ import {
     createMonitor,
     validateMonitor,
     MonitorType,
+    splitInterval,
+    toSeconds,
 } from './lib/monitor.js';
 import {PRESET_MONITORS} from './lib/presets.js';
 
@@ -567,31 +569,6 @@ function labeledRow(labelText, widget) {
     box.append(lbl);
     box.append(widget);
     return box;
-}
-
-/**
- * Convert a value+unit pair to total seconds.
- *
- * @param {number} value
- * @param {'seconds'|'minutes'|'hours'} unit
- * @returns {number}
- */
-function toSeconds(value, unit) {
-    const multipliers = {seconds: 1, minutes: 60, hours: 3600};
-    return value * (multipliers[unit] ?? 1);
-}
-
-/**
- * Split an interval in seconds into a human-friendly magnitude + unit pair.
- * Prefers larger units to avoid e.g. "3600 seconds".
- *
- * @param {number} seconds
- * @returns {{magnitude: number, unit: string}}
- */
-function splitInterval(seconds) {
-    if (seconds % 3600 === 0 && seconds >= 3600) return {magnitude: seconds / 3600, unit: 'hours'};
-    if (seconds % 60   === 0 && seconds >= 60)   return {magnitude: seconds / 60,   unit: 'minutes'};
-    return {magnitude: seconds, unit: 'seconds'};
 }
 
 /**
