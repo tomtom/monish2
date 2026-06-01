@@ -737,7 +737,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         const isFirst = i === 0;
         const isLast  = i === monitors.length - 1;
 
-        const cmdPreview = monitor.command.slice(0, 60) + (monitor.command.length > 60 ? '…' : '');
+        const cmdPreview = monitor.command.replace(/\s+/g, ' ').trim().slice(0, 60) + (monitor.command.length > 60 ? '…' : '');
         let intervalStr;
         if (monitor.intervalSeconds === 0) {
             intervalStr = 'on-demand';

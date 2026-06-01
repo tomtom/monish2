@@ -502,3 +502,17 @@ describe('action commands — ISSUE 50', () => {
         expect(extensionSource).toContain('actionsBox');
     });
 });
+
+describe('prefs.js cmdPreview whitespace normalisation — ISSUE 52', () => {
+    it('cmdPreview replaces whitespace runs before slicing so Adw.ActionRow subtitle stays single-line', () => {
+        // Gnome RDP command starts with "try {\n    const..." — a raw .slice(0,60)
+        // embeds a literal \\n in the Adw.ActionRow subtitle, making the row taller
+        // and offsetting the suffix buttons so the edit button cannot be clicked.
+        expect(prefsSource).toMatch(/monitor\.command\.[a-zA-Z]*replace/);
+    });
+
+    it('cmdPreview trims trailing whitespace after normalisation', () => {
+        // After whitespace collapse the slice must produce a clean single-line string.
+        expect(prefsSource).toMatch(/command\.\S*replace[^.]*\.trim\(\)/);
+    });
+});
