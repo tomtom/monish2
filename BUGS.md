@@ -5,7 +5,6 @@ Next number: 64
 
 ## Current
 
-53. In Top CPU/MEM Processes: the per-app sparklines should also be right-aligned.
 54. In Prefs: For each monitor, add a switch whether to display a sparkline.
 55. Logged-in users: What does the sparkline represent here? The number of unique logged in users? Maybe don't display a sparkline.
 56. In Gnome RDP: The Status is displayed as N/A.

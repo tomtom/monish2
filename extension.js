@@ -221,7 +221,7 @@ class MonishIndicator extends PanelMenu.Button {
      *
      * Layout (multi-line value):
      *   [statusIcon] [nameLabel (clickable)]
-     *                [mlValueLabel spanning full width]
+     *                [mlBox: [lineText (x_expand)] [lineSpark] per line]
      *
      * Clicking the name immediately re-runs the monitor and resets its timer.
      * On-demand monitors show no value until clicked; value reverts after validity expires.
@@ -268,7 +268,7 @@ class MonishIndicator extends PanelMenu.Button {
         });
         headerBox.add_child(sparklineLabel);
 
-        // Multi-line value — below name; shown only when value contains newlines
+        // Multi-line value label kept for compatibility; hidden in favour of mlBox.
         const mlValueLabel = new St.Label({
             text:        '',
             style_class: `${CSS_PREFIX}-monitor-value-multiline`,
@@ -277,10 +277,18 @@ class MonishIndicator extends PanelMenu.Button {
         });
         mlValueLabel.get_clutter_text().set_line_wrap(true);
 
+        // Per-line container: one HBox per output line so sparklines can be right-aligned.
+        const mlBox = new St.BoxLayout({
+            vertical:    true,
+            x_expand:    true,
+            visible:     false,
+            style_class: `${CSS_PREFIX}-monitor-multiline-box`,
+        });
+
         // Show description as a tooltip when hovering over value labels.
         if (monitor.description) {
             const desc = monitor.description;
-            for (const lbl of [inlineValueLabel, mlValueLabel]) {
+            for (const lbl of [inlineValueLabel, mlValueLabel, mlBox]) {
                 lbl.reactive = true;
                 lbl.connect('enter-event', () => this._showTooltip(desc));
                 lbl.connect('leave-event', () => this._hideTooltip());
@@ -315,13 +323,14 @@ class MonishIndicator extends PanelMenu.Button {
 
         textBox.add_child(headerBox);
         textBox.add_child(mlValueLabel);
+        textBox.add_child(mlBox);
         textBox.add_child(actionsBox);
 
         item.add_child(statusIcon);
         item.add_child(textBox);
 
         this.menu.addMenuItem(item);
-        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, sparklineLabel, actionsBox});
+        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, mlBox, sparklineLabel, actionsBox});
     }
 
     // -----------------------------------------------------------------------
@@ -391,6 +400,7 @@ class MonishIndicator extends PanelMenu.Button {
             entry.inlineValueLabel.text    = '…';
             entry.sparklineLabel.text      = '';
             entry.mlValueLabel.visible     = false;
+            entry.mlBox.visible            = false;
         }
 
         await this._runMonitor(monitor);
@@ -514,7 +524,7 @@ class MonishIndicator extends PanelMenu.Button {
             if (isMulti) {
                 // Per-app sparklines: each line is "appName value"; update per-app ring buffer.
                 const perApp = this._appHistory.get(id) ?? new Map();
-                const lines  = value.split('\n').map(line => {
+                const perLines = value.split('\n').map(line => {
                     const parts   = line.trim().split(/\s+/);
                     const appName = parts[0] ?? '';
                     const appVal  = parts.slice(1).join(' ');
@@ -525,15 +535,37 @@ class MonishIndicator extends PanelMenu.Button {
                         if (hist.length > SPARKLINE_MAX_VALUES) hist.shift();
                         perApp.set(appName, hist);
                     }
-                    const spark = buildSparkline(perApp.get(appName) ?? []);
-                    return spark ? `${line}  ${spark}` : line;
+                    return {text: line.trim(), spark: buildSparkline(perApp.get(appName) ?? [])};
                 });
                 this._appHistory.set(id, perApp);
+
+                // Rebuild mlBox with one [lineText (x_expand) | lineSpark] row per line.
+                let mlChild = entry.mlBox.get_first_child();
+                while (mlChild) {
+                    const next = mlChild.get_next_sibling();
+                    entry.mlBox.remove_child(mlChild);
+                    mlChild = next;
+                }
+                for (const {text, spark} of perLines) {
+                    const lineRow = new St.BoxLayout({x_expand: true});
+                    const lineText = new St.Label({
+                        text,
+                        x_expand:    true,
+                        style_class: `${CSS_PREFIX}-monitor-value-multiline`,
+                    });
+                    const lineSpark = new St.Label({
+                        text:        spark,
+                        style_class: `${CSS_PREFIX}-monitor-sparkline`,
+                    });
+                    lineRow.add_child(lineText);
+                    lineRow.add_child(lineSpark);
+                    entry.mlBox.add_child(lineRow);
+                }
                 entry.inlineValueLabel.visible  = false;
                 entry.inlineValueLabel.text     = '';
                 entry.sparklineLabel.text       = '';
-                entry.mlValueLabel.visible      = true;
-                entry.mlValueLabel.text         = lines.join('\n');
+                entry.mlValueLabel.visible      = false;
+                entry.mlBox.visible             = true;
             } else {
                 // Sparkline goes into the dedicated right-aligned sparklineLabel widget.
                 entry.inlineValueLabel.visible  = true;
@@ -541,6 +573,7 @@ class MonishIndicator extends PanelMenu.Button {
                 entry.sparklineLabel.text       = sparkline;
                 entry.mlValueLabel.visible      = false;
                 entry.mlValueLabel.text         = '';
+                entry.mlBox.visible             = false;
             }
 
             entry.statusIcon.icon_name = STATUS_ICONS[status] ?? STATUS_ICONS[MonitorStatus.NORMAL];
@@ -567,6 +600,7 @@ class MonishIndicator extends PanelMenu.Button {
             entry.inlineValueLabel.text    = '';
             entry.sparklineLabel.text      = '';
             entry.mlValueLabel.visible     = false;
+            entry.mlBox.visible            = false;
             entry.statusIcon.icon_name     = STATUS_ICONS[MonitorStatus.PENDING];
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));

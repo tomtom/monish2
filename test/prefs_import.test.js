@@ -503,6 +503,26 @@ describe('action commands — ISSUE 50', () => {
     });
 });
 
+describe('extension.js right-aligned per-app sparklines — ISSUE 53', () => {
+    it('defines mlBox container for per-line rows in multi-line monitors', () => {
+        // mlValueLabel with inline sparkline text is left-aligned; mlBox with
+        // per-line HBox rows (lineText x_expand + lineSpark) right-aligns them.
+        expect(extensionSource).toContain('mlBox');
+    });
+
+    it('each per-line row uses a lineText label with x_expand to push sparkline right', () => {
+        expect(extensionSource).toContain('lineText');
+    });
+
+    it('entry includes mlBox so _setMonitorResult can populate per-line rows', () => {
+        expect(extensionSource).toContain('entry.mlBox');
+    });
+
+    it('mlBox children are cleared and rebuilt on each multi-line update', () => {
+        expect(extensionSource).toContain('mlBox.get_first_child()');
+    });
+});
+
 describe('prefs.js cmdPreview whitespace normalisation — ISSUE 52', () => {
     it('cmdPreview replaces whitespace runs before slicing so Adw.ActionRow subtitle stays single-line', () => {
         // Gnome RDP command starts with "try {\n    const..." — a raw .slice(0,60)

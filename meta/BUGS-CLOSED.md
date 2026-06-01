@@ -51,3 +51,4 @@
 50. Monitor action commands: Actions section in edit dialog; status icon toggles actionsBox with per-action buttons; _runAction executes and refreshes value. #closed/2026-05-31
 51. Gnome RDP preset: grdctl status via GJS, CAUTION when enabled, Enable/Disable action commands. #closed/2026-05-31
 52. In Prefs: Cannot edit "Gnome RDP" monitor — cmdPreview now normalises whitespace so Adw.ActionRow subtitle is single-line, keeping suffix buttons in correct click position. #closed/2026-06-01
+53. Per-app sparklines in Top CPU/MEM Processes right-aligned — mlBox with per-line HBox rows (lineText x_expand + lineSpark) replaces inline text embedding. #closed/2026-06-01
