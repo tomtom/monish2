@@ -3,3 +3,7 @@ node_modules/
 graphify-out/
 AGENTS.md
 BUGS.md
+meta/
+
+# Claude Code ctags index
+.claude/tags
