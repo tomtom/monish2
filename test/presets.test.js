@@ -78,6 +78,22 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('who');
     });
 
+    it('Battery Time Remaining preset exists and shows AC on mains — ISSUE 63', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Battery Time Remaining');
+        expect(preset).toBeDefined();
+        expect(preset.type).toBe(MonitorType.JAVASCRIPT);
+        expect(preset.command).toContain('Discharging');
+        expect(preset.command).toContain('energy_now');
+        expect(preset.command).toContain('AC');
+        expect(preset.showSparkline).toBe(false);
+    });
+
+    it('Battery Time Remaining falls back to charge_now/current_now — ISSUE 63', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Battery Time Remaining');
+        expect(preset.command).toContain('charge_now');
+        expect(preset.command).toContain('current_now');
+    });
+
     it('CPU Power (RAPL) preset exists with help text — ISSUE 62', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'CPU Power (RAPL)');
         expect(preset).toBeDefined();

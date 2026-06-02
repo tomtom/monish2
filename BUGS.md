@@ -5,7 +5,6 @@ Next number: 64
 
 ## Current
 
-63. Add predefined monitor to estimate remaining time on battery (when on battery).
 
 
 ## Open
