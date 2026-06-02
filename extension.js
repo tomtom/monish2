@@ -120,6 +120,8 @@ class MonishIndicator extends PanelMenu.Button {
         this._history       = new Map();   // monitorId -> number[] ring buffer (max SPARKLINE_MAX_VALUES)
         this._appHistory    = new Map();   // monitorId -> Map<appName, number[]> for multi-line per-app sparklines
         this._debugLogPath  = GLib.build_filenamev([extensionPath, 'debug.log']);
+        this._stateFileDir  = GLib.build_filenamev([GLib.get_user_runtime_dir(), 'monish2']);
+        this._stateFilePath = GLib.build_filenamev([this._stateFileDir, 'state.json']);
 
         // Floating tooltip widget shown when hovering over a monitor value
         this._tooltip = new St.Label({style_class: `${CSS_PREFIX}-tooltip`, visible: false});
@@ -180,6 +182,8 @@ class MonishIndicator extends PanelMenu.Button {
         // downstream code uses monitor.onDemand regardless of how old data was stored.
         this._monitors = deserializeMonitors(this._settings.get_string(SETTINGS_KEY))
             .map(m => ({...m, onDemand: m.onDemand || m.intervalSeconds === 0}));
+
+        this._loadState();
         const enabled  = this._monitors.filter(m => m.enabled);
 
         if (enabled.length === 0) {
@@ -190,6 +194,8 @@ class MonishIndicator extends PanelMenu.Button {
                 this._addMonitorMenuItem(monitor);
             }
         }
+
+        this._applyRestoredState();
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
@@ -510,6 +516,73 @@ class MonishIndicator extends PanelMenu.Button {
         } catch (_) {}
     }
 
+    // -----------------------------------------------------------------------
+    // State persistence (/run/user/$UID/monish2/state.json, RAM-backed tmpfs)
+    // Survives GNOME Shell context destruction on screen lock, dies on reboot.
+    // -----------------------------------------------------------------------
+
+    /**
+     * Persist _results, _history, _appHistory to a JSON file in the
+     * user runtime directory (tmpfs, /run/user/$UID/monish2/state.json).
+     * Only writes when there is data to preserve.
+     */
+    _saveState() {
+        if (this._results.size === 0) return;
+        try {
+            GLib.mkdir_with_parents(this._stateFileDir, 0o755);
+            const data = JSON.stringify({
+                results:    Object.fromEntries(this._results),
+                history:    Object.fromEntries(this._history),
+                appHistory: Object.fromEntries(
+                    [...this._appHistory].map(([id, perApp]) => [id, Object.fromEntries(perApp)])
+                ),
+            });
+            GLib.file_set_contents(this._stateFilePath, new TextEncoder().encode(data));
+        } catch (_) {}
+    }
+
+    /**
+     * Restore _results, _history, _appHistory from the state file.
+     * Only restores monitors that still exist in the current config.
+     */
+    _loadState() {
+        try {
+            const [ok, bytes] = GLib.file_get_contents(this._stateFilePath);
+            if (!ok) return;
+            const data = JSON.parse(new TextDecoder().decode(bytes));
+            const validIds = new Set(this._monitors.map(m => m.id));
+
+            if (data.history) {
+                for (const [id, hist] of Object.entries(data.history)) {
+                    if (validIds.has(id)) this._history.set(id, hist);
+                }
+            }
+            if (data.appHistory) {
+                for (const [id, perApp] of Object.entries(data.appHistory)) {
+                    if (validIds.has(id)) this._appHistory.set(id, new Map(Object.entries(perApp)));
+                }
+            }
+            if (data.results) {
+                for (const [id, result] of Object.entries(data.results)) {
+                    if (validIds.has(id)) this._results.set(id, result);
+                }
+            }
+        } catch (_) {}
+    }
+
+    /** Restore menu item UI from loaded state (history already populated). */
+    _applyRestoredState() {
+        for (const [id, {value, status}] of this._results) {
+            this._setMonitorResult(id, value, status, {skipHistory: true});
+        }
+        // On-demand monitors should not show stale values
+        for (const monitor of this._monitors) {
+            if (monitor.onDemand && this._results.has(monitor.id)) {
+                this._results.delete(monitor.id);
+            }
+        }
+    }
+
     /**
      * Update stored result and refresh the corresponding menu row + panel icon.
      * For on-demand monitors: hides the Update button, shows the value, then
@@ -522,10 +595,10 @@ class MonishIndicator extends PanelMenu.Button {
      * @param {string} value  - Extracted display value.
      * @param {string} status - One of MonitorStatus values.
      */
-    _setMonitorResult(id, value, status) {
+    _setMonitorResult(id, value, status, {skipHistory = false} = {}) {
         // Update sparkline history with the numeric component of this value.
         // Error states are excluded so spurious numbers in error messages don't skew the graph.
-        if (status !== MonitorStatus.ERROR) {
+        if (!skipHistory && status !== MonitorStatus.ERROR) {
             const num = extractNumber(value);
             if (!isNaN(num)) {
                 const hist = this._history.get(id) ?? [];
@@ -636,11 +709,11 @@ class MonishIndicator extends PanelMenu.Button {
             }
         }
 
+        this._saveState();
         this._updatePanelIcon();
     }
 
     /**
-     * Revert an on-demand monitor back to its "Update" button state.
      * Called when the validity timer fires.  Clears the stored result so the
      * panel icon no longer reflects this monitor's last value.
      *
@@ -740,6 +813,7 @@ class MonishIndicator extends PanelMenu.Button {
      * Full cleanup — disconnect signals, stop timers, destroy UI.
      */
     destroy() {
+        this._saveState();
         this._stopAllTimers();
         if (this._settingsChangedId) {
             this._settings.disconnect(this._settingsChangedId);
