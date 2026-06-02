@@ -706,6 +706,24 @@ describe('extension.js right-aligned per-app sparklines — ISSUE 53', () => {
     });
 });
 
+describe('extension.js multi-line value right-aligned — ISSUE 76', () => {
+    it('each per-line row adds a separate lineVal label for the value part', () => {
+        // Previously the full "name value" string was one label; now name and value
+        // are split so the value can be right-aligned with the monish-monitor-value style.
+        expect(extensionSource).toContain('lineVal');
+    });
+
+    it('lineVal uses monish-monitor-value CSS class to match single-line value alignment', () => {
+        expect(extensionSource).toContain(`monitor-value`);
+        expect(extensionSource).toContain('lineVal');
+    });
+
+    it('perLines returns appName and appVal separately (not combined text)', () => {
+        // Previously returned {text: line.trim(), spark}; now {appName, appVal, spark}.
+        expect(extensionSource).toContain('appVal');
+    });
+});
+
 describe('prefs.js cmdPreview whitespace normalisation — ISSUE 52', () => {
     it('cmdPreview replaces whitespace runs before slicing so Adw.ActionRow subtitle stays single-line', () => {
         // Gnome RDP command starts with "try {\n    const..." — a raw .slice(0,60)

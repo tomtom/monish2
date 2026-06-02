@@ -5,7 +5,6 @@ Next number: 77
 
 ## Current
 
-76. In Top CPU/MEM Processes: Display the numbers right-aligned (left of the sparkline; the same as with the other monitors)
 
 
 ## Open

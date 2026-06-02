@@ -643,29 +643,36 @@ class MonishIndicator extends PanelMenu.Button {
                         perApp.set(appName, hist);
                     }
                     const spark = showSpark ? buildSparkline(perApp.get(appName) ?? []) : '';
-                    return {text: line.trim(), spark};
+                    return {appName, appVal, spark};
                 });
                 this._appHistory.set(id, perApp);
 
-                // Rebuild mlBox with one [lineText (x_expand) | lineSpark] row per line.
+                // Rebuild mlBox with one [lineText (x_expand) | lineVal | lineSpark] row per line.
+                // lineText holds the process name; lineVal holds the right-aligned numeric value
+                // matching the single-line inlineValueLabel layout (ISSUE 76).
                 let mlChild = entry.mlBox.get_first_child();
                 while (mlChild) {
                     const next = mlChild.get_next_sibling();
                     entry.mlBox.remove_child(mlChild);
                     mlChild = next;
                 }
-                for (const {text, spark} of perLines) {
+                for (const {appName, appVal, spark} of perLines) {
                     const lineRow = new St.BoxLayout({x_expand: true});
                     const lineText = new St.Label({
-                        text,
+                        text:        appName,
                         x_expand:    true,
                         style_class: `${CSS_PREFIX}-monitor-value-multiline`,
+                    });
+                    const lineVal = new St.Label({
+                        text:        appVal,
+                        style_class: `${CSS_PREFIX}-monitor-value`,
                     });
                     const lineSpark = new St.Label({
                         text:        spark,
                         style_class: `${CSS_PREFIX}-monitor-sparkline`,
                     });
                     lineRow.add_child(lineText);
+                    lineRow.add_child(lineVal);
                     lineRow.add_child(lineSpark);
                     entry.mlBox.add_child(lineRow);
                 }
