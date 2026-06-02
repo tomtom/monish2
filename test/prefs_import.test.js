@@ -636,40 +636,31 @@ describe('extension.js tooltip position above menu — ISSUE 69', () => {
     });
 });
 
-describe('extension.js actions icon alongside status icon — ISSUE 67', () => {
-    it('adds a separate actualStatusIcon for monitors with actions', () => {
-        // The ⋮ toggle must be RIGHT of the actual status icon,
-        // not INSTEAD of it (ISSUE 67 — display both, not one).
-        expect(extensionSource).toContain('actualStatusIcon');
+describe('extension.js action monitors use overlay dot — ISSUE 74', () => {
+    it('does not use view-more-symbolic (three-dots) for action monitors', () => {
+        // ISSUE 74: interactivity is signalled by a dot overlay, not the ⋮ icon.
+        expect(extensionSource).not.toContain('view-more-symbolic');
     });
 
-    it('actualStatusIcon uses STATUS_ICONS[PENDING] as initial icon name', () => {
-        // Avoids the ternary that hides actual status by using ACTION_STATUS_ICONS.
+    it('does not define ACTION_STATUS_ICONS (replaced by overlay approach)', () => {
+        expect(extensionSource).not.toContain('ACTION_STATUS_ICONS');
+    });
+
+    it('does not use actualStatusIcon (single icon now suffices)', () => {
+        // Previously two icons were shown; now one icon with a dot overlay.
+        expect(extensionSource).not.toContain('actualStatusIcon');
+    });
+
+    it('uses monish-action-dot CSS class for the overlay dot on action monitors', () => {
+        expect(extensionSource).toContain('action-dot');
+    });
+
+    it('wraps status icon in a BinLayout container for action monitors', () => {
+        expect(extensionSource).toContain('BinLayout');
+    });
+
+    it('statusIcon always uses STATUS_ICONS (real status, not a toggle glyph)', () => {
         expect(extensionSource).toContain('STATUS_ICONS[MonitorStatus.PENDING]');
-    });
-
-    it('_setMonitorResult updates actualStatusIcon with real STATUS_ICONS', () => {
-        expect(extensionSource).toContain('entry.actualStatusIcon');
-    });
-});
-
-describe('extension.js action monitors use distinct icon — ISSUE 58', () => {
-    it('defines ACTION_STATUS_ICONS for monitors with actions', () => {
-        expect(extensionSource).toContain('ACTION_STATUS_ICONS');
-    });
-
-    it('ACTION_STATUS_ICONS uses view-more-symbolic for PENDING/NORMAL to signal clickability', () => {
-        expect(extensionSource).toContain('view-more-symbolic');
-    });
-
-    it('initial statusIcon uses ACTION_STATUS_ICONS when monitor has actions', () => {
-        // Monitors with actions show ⋮ icon before first poll instead of plain dot.
-        expect(extensionSource).toMatch(/actions.*ACTION_STATUS_ICONS|ACTION_STATUS_ICONS.*actions/s);
-    });
-
-    it('_setMonitorResult selects icon set based on whether monitor has actions', () => {
-        // ACTION_STATUS_ICONS is chosen when actions exist; STATUS_ICONS otherwise.
-        expect(extensionSource).toContain('ACTION_STATUS_ICONS : STATUS_ICONS');
     });
 });
 

@@ -71,3 +71,4 @@
 71. In Gnome RDP Preset: When enabled, count the entries from `ss -tnp | grep ':3389'` (if the command exists; check once on startup) and put the number into parentheses next to enabled. When the number is > 0 then mark the monitor as DANGER. #closed/2026-06-02
 72. Add a predefined (JavaScript) monitor "RAM Free" that corresponds to the "free" value in `free -h`. #closed/2026-06-02
 73. The sparklines get zapped when the screen locks and similar events. Make sure the sparklines and the latest monitor values persist of screen locks etc. #closed/2026-06-02
+74. In toolbar menu: For monitors with actions, use an overlay (dot or similar) to indicate interactivity. Don't use the three dots icon. #closed/2026-06-02

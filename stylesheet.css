@@ -57,6 +57,15 @@
     margin-left: 6px;
 }
 
+/* Small dot overlaid on the status icon for monitors that have action buttons.
+   Signals interactivity without replacing the real status glyph. */
+.monish-action-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 3px;
+    background-color: #729fcf;
+}
+
 /* Action buttons panel — shown when the status icon is clicked */
 .monish-actions-box {
     padding-top: 4px;

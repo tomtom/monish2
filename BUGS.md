@@ -1,9 +1,12 @@
-Next number: 74
+Next number: 77
 
 
 # Bugs & Feature Request
 
 ## Current
+
+75. In CPU Power (RAPL): Clicking on "Setup instructions" does nothing.
+76. In Top CPU/MEM Processes: Display the numbers right-aligned (left of the sparkline; the same as with the other monitors)
 
 
 ## Open
