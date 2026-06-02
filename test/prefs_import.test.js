@@ -503,6 +503,26 @@ describe('action commands — ISSUE 50', () => {
     });
 });
 
+describe('extension.js action monitors use distinct icon — ISSUE 58', () => {
+    it('defines ACTION_STATUS_ICONS for monitors with actions', () => {
+        expect(extensionSource).toContain('ACTION_STATUS_ICONS');
+    });
+
+    it('ACTION_STATUS_ICONS uses view-more-symbolic for PENDING/NORMAL to signal clickability', () => {
+        expect(extensionSource).toContain('view-more-symbolic');
+    });
+
+    it('initial statusIcon uses ACTION_STATUS_ICONS when monitor has actions', () => {
+        // Monitors with actions show ⋮ icon before first poll instead of plain dot.
+        expect(extensionSource).toMatch(/actions.*ACTION_STATUS_ICONS|ACTION_STATUS_ICONS.*actions/s);
+    });
+
+    it('_setMonitorResult selects icon set based on whether monitor has actions', () => {
+        // ACTION_STATUS_ICONS is chosen when actions exist; STATUS_ICONS otherwise.
+        expect(extensionSource).toContain('ACTION_STATUS_ICONS : STATUS_ICONS');
+    });
+});
+
 describe('prefs.js per-monitor sparkline toggle — ISSUE 54', () => {
     it('edit dialog includes a showSparkline toggle switch', () => {
         expect(prefsSource).toContain('showSparkline');

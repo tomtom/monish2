@@ -55,3 +55,4 @@
 54. Per-monitor sparkline toggle: showSparkline boolean in model (default true), Switch in edit dialog, extension skips sparkline when false. #closed/2026-06-02
 55. Logged-in Users preset: showSparkline set to false — multi-line user list has no meaningful sparkline. #closed/2026-06-02
 56. Gnome RDP Status N/A: grdctl status --headless is invalid; changed to grdctl status. #closed/2026-06-02
+58. Monitors with actions use ACTION_STATUS_ICONS (view-more-symbolic ⋮ for PENDING/NORMAL) to signal the status icon is clickable for actions. #closed/2026-06-02

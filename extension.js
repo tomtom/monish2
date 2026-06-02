@@ -70,6 +70,19 @@ const STATUS_ICONS = {
     [MonitorStatus.ERROR]:   'dialog-warning-symbolic',
 };
 
+/**
+ * Alternative status icons for monitors that have action commands.
+ * PENDING/NORMAL use view-more-symbolic (⋮) so the status icon visually signals
+ * that clicking it opens the actions panel, without sacrificing caution/danger colours.
+ */
+const ACTION_STATUS_ICONS = {
+    [MonitorStatus.PENDING]: 'view-more-symbolic',
+    [MonitorStatus.NORMAL]:  'view-more-symbolic',
+    [MonitorStatus.CAUTION]: 'dialog-warning-symbolic',
+    [MonitorStatus.DANGER]:  'dialog-error-symbolic',
+    [MonitorStatus.ERROR]:   'dialog-warning-symbolic',
+};
+
 /** Icon colour per status; applied as inline style to bypass panel theme specificity. */
 const STATUS_COLORS = {
     [MonitorStatus.CAUTION]: '#e5a50a',
@@ -231,8 +244,9 @@ class MonishIndicator extends PanelMenu.Button {
     _addMonitorMenuItem(monitor) {
         const item = new PopupMenu.PopupBaseMenuItem({reactive: false});
 
+        const hasActions = (monitor.actions ?? []).length > 0;
         const statusIcon = new St.Icon({
-            icon_name:  STATUS_ICONS[MonitorStatus.PENDING],
+            icon_name:  (hasActions ? ACTION_STATUS_ICONS : STATUS_ICONS)[MonitorStatus.PENDING],
             style_class: `${CSS_PREFIX}-status-icon`,
             icon_size:  16,
             y_align:    Clutter.ActorAlign.START,
@@ -313,7 +327,7 @@ class MonishIndicator extends PanelMenu.Button {
         }
 
         // Make the status icon a toggle for the actions panel when actions exist.
-        if ((monitor.actions ?? []).length > 0) {
+        if (hasActions) {
             statusIcon.reactive = true;
             statusIcon.connect('button-press-event', () => {
                 actionsBox.visible = !actionsBox.visible;
@@ -578,7 +592,8 @@ class MonishIndicator extends PanelMenu.Button {
                 entry.mlBox.visible             = false;
             }
 
-            entry.statusIcon.icon_name = STATUS_ICONS[status] ?? STATUS_ICONS[MonitorStatus.NORMAL];
+            const icons = (monitor?.actions ?? []).length > 0 ? ACTION_STATUS_ICONS : STATUS_ICONS;
+            entry.statusIcon.icon_name = icons[status] ?? icons[MonitorStatus.NORMAL];
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));
             entry.item.add_style_class_name(`${CSS_PREFIX}-status-${status}`);
@@ -603,7 +618,9 @@ class MonishIndicator extends PanelMenu.Button {
             entry.sparklineLabel.text      = '';
             entry.mlValueLabel.visible     = false;
             entry.mlBox.visible            = false;
-            entry.statusIcon.icon_name     = STATUS_ICONS[MonitorStatus.PENDING];
+            const resetMonitor = this._monitors.find(m => m.id === id);
+            const resetIcons   = (resetMonitor?.actions ?? []).length > 0 ? ACTION_STATUS_ICONS : STATUS_ICONS;
+            entry.statusIcon.icon_name     = resetIcons[MonitorStatus.PENDING];
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));
         }
