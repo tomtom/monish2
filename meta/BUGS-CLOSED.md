@@ -72,3 +72,4 @@
 72. Add a predefined (JavaScript) monitor "RAM Free" that corresponds to the "free" value in `free -h`. #closed/2026-06-02
 73. The sparklines get zapped when the screen locks and similar events. Make sure the sparklines and the latest monitor values persist of screen locks etc. #closed/2026-06-02
 74. In toolbar menu: For monitors with actions, use an overlay (dot or similar) to indicate interactivity. Don't use the three dots icon. #closed/2026-06-02
+75. In CPU Power (RAPL): Clicking on "Setup instructions" does nothing. #closed/2026-06-02

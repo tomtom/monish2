@@ -538,6 +538,14 @@ describe('prefs.js help dialog for setup instructions — ISSUE 68', () => {
     });
 });
 
+describe('prefs.js help dialog transient parent — ISSUE 75', () => {
+    it('showHelpDialog is called with the edit dialog (not the prefs window) as parent', () => {
+        // When the edit dialog is modal, passing the prefs window as transient_for
+        // hides the help dialog behind the modal. Fix: pass `dialog` instead.
+        expect(prefsSource).toContain('showHelpDialog(dialog,');
+    });
+});
+
 describe('prefs.js description field — ISSUE 66', () => {
     it('edit dialog has a Description labeled row', () => {
         expect(prefsSource).toContain("labeledRow('Description'");

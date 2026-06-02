@@ -101,7 +101,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
             css_classes: ['caption', 'dim-label'],
         });
         helpLink.connect('activate-link', () => {
-            showHelpDialog(parent, data.helpText);
+            showHelpDialog(dialog, data.helpText);
             return true; // prevent default URI handling
         });
         content.append(helpLink);
