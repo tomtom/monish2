@@ -360,6 +360,14 @@ describe('createMonitor', () => {
         const actions = [{label: 'Enable', command: 'cmd enable', type: 'shell'}];
         expect(createMonitor({actions}).actions).toEqual(actions);
     });
+
+    it('defaults showSparkline to true — ISSUE 54', () => {
+        expect(createMonitor().showSparkline).toBe(true);
+    });
+
+    it('allows disabling sparkline via override — ISSUE 54', () => {
+        expect(createMonitor({showSparkline: false}).showSparkline).toBe(false);
+    });
 });
 
 // ---------------------------------------------------------------------------

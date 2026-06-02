@@ -518,7 +518,8 @@ class MonishIndicator extends PanelMenu.Button {
                 this._expiryTimers.set(id, timerId);
             }
 
-            const sparkline = buildSparkline(this._history.get(id) ?? []);
+            const showSpark = monitor?.showSparkline !== false;
+            const sparkline = showSpark ? buildSparkline(this._history.get(id) ?? []) : '';
             const isMulti   = value.includes('\n');
 
             if (isMulti) {
@@ -535,7 +536,8 @@ class MonishIndicator extends PanelMenu.Button {
                         if (hist.length > SPARKLINE_MAX_VALUES) hist.shift();
                         perApp.set(appName, hist);
                     }
-                    return {text: line.trim(), spark: buildSparkline(perApp.get(appName) ?? [])};
+                    const spark = showSpark ? buildSparkline(perApp.get(appName) ?? []) : '';
+                    return {text: line.trim(), spark};
                 });
                 this._appHistory.set(id, perApp);
 

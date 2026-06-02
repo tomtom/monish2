@@ -503,6 +503,20 @@ describe('action commands — ISSUE 50', () => {
     });
 });
 
+describe('prefs.js per-monitor sparkline toggle — ISSUE 54', () => {
+    it('edit dialog includes a showSparkline toggle switch', () => {
+        expect(prefsSource).toContain('showSparkline');
+    });
+
+    it('edit dialog shows the sparkline toggle labeled "Show Sparkline"', () => {
+        expect(prefsSource).toContain('Show Sparkline');
+    });
+
+    it('extension reads showSparkline from monitor config to decide whether to display it', () => {
+        expect(extensionSource).toContain('showSparkline');
+    });
+});
+
 describe('extension.js right-aligned per-app sparklines — ISSUE 53', () => {
     it('defines mlBox container for per-line rows in multi-line monitors', () => {
         // mlValueLabel with inline sparkline text is left-aligned; mlBox with

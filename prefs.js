@@ -428,6 +428,13 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     });
     content.append(labeledRow('Danger Patterns', dangerEntry));
 
+    // ---- Show Sparkline toggle ----
+    const sparklineSwitch = new Gtk.Switch({
+        active: data.showSparkline !== false,
+        valign: Gtk.Align.CENTER,
+    });
+    content.append(labeledRow('Show Sparkline', sparklineSwitch));
+
     // ---- Valid for (seconds) — shown only when interval=0 (on-demand) ----
     const validSecSpin = new Gtk.SpinButton({
         adjustment: new Gtk.Adjustment({
@@ -477,6 +484,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
                 onDemand:             totalSec === 0,
                 onDemandValidSeconds: validSecSpin.get_value_as_int(),
                 actions:              data.actions ?? [],
+                showSparkline:        sparklineSwitch.active,
             };
 
             const errors = validateMonitor(updated);

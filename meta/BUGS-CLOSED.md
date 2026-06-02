@@ -52,3 +52,4 @@
 51. Gnome RDP preset: grdctl status via GJS, CAUTION when enabled, Enable/Disable action commands. #closed/2026-05-31
 52. In Prefs: Cannot edit "Gnome RDP" monitor — cmdPreview now normalises whitespace so Adw.ActionRow subtitle is single-line, keeping suffix buttons in correct click position. #closed/2026-06-01
 53. Per-app sparklines in Top CPU/MEM Processes right-aligned — mlBox with per-line HBox rows (lineText x_expand + lineSpark) replaces inline text embedding. #closed/2026-06-01
+54. Per-monitor sparkline toggle: showSparkline boolean in model (default true), Switch in edit dialog, extension skips sparkline when false. #closed/2026-06-02
