@@ -245,6 +245,18 @@ class MonishIndicator extends PanelMenu.Button {
         const item = new PopupMenu.PopupBaseMenuItem({reactive: false});
 
         const hasActions = (monitor.actions ?? []).length > 0;
+
+        // For monitors with actions, show BOTH a real status icon AND the ⋮ toggle
+        // (ISSUE 67: display alongside, not instead of, the status icon).
+        // actualStatusIcon is only added for action monitors; non-action monitors
+        // use statusIcon alone (which already shows the real status).
+        const actualStatusIcon = hasActions ? new St.Icon({
+            icon_name:   STATUS_ICONS[MonitorStatus.PENDING],
+            style_class: `${CSS_PREFIX}-status-icon`,
+            icon_size:   16,
+            y_align:     Clutter.ActorAlign.START,
+        }) : null;
+
         const statusIcon = new St.Icon({
             icon_name:  (hasActions ? ACTION_STATUS_ICONS : STATUS_ICONS)[MonitorStatus.PENDING],
             style_class: `${CSS_PREFIX}-status-icon`,
@@ -344,11 +356,12 @@ class MonishIndicator extends PanelMenu.Button {
         textBox.add_child(mlBox);
         textBox.add_child(actionsBox);
 
+        if (actualStatusIcon) item.add_child(actualStatusIcon);
         item.add_child(statusIcon);
         item.add_child(textBox);
 
         this.menu.addMenuItem(item);
-        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, mlBox, sparklineLabel, actionsBox, actionBtns});
+        this._menuItems.set(monitor.id, {item, statusIcon, actualStatusIcon, nameLabel, inlineValueLabel, mlValueLabel, mlBox, sparklineLabel, actionsBox, actionBtns});
     }
 
     // -----------------------------------------------------------------------
@@ -598,6 +611,10 @@ class MonishIndicator extends PanelMenu.Button {
 
             const icons = (monitor?.actions ?? []).length > 0 ? ACTION_STATUS_ICONS : STATUS_ICONS;
             entry.statusIcon.icon_name = icons[status] ?? icons[MonitorStatus.NORMAL];
+            // Update the real status icon for monitors that have an actions toggle.
+            if (entry.actualStatusIcon) {
+                entry.actualStatusIcon.icon_name = STATUS_ICONS[status] ?? STATUS_ICONS[MonitorStatus.NORMAL];
+            }
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));
             entry.item.add_style_class_name(`${CSS_PREFIX}-status-${status}`);
@@ -637,6 +654,9 @@ class MonishIndicator extends PanelMenu.Button {
             const resetMonitor = this._monitors.find(m => m.id === id);
             const resetIcons   = (resetMonitor?.actions ?? []).length > 0 ? ACTION_STATUS_ICONS : STATUS_ICONS;
             entry.statusIcon.icon_name     = resetIcons[MonitorStatus.PENDING];
+            if (entry.actualStatusIcon) {
+                entry.actualStatusIcon.icon_name = STATUS_ICONS[MonitorStatus.PENDING];
+            }
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));
         }

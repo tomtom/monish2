@@ -64,3 +64,4 @@
 64. Action button guard: optional JS guard expression on each action; evaluated with current value in _setMonitorResult; Gnome RDP preset uses guards for Enable/Disable. #closed/2026-06-02
 65. Export/import monitors as JSON: showExportDialog (Gtk.FileDialog.save + pretty JSON) and showImportDialog (open + append/replace dialog). #closed/2026-06-02
 66. Description field in monitor edit dialog; preset descriptions pre-filled; shown in monitor list subtitle. #closed/2026-06-02
+67. Monitors with actions show real status icon + ⋮ toggle alongside (not instead of status icon). #closed/2026-06-02

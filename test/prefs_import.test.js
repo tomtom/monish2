@@ -610,6 +610,23 @@ describe('action button guard — ISSUE 64', () => {
     });
 });
 
+describe('extension.js actions icon alongside status icon — ISSUE 67', () => {
+    it('adds a separate actualStatusIcon for monitors with actions', () => {
+        // The ⋮ toggle must be RIGHT of the actual status icon,
+        // not INSTEAD of it (ISSUE 67 — display both, not one).
+        expect(extensionSource).toContain('actualStatusIcon');
+    });
+
+    it('actualStatusIcon uses STATUS_ICONS[PENDING] as initial icon name', () => {
+        // Avoids the ternary that hides actual status by using ACTION_STATUS_ICONS.
+        expect(extensionSource).toContain('STATUS_ICONS[MonitorStatus.PENDING]');
+    });
+
+    it('_setMonitorResult updates actualStatusIcon with real STATUS_ICONS', () => {
+        expect(extensionSource).toContain('entry.actualStatusIcon');
+    });
+});
+
 describe('extension.js action monitors use distinct icon — ISSUE 58', () => {
     it('defines ACTION_STATUS_ICONS for monitors with actions', () => {
         expect(extensionSource).toContain('ACTION_STATUS_ICONS');
