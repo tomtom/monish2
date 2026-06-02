@@ -76,3 +76,4 @@
 76. In Top CPU/MEM Processes: Display the numbers right-aligned (left of the sparkline; the same as with the other monitors) #closed/2026-06-02
 77. The solution for issue #71 does not work. Undo that change. Remove the respective code. #closed/2026-06-02
 78. Ad ISSUE 74: Make the overlay bigger and more succinct. May draw a box around the indicator icon. #closed/2026-06-02
+79. Ad issue 78: Make the overlay the same color as the indicator icon - or the text. #closed/2026-06-02

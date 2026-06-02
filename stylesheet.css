@@ -65,6 +65,11 @@
     padding: 1px;
 }
 
+/* Match border colour to the row's status colour (same values as STATUS_COLORS). */
+.monish-status-caution .monish-action-icon { border-color: #e5a50a; }
+.monish-status-danger  .monish-action-icon { border-color: #e01b24; }
+.monish-status-error   .monish-action-icon { border-color: #c64600; }
+
 /* Action buttons panel — shown when the status icon is clicked */
 .monish-actions-box {
     padding-top: 4px;
