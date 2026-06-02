@@ -225,6 +225,26 @@ describe('preset GJS scripts: GLib.file_get_contents error handling', () => {
         expect(mem.command).not.toContain('memTotal * 100');
     });
 
+    it('Top CPU/MEM Processes have a COUNT arg with default 3 — ISSUE 61', () => {
+        for (const name of ['Top CPU Processes', 'Top MEM Processes']) {
+            const preset = PRESET_MONITORS.find(p => p.name === name);
+            const countArg = (preset.args ?? []).find(a => a.name === 'COUNT');
+            expect(countArg).toBeDefined();
+            expect(countArg.default).toBe('3');
+        }
+    });
+
+    it('Top CPU/MEM commands use _count variable for slice limit — ISSUE 61', () => {
+        const cpu = PRESET_MONITORS.find(p => p.name === 'Top CPU Processes');
+        const mem = PRESET_MONITORS.find(p => p.name === 'Top MEM Processes');
+        for (const preset of [cpu, mem]) {
+            expect(preset.command).toContain('_count');
+            expect(preset.command).toContain('slice(0, _count)');
+            // Must not use the hardcoded literal 3 in the slice call.
+            expect(preset.command).not.toContain('slice(0, 3)');
+        }
+    });
+
     it('Top CPU/MEM Processes commands check EXCLUDE variable for filtering', () => {
         const cpu = PRESET_MONITORS.find(p => p.name === 'Top CPU Processes');
         const mem = PRESET_MONITORS.find(p => p.name === 'Top MEM Processes');
