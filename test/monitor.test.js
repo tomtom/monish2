@@ -24,6 +24,7 @@ import {
     SPARKLINE_CHARS,
     SPARKLINE_MAX_VALUES,
     injectArgs,
+    countAlertStatuses,
 } from '../lib/monitor.js';
 
 import {describe, it, expect} from '@jest/globals';
@@ -660,5 +661,45 @@ describe('createMonitor args / argValues defaults', () => {
             argValues: {X: 'custom'},
         });
         expect(monitor.argValues.X).toBe('custom');
+    });
+});
+
+// ---------------------------------------------------------------------------
+// countAlertStatuses
+// ---------------------------------------------------------------------------
+
+describe('countAlertStatuses', () => {
+    it('returns 0 for null/empty input', () => {
+        expect(countAlertStatuses(null)).toBe(0);
+        expect(countAlertStatuses([])).toBe(0);
+    });
+
+    it('returns 0 when no alerting statuses', () => {
+        expect(countAlertStatuses([MonitorStatus.NORMAL, MonitorStatus.PENDING])).toBe(0);
+    });
+
+    it('counts CAUTION statuses', () => {
+        expect(countAlertStatuses([MonitorStatus.CAUTION])).toBe(1);
+        expect(countAlertStatuses([MonitorStatus.CAUTION, MonitorStatus.CAUTION])).toBe(2);
+    });
+
+    it('counts DANGER statuses', () => {
+        expect(countAlertStatuses([MonitorStatus.DANGER])).toBe(1);
+        expect(countAlertStatuses([MonitorStatus.DANGER, MonitorStatus.DANGER, MonitorStatus.DANGER])).toBe(3);
+    });
+
+    it('counts mixed CAUTION and DANGER statuses', () => {
+        expect(countAlertStatuses([MonitorStatus.CAUTION, MonitorStatus.DANGER])).toBe(2);
+    });
+
+    it('does not count ERROR as an alert status', () => {
+        expect(countAlertStatuses([MonitorStatus.ERROR])).toBe(0);
+        expect(countAlertStatuses([MonitorStatus.ERROR, MonitorStatus.CAUTION])).toBe(1);
+    });
+
+    it('ignores non-alerting statuses mixed in', () => {
+        expect(countAlertStatuses([
+            MonitorStatus.NORMAL, MonitorStatus.CAUTION, MonitorStatus.DANGER, MonitorStatus.PENDING,
+        ])).toBe(2);
     });
 });

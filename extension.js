@@ -29,6 +29,7 @@ import {
     parseValue,
     evaluateStatus,
     worstStatus,
+    countAlertStatuses,
     intervalToMs,
     jitteredInterval,
     formatError,
@@ -699,6 +700,9 @@ class MonishIndicator extends PanelMenu.Button {
         if (alerting && color) {
             this._errorBadge.style = `color: ${color};`;
         }
+        // Use as many exclamation marks as there are CAUTION/DANGER monitors
+        const alertCount = countAlertStatuses(statuses);
+        this._errorBadge.text = alertCount > 0 ? '!'.repeat(alertCount) : '!';
     }
 
     // -----------------------------------------------------------------------
