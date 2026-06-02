@@ -68,3 +68,4 @@
 68. CPU Power (RAPL): helpText field with chmod/udev setup instructions; clickable Setup link in edit dialog. #closed/2026-06-02
 69. Tooltip in monitor menu now positioned above cursor using get_preferred_height, not below. #closed/2026-06-02
 70. When multiple monitors are in CAUTION/DANGER, show one '!' per alerting monitor in the toolbar badge. #closed/2026-06-02
+71. In Gnome RDP Preset: When enabled, count the entries from `ss -tnp | grep ':3389'` (if the command exists; check once on startup) and put the number into parentheses next to enabled. When the number is > 0 then mark the monitor as DANGER. #closed/2026-06-02

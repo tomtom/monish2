@@ -1,10 +1,9 @@
-Next number: 71
+Next number: 72
 
 
 # Bugs & Feature Request
 
 ## Current
-
 
 ## Open
 
