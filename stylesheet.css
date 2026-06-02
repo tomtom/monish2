@@ -63,12 +63,9 @@
     border: 1.5px solid #729fcf;
     border-radius: 3px;
     padding: 1px;
+    margin-left: -2.5px;   /* pull left so icon content aligns with non-action rows */
+    margin-right: 3.5px;   /* border+padding on right = 2.5px; 6px gap - 2.5px = 3.5px keeps text aligned */
 }
-
-/* Match border colour to the row's status colour (same values as STATUS_COLORS). */
-.monish-status-caution .monish-action-icon { border-color: #e5a50a; }
-.monish-status-danger  .monish-action-icon { border-color: #e01b24; }
-.monish-status-error   .monish-action-icon { border-color: #c64600; }
 
 /* Action buttons panel — shown when the status icon is clicked */
 .monish-actions-box {

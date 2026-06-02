@@ -678,6 +678,10 @@ class MonishIndicator extends PanelMenu.Button {
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));
             entry.item.add_style_class_name(`${CSS_PREFIX}-status-${status}`);
+            if (entry.statusIcon.has_style_class_name(`${CSS_PREFIX}-action-icon`)) {
+                const borderColor = STATUS_COLORS[status];
+                entry.statusIcon.style = borderColor ? `border-color: ${borderColor};` : null;
+            }
 
             // Evaluate each action button's guard with the current value and
             // show/hide accordingly.  Buttons with no guard are always visible.
@@ -712,6 +716,8 @@ class MonishIndicator extends PanelMenu.Button {
             entry.mlValueLabel.visible     = false;
             entry.mlBox.visible            = false;
             entry.statusIcon.icon_name = STATUS_ICONS[MonitorStatus.PENDING];
+            if (entry.statusIcon.has_style_class_name(`${CSS_PREFIX}-action-icon`))
+                entry.statusIcon.style = null;
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));
         }
