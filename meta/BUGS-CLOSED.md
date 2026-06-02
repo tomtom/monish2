@@ -59,3 +59,4 @@
 59. Up/down in Prefs no longer jumps scroll: findScrolledWindow saves vadjustment before rebuild; GLib.idle_add restores it after grab_focus. #closed/2026-06-02
 60. Last Login preset: last -n 1 -w, extracts user/tty/date via regex, showSparkline:false. #closed/2026-06-02
 61. Top CPU/MEM Processes: added COUNT arg (default '3'); scripts use _count variable in slice(0, _count). #closed/2026-06-02
+62. CPU Power (RAPL) preset: reads energy_uj twice over 0.5s, computes watts; description includes chmod/udev help text. #closed/2026-06-02

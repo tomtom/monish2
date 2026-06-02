@@ -78,6 +78,18 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('who');
     });
 
+    it('CPU Power (RAPL) preset exists with help text — ISSUE 62', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'CPU Power (RAPL)');
+        expect(preset).toBeDefined();
+        expect(preset.type).toBe(MonitorType.JAVASCRIPT);
+        // Command must read energy_uj twice and compute watts.
+        expect(preset.command).toContain('energy_uj');
+        expect(preset.command).toContain('GLib.usleep');
+        expect(preset.command).toContain('watts');
+        // Description must include the chmod/udev help text.
+        expect(preset.description).toContain('chmod');
+    });
+
     it('Last Login preset exists with no sparkline — ISSUE 60', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Last Login');
         expect(preset).toBeDefined();

@@ -5,7 +5,6 @@ Next number: 64
 
 ## Current
 
-62. Add predefined monitor to estimate CPU power consumption via Intel RAPL (provide a help text with how to make this work without sudo privileges).
 63. Add predefined monitor to estimate remaining time on battery (when on battery).
 
 
