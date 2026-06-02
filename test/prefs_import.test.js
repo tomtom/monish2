@@ -659,12 +659,12 @@ describe('extension.js action monitors use overlay dot — ISSUE 74', () => {
         expect(extensionSource).not.toContain('actualStatusIcon');
     });
 
-    it('uses monish-action-dot CSS class for the overlay dot on action monitors', () => {
-        expect(extensionSource).toContain('action-dot');
+    it('uses monish-action-icon CSS class for the border on action monitors', () => {
+        expect(extensionSource).toContain('action-icon');
     });
 
-    it('wraps status icon in a BinLayout container for action monitors', () => {
-        expect(extensionSource).toContain('BinLayout');
+    it('does not use BinLayout (box border replaces dot overlay)', () => {
+        expect(extensionSource).not.toContain('BinLayout');
     });
 
     it('statusIcon always uses STATUS_ICONS (real status, not a toggle glyph)', () => {

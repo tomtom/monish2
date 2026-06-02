@@ -244,34 +244,17 @@ class MonishIndicator extends PanelMenu.Button {
         const hasActions = (monitor.actions ?? []).length > 0;
 
         // statusIcon always shows the real monitor status via STATUS_ICONS.
-        // For action monitors it is wrapped in a BinLayout container so a small
-        // dot overlay can be placed at the bottom-right corner to signal
-        // interactivity (ISSUE 74: overlay dot replaces the old ⋮ toggle icon).
+        // For action monitors a border class is added to signal interactivity.
         const statusIcon = new St.Icon({
-            icon_name:  STATUS_ICONS[MonitorStatus.PENDING],
-            icon_size:  16,
-            y_align:    Clutter.ActorAlign.START,
+            icon_name:   STATUS_ICONS[MonitorStatus.PENDING],
+            icon_size:   16,
+            style_class: `${CSS_PREFIX}-status-icon`,
+            y_align:     Clutter.ActorAlign.START,
         });
-
-        // For action monitors wrap the icon + dot in a container; for plain
-        // monitors use the icon directly (with its margin class on the icon itself).
-        let statusIconWidget;
         if (hasActions) {
-            statusIconWidget = new St.Widget({
-                layout_manager: new Clutter.BinLayout(),
-                style_class:    `${CSS_PREFIX}-status-icon`,
-                y_align:        Clutter.ActorAlign.START,
-            });
-            statusIconWidget.add_child(statusIcon);
-            statusIconWidget.add_child(new St.Widget({
-                style_class: `${CSS_PREFIX}-action-dot`,
-                x_align:     Clutter.ActorAlign.END,
-                y_align:     Clutter.ActorAlign.END,
-            }));
-        } else {
-            statusIcon.add_style_class_name(`${CSS_PREFIX}-status-icon`);
-            statusIconWidget = statusIcon;
+            statusIcon.add_style_class_name(`${CSS_PREFIX}-action-icon`);
         }
+        const statusIconWidget = statusIcon;
 
         // Name is a button so it receives clicks, changes cursor, and handles hover.
         // x_expand pushes the value and sparkline labels to the right edge of the row.
