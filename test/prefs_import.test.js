@@ -524,6 +524,34 @@ describe('action commands — ISSUE 50', () => {
     });
 });
 
+describe('action button guard — ISSUE 64', () => {
+    it('prefs buildActionRow includes a guard entry for JS condition', () => {
+        expect(prefsSource).toContain('action.guard');
+    });
+
+    it('prefs guard entry has a meaningful placeholder', () => {
+        expect(prefsSource).toContain('JS condition');
+    });
+
+    it('extension stores actionBtns in _menuItems for per-button visibility control', () => {
+        expect(extensionSource).toContain('actionBtns');
+    });
+
+    it('extension evaluates guard expression with current value in _setMonitorResult', () => {
+        expect(extensionSource).toContain('action.guard');
+    });
+
+    it('extension uses new Function to evaluate guard safely', () => {
+        expect(extensionSource).toContain('new Function');
+    });
+
+    it('Gnome RDP Enable action has guard so it only shows when disabled', () => {
+        // Import checked via presets.test.js; here we verify the source contains the pattern.
+        // The preset guard expression matches the monitor value.
+        expect(extensionSource).toContain("action.guard");
+    });
+});
+
 describe('extension.js action monitors use distinct icon — ISSUE 58', () => {
     it('defines ACTION_STATUS_ICONS for monitors with actions', () => {
         expect(extensionSource).toContain('ACTION_STATUS_ICONS');

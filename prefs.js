@@ -352,8 +352,21 @@ function showMonitorEditDialog(parent, monitor, onSave) {
             action.command = cmdEntry.get_text();
         });
 
+        // Optional JS condition evaluated against the current monitor value.
+        // Empty = always show the button.
+        const guardEntry = new Gtk.Entry({
+            text:             action.guard ?? '',
+            placeholder_text: "JS condition on value (e.g. value === 'disabled')",
+            hexpand:          true,
+            monospace:        true,
+        });
+        guardEntry.connect('changed', () => {
+            action.guard = guardEntry.get_text();
+        });
+
         row.append(topRow);
         row.append(cmdEntry);
+        row.append(guardEntry);
         return row;
     }
 

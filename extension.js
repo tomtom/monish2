@@ -316,6 +316,9 @@ class MonishIndicator extends PanelMenu.Button {
             style_class: `${CSS_PREFIX}-actions-box`,
             visible:     false,
         });
+        // actionBtns pairs each button with its optional guard expression so
+        // _setMonitorResult can show/hide individual buttons per the current value.
+        const actionBtns = [];
         for (const action of (monitor.actions ?? [])) {
             const actionBtn = new St.Button({
                 label:       action.label || action.command,
@@ -324,6 +327,7 @@ class MonishIndicator extends PanelMenu.Button {
             });
             actionBtn.connect('clicked', () => this._runAction(monitor, action));
             actionsBox.add_child(actionBtn);
+            actionBtns.push({btn: actionBtn, guard: action.guard ?? ''});
         }
 
         // Make the status icon a toggle for the actions panel when actions exist.
@@ -344,7 +348,7 @@ class MonishIndicator extends PanelMenu.Button {
         item.add_child(textBox);
 
         this.menu.addMenuItem(item);
-        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, mlBox, sparklineLabel, actionsBox});
+        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, mlBox, sparklineLabel, actionsBox, actionBtns});
     }
 
     // -----------------------------------------------------------------------
@@ -597,6 +601,18 @@ class MonishIndicator extends PanelMenu.Button {
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));
             entry.item.add_style_class_name(`${CSS_PREFIX}-status-${status}`);
+
+            // Evaluate each action button's guard with the current value and
+            // show/hide accordingly.  Buttons with no guard are always visible.
+            for (const {btn, guard} of (entry.actionBtns ?? [])) {
+                if (!guard) continue;
+                try {
+                    // eslint-disable-next-line no-new-func
+                    btn.visible = Boolean(new Function('value', `return (${guard})`)(value));
+                } catch (_) {
+                    btn.visible = true; // malformed guard → always show
+                }
+            }
         }
 
         this._updatePanelIcon();

@@ -128,6 +128,18 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('grdctl status');
     });
 
+    it('Gnome RDP Enable/Disable actions have guards — ISSUE 64', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Gnome RDP');
+        const enable  = (preset.actions ?? []).find(a => a.label === 'Enable');
+        const disable = (preset.actions ?? []).find(a => a.label === 'Disable');
+        // Enable guard: show only when RDP is currently disabled.
+        expect(enable.guard).toBeTruthy();
+        expect(enable.guard).toContain('disabled');
+        // Disable guard: show only when RDP is currently enabled.
+        expect(disable.guard).toBeTruthy();
+        expect(disable.guard).toContain('enabled');
+    });
+
     it('Gnome RDP preset exists with correct properties — ISSUE 51', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Gnome RDP');
         expect(preset).toBeDefined();

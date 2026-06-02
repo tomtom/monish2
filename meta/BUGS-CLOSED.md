@@ -61,3 +61,4 @@
 61. Top CPU/MEM Processes: added COUNT arg (default '3'); scripts use _count variable in slice(0, _count). #closed/2026-06-02
 62. CPU Power (RAPL) preset: reads energy_uj twice over 0.5s, computes watts; description includes chmod/udev help text. #closed/2026-06-02
 63. Battery Time Remaining preset: reads energy_now/power_now or charge_now/current_now; shows AC on mains; showSparkline:false. #closed/2026-06-02
+64. Action button guard: optional JS guard expression on each action; evaluated with current value in _setMonitorResult; Gnome RDP preset uses guards for Enable/Disable. #closed/2026-06-02

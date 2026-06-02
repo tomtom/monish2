@@ -1,10 +1,11 @@
-Next number: 64
+Next number: 66
 
 
 # Bugs & Feature Request
 
 ## Current
 
+65. In Prefs: Add a way to export and import monitors as yaml, toml, or similar
 
 
 ## Open
