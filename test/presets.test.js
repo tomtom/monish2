@@ -78,6 +78,14 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('who');
     });
 
+    it('Gnome RDP command uses grdctl status (no --headless flag) — ISSUE 56', () => {
+        // grdctl status --headless is not a valid subcommand; it causes grdctl to
+        // exit non-zero so the [ok, out] check always fails, printing N/A.
+        const preset = PRESET_MONITORS.find(p => p.name === 'Gnome RDP');
+        expect(preset.command).not.toContain('--headless');
+        expect(preset.command).toContain('grdctl status');
+    });
+
     it('Gnome RDP preset exists with correct properties — ISSUE 51', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Gnome RDP');
         expect(preset).toBeDefined();

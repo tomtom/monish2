@@ -54,3 +54,4 @@
 53. Per-app sparklines in Top CPU/MEM Processes right-aligned — mlBox with per-line HBox rows (lineText x_expand + lineSpark) replaces inline text embedding. #closed/2026-06-01
 54. Per-monitor sparkline toggle: showSparkline boolean in model (default true), Switch in edit dialog, extension skips sparkline when false. #closed/2026-06-02
 55. Logged-in Users preset: showSparkline set to false — multi-line user list has no meaningful sparkline. #closed/2026-06-02
+56. Gnome RDP Status N/A: grdctl status --headless is invalid; changed to grdctl status. #closed/2026-06-02
