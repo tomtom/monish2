@@ -66,3 +66,4 @@
 66. Description field in monitor edit dialog; preset descriptions pre-filled; shown in monitor list subtitle. #closed/2026-06-02
 67. Monitors with actions show real status icon + ⋮ toggle alongside (not instead of status icon). #closed/2026-06-02
 68. CPU Power (RAPL): helpText field with chmod/udev setup instructions; clickable Setup link in edit dialog. #closed/2026-06-02
+69. Tooltip in monitor menu now positioned above cursor using get_preferred_height, not below. #closed/2026-06-02

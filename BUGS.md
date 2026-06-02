@@ -5,7 +5,6 @@ Next number: 70
 
 ## Current
 
-69. In the monitors menu: The tooltop (when the mouse hovers over the value) is displayed below the menu. It must be displayed on top of the menu.
 
 
 ## Open

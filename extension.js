@@ -209,6 +209,7 @@ class MonishIndicator extends PanelMenu.Button {
 
     /**
      * Position and show the shared tooltip label near the current pointer.
+     * Placed ABOVE the cursor so it is never hidden by the menu below.
      * No-ops when text is empty so monitors without descriptions stay silent.
      *
      * @param {string} text - Description text to display.
@@ -217,7 +218,9 @@ class MonishIndicator extends PanelMenu.Button {
         if (!text) return;
         this._tooltip.text = text;
         const [px, py] = global.get_pointer();
-        this._tooltip.set_position(px + 12, py + 12);
+        // Measure natural height so the tooltip clears the pointer vertically.
+        const [, tooltipH] = this._tooltip.get_preferred_height(-1);
+        this._tooltip.set_position(px + 12, py - (tooltipH || 24) - 12);
         this._tooltip.visible = true;
     }
 

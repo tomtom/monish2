@@ -624,6 +624,18 @@ describe('action button guard — ISSUE 64', () => {
     });
 });
 
+describe('extension.js tooltip position above menu — ISSUE 69', () => {
+    it('_showTooltip does not place tooltip below the cursor (no py + 12)', () => {
+        // Positioning below the pointer (py + 12) hides the tooltip under the menu.
+        // The fix places it above the cursor so it is always visible.
+        expect(extensionSource).not.toContain('py + 12');
+    });
+
+    it('_showTooltip positions tooltip above cursor using preferred height', () => {
+        expect(extensionSource).toContain('get_preferred_height');
+    });
+});
+
 describe('extension.js actions icon alongside status icon — ISSUE 67', () => {
     it('adds a separate actualStatusIcon for monitors with actions', () => {
         // The ⋮ toggle must be RIGHT of the actual status icon,
