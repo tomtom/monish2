@@ -637,21 +637,31 @@ export default class MonishPreferences extends ExtensionPreferences {
         });
         page.add(monitorsGroup);
 
-        // Add Monitor button is added first so it is always pinned to the top
-        // of the group regardless of whether the list is empty or populated.
-        // (buildMonitorRows appends rows after it; refresh removes/re-appends
-        // those rows, leaving addRow permanently at position 0.)
-        const addRow = new Adw.ButtonRow({title: 'Add Monitor'});
-        addRow.add_css_class('suggested-action');
-        monitorsGroup.add(addRow);
+        // Three action buttons (Add / Export / Import) displayed side by side
+        // in a single row so they don't each occupy a full-height list row.
+        const actionsRow = new Adw.PreferencesRow({activatable: false, focusable: false});
+        const actionsBox = new Gtk.Box({
+            orientation:  Gtk.Orientation.HORIZONTAL,
+            spacing:      8,
+            homogeneous:  true,
+            margin_top:   8,
+            margin_bottom: 8,
+            margin_start:  12,
+            margin_end:    12,
+        });
 
-        const exportRow = new Adw.ButtonRow({title: 'Export Monitors'});
-        monitorsGroup.add(exportRow);
-        exportRow.connect('activated', () => showExportDialog(settings, window));
+        const addBtn = new Gtk.Button({label: '+ Add', css_classes: ['suggested-action']});
+        const exportBtn = new Gtk.Button({label: 'Export'});
+        const importBtn = new Gtk.Button({label: 'Import'});
 
-        const importRow = new Adw.ButtonRow({title: 'Import Monitors'});
-        monitorsGroup.add(importRow);
-        importRow.connect('activated', () => showImportDialog(settings, window, () => refreshAll()));
+        actionsBox.append(addBtn);
+        actionsBox.append(exportBtn);
+        actionsBox.append(importBtn);
+        actionsRow.set_child(actionsBox);
+        monitorsGroup.add(actionsRow);
+
+        exportBtn.connect('clicked', () => showExportDialog(settings, window));
+        importBtn.connect('clicked', () => showImportDialog(settings, window, () => refreshAll()));
 
         // refreshAll is set after both refresh functions are defined so that
         // arrow-function closures can capture it by reference.
@@ -684,7 +694,7 @@ export default class MonishPreferences extends ExtensionPreferences {
             }
         };
 
-        addRow.connect('activated', () => {
+        addBtn.connect('clicked', () => {
             showMonitorEditDialog(window, null, (newMonitor) => {
                 const monitors = deserializeMonitors(settings.get_string('monitors'));
                 monitors.push(newMonitor);
