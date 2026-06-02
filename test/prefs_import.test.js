@@ -524,6 +524,25 @@ describe('action commands — ISSUE 50', () => {
     });
 });
 
+describe('prefs.js description field — ISSUE 66', () => {
+    it('edit dialog has a Description labeled row', () => {
+        expect(prefsSource).toContain("labeledRow('Description'");
+    });
+
+    it('edit dialog initialises description from data.description', () => {
+        expect(prefsSource).toContain('data.description');
+    });
+
+    it('save handler includes description in updated object', () => {
+        expect(prefsSource).toContain('description:');
+        expect(prefsSource).toContain('descEntry.get_text()');
+    });
+
+    it('buildMonitorRows subtitle includes monitor.description when present', () => {
+        expect(prefsSource).toContain('monitor.description');
+    });
+});
+
 describe('prefs.js monitor export/import — ISSUE 65', () => {
     it('defines showExportDialog function', () => {
         expect(prefsSource).toContain('showExportDialog');

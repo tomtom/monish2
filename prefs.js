@@ -84,6 +84,14 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     });
     content.append(labeledRow('Name', nameEntry));
 
+    // ---- Description ----
+    const descEntry = new Gtk.Entry({
+        placeholder_text: 'Optional: what this monitor measures',
+        text:             data.description ?? '',
+        hexpand:          true,
+    });
+    content.append(labeledRow('Description', descEntry));
+
     // ---- Command ----
     const cmdView = new Gtk.TextView({
         wrap_mode:     Gtk.WrapMode.WORD_CHAR,
@@ -488,6 +496,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
             const updated = {
                 ...data,
                 name:                 nameEntry.get_text().trim(),
+                description:          descEntry.get_text().trim(),
                 command:              cmd,
                 type:                 MONITOR_TYPE_VALUES[typeDropDown.get_selected()] ?? MonitorType.SHELL,
                 intervalSeconds:      totalSec,
@@ -639,7 +648,7 @@ export default class MonishPreferences extends ExtensionPreferences {
 
         // Three action buttons (Add / Export / Import) displayed side by side
         // in a single row so they don't each occupy a full-height list row.
-        const actionsRow = new Adw.PreferencesRow({activatable: false, focusable: false});
+        const addRow = new Adw.PreferencesRow({activatable: false, focusable: false});
         const actionsBox = new Gtk.Box({
             orientation:  Gtk.Orientation.HORIZONTAL,
             spacing:      8,
@@ -657,8 +666,8 @@ export default class MonishPreferences extends ExtensionPreferences {
         actionsBox.append(addBtn);
         actionsBox.append(exportBtn);
         actionsBox.append(importBtn);
-        actionsRow.set_child(actionsBox);
-        monitorsGroup.add(actionsRow);
+        addRow.set_child(actionsBox);
+        monitorsGroup.add(addRow);
 
         exportBtn.connect('clicked', () => showExportDialog(settings, window));
         importBtn.connect('clicked', () => showImportDialog(settings, window, () => refreshAll()));
@@ -894,7 +903,9 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         }
         const row = new Adw.ActionRow({
             title:    monitor.name,
-            subtitle: `${intervalStr} — ${cmdPreview}`,
+            subtitle: monitor.description
+                ? `${monitor.description}\n${intervalStr} — ${cmdPreview}`
+                : `${intervalStr} — ${cmdPreview}`,
         });
         if (!monitor.enabled)
             row.opacity = 0.5;

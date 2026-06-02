@@ -63,3 +63,4 @@
 63. Battery Time Remaining preset: reads energy_now/power_now or charge_now/current_now; shows AC on mains; showSparkline:false. #closed/2026-06-02
 64. Action button guard: optional JS guard expression on each action; evaluated with current value in _setMonitorResult; Gnome RDP preset uses guards for Enable/Disable. #closed/2026-06-02
 65. Export/import monitors as JSON: showExportDialog (Gtk.FileDialog.save + pretty JSON) and showImportDialog (open + append/replace dialog). #closed/2026-06-02
+66. Description field in monitor edit dialog; preset descriptions pre-filled; shown in monitor list subtitle. #closed/2026-06-02

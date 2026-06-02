@@ -1,10 +1,13 @@
-Next number: 66
+Next number: 70
 
 
 # Bugs & Feature Request
 
 ## Current
 
+67. In the monitors menu: Display the three-dot indicator for monitors with actions, right of the usual monitor icon - not instead. if this is not possible, use a dot or hamburger overlay instead.
+68. CPU Power (RAPL): User cannot access the "comment in presets.js". Would it be possible to create a help page and to provide a clickable link in the description.
+69. In the monitors menu: The tooltop (when the mouse hovers over the value) is displayed below the menu. It must be displayed on top of the menu.
 
 
 ## Open
