@@ -1,9 +1,12 @@
-Next number: 72
+Next number: 74
 
 
 # Bugs & Feature Request
 
 ## Current
+
+73. The sparklines get zapped when the screen locks and similar events. Make sure the sparklines and the latest monitor values persist of screen locks etc.
+
 
 ## Open
 

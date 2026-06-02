@@ -247,6 +247,19 @@ describe('PRESET_MONITORS', () => {
         expect(memPreset.command).not.toContain('substr($11');
     });
 
+    it('RAM Free preset uses MemFree, not MemAvailable — ISSUE 72', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'RAM Free');
+        expect(preset).toBeDefined();
+        // Must read MemFree from /proc/meminfo (the "free" column of free -h)
+        expect(preset.command).toContain('MemFree');
+        expect(preset.command).not.toContain('MemAvailable');
+    });
+
+    it('RAM Free description mentions free -h — ISSUE 72', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'RAM Free');
+        expect(preset.description).toMatch(/free -h/i);
+    });
+
     it('CPU Usage, Net Download, Net Upload use javascript type', () => {
         const jsPresets = ['CPU Usage', 'Net Download', 'Net Upload'];
         for (const name of jsPresets) {
