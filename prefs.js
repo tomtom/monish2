@@ -516,6 +516,100 @@ function showMonitorEditDialog(parent, monitor, onSave) {
 }
 
 // ---------------------------------------------------------------------------
+// Export / Import
+// ---------------------------------------------------------------------------
+
+/**
+ * Open a save-file dialog and write the current monitor list as pretty-printed
+ * JSON to the chosen file.
+ *
+ * @param {Gio.Settings} settings
+ * @param {Gtk.Window}   parent
+ */
+function showExportDialog(settings, parent) {
+    const dialog = new Gtk.FileDialog({
+        title:        'Export Monitors',
+        initial_name: 'monitors.json',
+    });
+    dialog.save(parent, null, (_src, result) => {
+        try {
+            const file = dialog.save_finish(result);
+            const monitors = deserializeMonitors(settings.get_string('monitors'));
+            const json = JSON.stringify(monitors, null, 2);
+            file.replace_contents(
+                new TextEncoder().encode(json),
+                null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null,
+            );
+        } catch (_) { /* user cancelled or write error — silently ignore */ }
+    });
+}
+
+/**
+ * Open a file-chooser dialog, parse the selected JSON file as a monitor array,
+ * and ask whether to append to or replace the current monitors.
+ *
+ * @param {Gio.Settings} settings
+ * @param {Gtk.Window}   parent
+ * @param {function():void} refresh - Called after monitors are updated.
+ */
+function showImportDialog(settings, parent, refresh) {
+    const openDialog = new Gtk.FileDialog({title: 'Import Monitors'});
+    openDialog.open(parent, null, (_src, result) => {
+        let parsed;
+        try {
+            const file    = openDialog.open_finish(result);
+            const [, bytes] = GLib.file_get_contents(file.get_path());
+            parsed = JSON.parse(new TextDecoder().decode(bytes));
+        } catch (_) {
+            return; // user cancelled or unreadable / invalid JSON
+        }
+
+        if (!Array.isArray(parsed)) return;
+        // Assign fresh IDs so imported monitors never collide with existing ones.
+        const imported = parsed
+            .filter(m => m.name && m.command)
+            .map(m => createMonitor({...m}));
+        if (imported.length === 0) return;
+
+        // Ask the user whether to append or replace.
+        const askDlg = new Gtk.Dialog({
+            title:         'Import Monitors',
+            transient_for: parent,
+            modal:         true,
+        });
+        const RESP_APPEND  = 1;
+        const RESP_REPLACE = 2;
+        askDlg.add_button('Cancel',      Gtk.ResponseType.CANCEL);
+        askDlg.add_button('Append',      RESP_APPEND).add_css_class('suggested-action');
+        askDlg.add_button('Replace All', RESP_REPLACE);
+
+        const lbl = new Gtk.Label({
+            label:         `Found ${imported.length} monitor(s). Add to existing or replace all?`,
+            wrap:          true,
+            xalign:        0,
+            margin_top:    12,
+            margin_bottom: 12,
+            margin_start:  16,
+            margin_end:    16,
+        });
+        askDlg.get_content_area().append(lbl);
+
+        askDlg.connect('response', (_d, resp) => {
+            if (resp === RESP_APPEND) {
+                const current = deserializeMonitors(settings.get_string('monitors'));
+                settings.set_string('monitors', serializeMonitors([...current, ...imported]));
+                refresh();
+            } else if (resp === RESP_REPLACE) {
+                settings.set_string('monitors', serializeMonitors(imported));
+                refresh();
+            }
+            askDlg.destroy();
+        });
+        askDlg.present();
+    });
+}
+
+// ---------------------------------------------------------------------------
 // Preferences window
 // ---------------------------------------------------------------------------
 
@@ -550,6 +644,14 @@ export default class MonishPreferences extends ExtensionPreferences {
         const addRow = new Adw.ButtonRow({title: 'Add Monitor'});
         addRow.add_css_class('suggested-action');
         monitorsGroup.add(addRow);
+
+        const exportRow = new Adw.ButtonRow({title: 'Export Monitors'});
+        monitorsGroup.add(exportRow);
+        exportRow.connect('activated', () => showExportDialog(settings, window));
+
+        const importRow = new Adw.ButtonRow({title: 'Import Monitors'});
+        monitorsGroup.add(importRow);
+        importRow.connect('activated', () => showImportDialog(settings, window, () => refreshAll()));
 
         // refreshAll is set after both refresh functions are defined so that
         // arrow-function closures can capture it by reference.

@@ -524,6 +524,45 @@ describe('action commands — ISSUE 50', () => {
     });
 });
 
+describe('prefs.js monitor export/import — ISSUE 65', () => {
+    it('defines showExportDialog function', () => {
+        expect(prefsSource).toContain('showExportDialog');
+    });
+
+    it('defines showImportDialog function', () => {
+        expect(prefsSource).toContain('showImportDialog');
+    });
+
+    it('export serialises monitors as pretty-printed JSON', () => {
+        expect(prefsSource).toContain('JSON.stringify');
+        expect(prefsSource).toContain("null, 2");
+    });
+
+    it('export uses Gtk.FileDialog.save to pick destination', () => {
+        expect(prefsSource).toContain('FileDialog');
+        expect(prefsSource).toContain('.save(');
+    });
+
+    it('import uses Gtk.FileDialog.open to pick source file', () => {
+        expect(prefsSource).toContain('.open(');
+    });
+
+    it('import assigns fresh IDs so imported monitors never collide', () => {
+        // createMonitor({...m}) gives each imported monitor a new generateId().
+        expect(prefsSource).toMatch(/createMonitor\(\{\.\.\.m\b/);
+    });
+
+    it('import asks append vs replace via a dialog', () => {
+        expect(prefsSource).toContain('Append');
+        expect(prefsSource).toContain('Replace All');
+    });
+
+    it('prefs page has Export and Import button rows', () => {
+        expect(prefsSource).toContain('Export Monitors');
+        expect(prefsSource).toContain('Import Monitors');
+    });
+});
+
 describe('action button guard — ISSUE 64', () => {
     it('prefs buildActionRow includes a guard entry for JS condition', () => {
         expect(prefsSource).toContain('action.guard');

@@ -5,7 +5,6 @@ Next number: 66
 
 ## Current
 
-65. In Prefs: Add a way to export and import monitors as yaml, toml, or similar
 
 
 ## Open
