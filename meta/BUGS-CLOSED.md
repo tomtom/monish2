@@ -74,3 +74,4 @@
 74. In toolbar menu: For monitors with actions, use an overlay (dot or similar) to indicate interactivity. Don't use the three dots icon. #closed/2026-06-02
 75. In CPU Power (RAPL): Clicking on "Setup instructions" does nothing. #closed/2026-06-02
 76. In Top CPU/MEM Processes: Display the numbers right-aligned (left of the sparkline; the same as with the other monitors) #closed/2026-06-02
+77. The solution for issue #71 does not work. Undo that change. Remove the respective code. #closed/2026-06-02

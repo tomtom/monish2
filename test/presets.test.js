@@ -163,52 +163,6 @@ describe('PRESET_MONITORS', () => {
         expect(disable.command).toContain('grdctl rdp disable');
     });
 
-    it('Gnome RDP counts active RDP connections via ss and marks DANGER — ISSUE 71', () => {
-        const preset = PRESET_MONITORS.find(p => p.name === 'Gnome RDP');
-        // Script must check ss availability via GLib.find_program_in_path.
-        expect(preset.command).toContain('find_program_in_path');
-        expect(preset.command).toContain('ss');
-        expect(preset.command).toContain(':3389');
-        // Output format when enabled with connections: "enabled (N)"
-        expect(preset.command).toContain('enabled (');
-    });
-
-    it('Gnome RDP danger pattern fires for enabled with count > 0 — ISSUE 71', () => {
-        const preset = PRESET_MONITORS.find(p => p.name === 'Gnome RDP');
-        // DANGER when connections > 0
-        expect(preset.dangerPatterns.length).toBeGreaterThan(0);
-        const dangerRe = new RegExp(preset.dangerPatterns[0]);
-        expect(dangerRe.test('enabled (1)')).toBe(true);
-        expect(dangerRe.test('enabled (10)')).toBe(true);
-        expect(dangerRe.test('enabled (0)')).toBe(false);
-        expect(dangerRe.test('enabled')).toBe(false);
-        expect(dangerRe.test('disabled')).toBe(false);
-    });
-
-    it('Gnome RDP caution pattern still fires for enabled without count — ISSUE 71', () => {
-        const preset = PRESET_MONITORS.find(p => p.name === 'Gnome RDP');
-        const cautionRe = new RegExp(preset.cautionPatterns[0]);
-        expect(cautionRe.test('enabled')).toBe(true);
-        expect(cautionRe.test('enabled (0)')).toBe(true);
-        expect(cautionRe.test('enabled (2)')).toBe(true);
-        expect(cautionRe.test('disabled')).toBe(false);
-    });
-
-    it('Gnome RDP Disable guard works with "enabled (N)" values — ISSUE 71', () => {
-        const preset = PRESET_MONITORS.find(p => p.name === 'Gnome RDP');
-        const disable = (preset.actions ?? []).find(a => a.label === 'Disable');
-        // Guard must be a JS expression that covers "enabled (2)" not just "enabled"
-        // It must not be a strict equality check against the plain string 'enabled'
-        expect(disable.guard).not.toBe("value === 'enabled'");
-        // Verify the guard expression evaluates correctly for the various value shapes
-        // eslint-disable-next-line no-new-func
-        const evalGuard = value => new Function('value', `return ${disable.guard};`)(value);
-        expect(evalGuard('enabled')).toBe(true);
-        expect(evalGuard('enabled (0)')).toBe(true);
-        expect(evalGuard('enabled (3)')).toBe(true);
-        expect(evalGuard('disabled')).toBe(false);
-    });
-
     it('Logged-in Users preset has showSparkline: false — ISSUE 55', () => {
         // Multi-line user list; a sparkline (unique user count) is not meaningful.
         const preset = PRESET_MONITORS.find(p => p.name === 'Logged-in Users');
