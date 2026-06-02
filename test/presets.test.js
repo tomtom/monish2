@@ -94,6 +94,15 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('current_now');
     });
 
+    it('CPU Power (RAPL) preset has helpText with setup instructions — ISSUE 68', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'CPU Power (RAPL)');
+        expect(typeof preset.helpText).toBe('string');
+        expect(preset.helpText.trim().length).toBeGreaterThan(0);
+        // Must include both setup options so users can pick persistent or temporary.
+        expect(preset.helpText).toContain('chmod');
+        expect(preset.helpText).toContain('udev');
+    });
+
     it('CPU Power (RAPL) preset exists with help text — ISSUE 62', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'CPU Power (RAPL)');
         expect(preset).toBeDefined();

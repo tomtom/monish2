@@ -92,6 +92,21 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     });
     content.append(labeledRow('Description', descEntry));
 
+    // ---- Setup link (only for monitors that ship setup instructions) ----
+    if (data.helpText) {
+        const helpLink = new Gtk.Label({
+            label:       '<a href="#">Setup instructions…</a>',
+            use_markup:  true,
+            xalign:      0,
+            css_classes: ['caption', 'dim-label'],
+        });
+        helpLink.connect('activate-link', () => {
+            showHelpDialog(parent, data.helpText);
+            return true; // prevent default URI handling
+        });
+        content.append(helpLink);
+    }
+
     // ---- Command ----
     const cmdView = new Gtk.TextView({
         wrap_mode:     Gtk.WrapMode.WORD_CHAR,
@@ -853,6 +868,43 @@ function showDebugLogWindow(parent, logPath) {
     });
     win.set_content(toolbarView);
     win.present();
+}
+
+// ---------------------------------------------------------------------------
+// Help dialog
+// ---------------------------------------------------------------------------
+
+/**
+ * Open a modal dialog showing pre-formatted setup/help text.
+ * Text is rendered in a monospace, selectable label so users can copy commands.
+ *
+ * @param {Gtk.Window} parent - Transient parent (the prefs window or edit dialog).
+ * @param {string}     text   - Setup instructions to display.
+ */
+function showHelpDialog(parent, text) {
+    const label = new Gtk.Label({
+        label:         text,
+        xalign:        0,
+        margin_top:    12,
+        margin_bottom: 12,
+        margin_start:  16,
+        margin_end:    16,
+        wrap:          true,
+        selectable:    true,
+        monospace:     true,
+    });
+
+    const dialog = new Gtk.Dialog({
+        title:         'Setup Instructions',
+        transient_for: parent,
+        modal:         true,
+        default_width: 560,
+        resizable:     false,
+    });
+    dialog.add_button('Close', Gtk.ResponseType.CLOSE);
+    dialog.get_content_area().append(label);
+    dialog.connect('response', () => dialog.destroy());
+    dialog.present();
 }
 
 // ---------------------------------------------------------------------------

@@ -352,6 +352,15 @@ describe('createMonitor', () => {
         expect(m.description).toBe('CPU usage across all cores');
     });
 
+    it('defaults helpText to empty string — ISSUE 68', () => {
+        expect(createMonitor().helpText).toBe('');
+    });
+
+    it('preserves helpText when set via override — ISSUE 68', () => {
+        const m = createMonitor({helpText: 'Grant access: sudo chmod ...'});
+        expect(m.helpText).toBe('Grant access: sudo chmod ...');
+    });
+
     it('defaults actions to empty array — ISSUE 50', () => {
         expect(createMonitor().actions).toEqual([]);
     });

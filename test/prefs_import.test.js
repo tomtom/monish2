@@ -524,6 +524,20 @@ describe('action commands — ISSUE 50', () => {
     });
 });
 
+describe('prefs.js help dialog for setup instructions — ISSUE 68', () => {
+    it('defines showHelpDialog function', () => {
+        expect(prefsSource).toContain('showHelpDialog');
+    });
+
+    it('edit dialog shows a help link when data.helpText is set', () => {
+        expect(prefsSource).toContain('data.helpText');
+    });
+
+    it('help link uses activate-link signal to intercept the click', () => {
+        expect(prefsSource).toContain('activate-link');
+    });
+});
+
 describe('prefs.js description field — ISSUE 66', () => {
     it('edit dialog has a Description labeled row', () => {
         expect(prefsSource).toContain("labeledRow('Description'");
