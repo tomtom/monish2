@@ -53,3 +53,4 @@
 52. In Prefs: Cannot edit "Gnome RDP" monitor — cmdPreview now normalises whitespace so Adw.ActionRow subtitle is single-line, keeping suffix buttons in correct click position. #closed/2026-06-01
 53. Per-app sparklines in Top CPU/MEM Processes right-aligned — mlBox with per-line HBox rows (lineText x_expand + lineSpark) replaces inline text embedding. #closed/2026-06-01
 54. Per-monitor sparkline toggle: showSparkline boolean in model (default true), Switch in edit dialog, extension skips sparkline when false. #closed/2026-06-02
+55. Logged-in Users preset: showSparkline set to false — multi-line user list has no meaningful sparkline. #closed/2026-06-02

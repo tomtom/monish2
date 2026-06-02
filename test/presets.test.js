@@ -92,6 +92,12 @@ describe('PRESET_MONITORS', () => {
         expect(disable.command).toContain('grdctl rdp disable');
     });
 
+    it('Logged-in Users preset has showSparkline: false — ISSUE 55', () => {
+        // Multi-line user list; a sparkline (unique user count) is not meaningful.
+        const preset = PRESET_MONITORS.find(p => p.name === 'Logged-in Users');
+        expect(preset.showSparkline).toBe(false);
+    });
+
     it('Logged-in Users output is multiline NAME: HOW format — ISSUE 49', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Logged-in Users');
         // Groups login methods per user: "tom: seat0, tty2" one line per user
