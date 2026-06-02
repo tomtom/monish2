@@ -548,11 +548,24 @@ export default class MonishPreferences extends ExtensionPreferences {
         let builtRows = buildMonitorRows(monitorsGroup, settings, window, fId => refreshAll(fId));
 
         const refreshMonitorRows = (focusId) => {
+            // Save scroll position so grab_focus() doesn't jump the view.
+            const scrollWin = findScrolledWindow(page);
+            const scrollPos = scrollWin ? scrollWin.get_vadjustment().get_value() : 0;
+
             builtRows.forEach(row => monitorsGroup.remove(row));
             builtRows = buildMonitorRows(monitorsGroup, settings, window, fId => refreshAll(fId));
             if (focusId) {
                 const target = builtRows.find(r => r._monitorId === focusId);
-                target?.grab_focus();
+                if (target) {
+                    target.grab_focus();
+                    // Restore scroll position after grab_focus scrolls to the focused row.
+                    if (scrollWin) {
+                        GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                            scrollWin.get_vadjustment().set_value(scrollPos);
+                            return GLib.SOURCE_REMOVE;
+                        });
+                    }
+                }
             }
         };
 
@@ -938,6 +951,26 @@ function mutateMonitor(settings, id, fn) {
     const monitors = deserializeMonitors(settings.get_string('monitors'));
     const updated  = monitors.map(m => m.id === id ? fn(m) : m);
     settings.set_string('monitors', serializeMonitors(updated));
+}
+
+/**
+ * Depth-first search for the first Gtk.ScrolledWindow in a widget's subtree.
+ * Used to save/restore the page scroll position around a row rebuild so the
+ * up/down move doesn't cause a visible scroll jump.
+ *
+ * @param {Gtk.Widget} widget
+ * @returns {Gtk.ScrolledWindow|null}
+ */
+function findScrolledWindow(widget) {
+    if (!widget) return null;
+    let child = widget.get_first_child();
+    while (child) {
+        if (child instanceof Gtk.ScrolledWindow) return child;
+        const found = findScrolledWindow(child);
+        if (found) return found;
+        child = child.get_next_sibling();
+    }
+    return null;
 }
 
 /**

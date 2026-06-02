@@ -5,7 +5,6 @@ Next number: 64
 
 ## Current
 
-59. Issue 44 wasn't fixed. Clicking up/down on a monitor item resets the list view and the selected item could become out of focus. It should be fixed at the same vertical position in the Prefs window.
 60. Add a predefined monitor: Last login (user, login type, datetime). No sparkline.
 61. In Top CPU/MEM Processes: Add an argument for how many processes to show (default: 3).
 62. Add predefined monitor to estimate CPU power consumption via Intel RAPL (provide a help text with how to make this work without sudo privileges).

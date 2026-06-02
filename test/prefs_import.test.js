@@ -454,6 +454,27 @@ describe('prefs.js move up/down scroll preservation — ISSUE 44', () => {
     });
 });
 
+describe('prefs.js scroll position preservation after up/down — ISSUE 59', () => {
+    it('defines findScrolledWindow helper to locate the page scroll container', () => {
+        // Needed to get the Gtk.Adjustment before the row rebuild resets scroll.
+        expect(prefsSource).toContain('findScrolledWindow');
+    });
+
+    it('refreshMonitorRows saves scroll position before rebuild', () => {
+        expect(prefsSource).toContain('get_vadjustment().get_value()');
+    });
+
+    it('refreshMonitorRows restores scroll position via GLib.idle_add after grab_focus', () => {
+        // grab_focus() scrolls to show the focused row; idle_add runs after that
+        // scroll and overrides it, keeping the view at the pre-move position.
+        expect(prefsSource).toContain('GLib.idle_add');
+    });
+
+    it('scroll restoration sets the adjustment back to the saved value', () => {
+        expect(prefsSource).toContain('get_vadjustment().set_value(scrollPos)');
+    });
+});
+
 describe('debug logging — ISSUE 30', () => {
     it('schema defines a debug-logging boolean key', () => {
         expect(schemaSource).toContain('name="debug-logging" type="b"');

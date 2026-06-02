@@ -56,3 +56,4 @@
 55. Logged-in Users preset: showSparkline set to false — multi-line user list has no meaningful sparkline. #closed/2026-06-02
 56. Gnome RDP Status N/A: grdctl status --headless is invalid; changed to grdctl status. #closed/2026-06-02
 58. Monitors with actions use ACTION_STATUS_ICONS (view-more-symbolic ⋮ for PENDING/NORMAL) to signal the status icon is clickable for actions. #closed/2026-06-02
+59. Up/down in Prefs no longer jumps scroll: findScrolledWindow saves vadjustment before rebuild; GLib.idle_add restores it after grab_focus. #closed/2026-06-02
