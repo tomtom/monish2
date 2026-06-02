@@ -78,6 +78,20 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('who');
     });
 
+    it('Last Login preset exists with no sparkline — ISSUE 60', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Last Login');
+        expect(preset).toBeDefined();
+        expect(preset.type).toBe(MonitorType.JAVASCRIPT);
+        expect(preset.command).toContain('last -n 1');
+        expect(preset.showSparkline).toBe(false);
+    });
+
+    it('Last Login command extracts user, tty and date from last output — ISSUE 60', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Last Login');
+        expect(preset.command).toContain('wtmp');  // filters wtmp header line
+        expect(preset.command).toMatch(/user.*tty|p\[0\].*p\[1\]/s);
+    });
+
     it('Gnome RDP command uses grdctl status (no --headless flag) — ISSUE 56', () => {
         // grdctl status --headless is not a valid subcommand; it causes grdctl to
         // exit non-zero so the [ok, out] check always fails, printing N/A.
