@@ -16,6 +16,7 @@ import {
     serializeMonitors,
     validateMonitor,
     createMonitor,
+    normalizeMonitor,
     formatError,
     splitInterval,
     toSeconds,
@@ -217,11 +218,12 @@ describe('intervalToMs', () => {
 // ---------------------------------------------------------------------------
 
 describe('serializeMonitors / deserializeMonitors', () => {
+    // Use a fully-specified monitor so the round-trip survives normalizeMonitor().
     const monitors = [
-        {id: 'a', name: 'CPU', command: 'top', intervalSeconds: 5},
+        createMonitor({id: 'a', name: 'CPU', command: 'top', intervalSeconds: 5}),
     ];
 
-    it('round-trips a monitor array', () => {
+    it('round-trips a fully-specified monitor array', () => {
         expect(deserializeMonitors(serializeMonitors(monitors))).toEqual(monitors);
     });
 
@@ -756,6 +758,135 @@ describe('countAlertStatuses', () => {
 // ---------------------------------------------------------------------------
 // formatAge
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// normalizeMonitor / deserializeMonitors migration — ISSUE 99
+// ---------------------------------------------------------------------------
+
+describe('normalizeMonitor', () => {
+    it('fills missing command with empty string', () => {
+        const m = normalizeMonitor({id: 'x', name: 'Foo'});
+        expect(m.command).toBe('');
+    });
+
+    it('fills missing type with SHELL', () => {
+        const m = normalizeMonitor({id: 'x', name: 'Foo', command: 'echo hi'});
+        expect(m.type).toBe(MonitorType.SHELL);
+    });
+
+    it('fills missing intervalSeconds with 60', () => {
+        const m = normalizeMonitor({id: 'x', name: 'Foo', command: 'echo hi'});
+        expect(m.intervalSeconds).toBe(60);
+    });
+
+    it('fills missing intervalExpression with empty string', () => {
+        const m = normalizeMonitor({id: 'x', name: 'Foo', command: 'echo hi'});
+        expect(m.intervalExpression).toBe('');
+    });
+
+    it('fills missing args with empty array', () => {
+        const m = normalizeMonitor({id: 'x', name: 'Foo', command: 'echo hi'});
+        expect(m.args).toEqual([]);
+    });
+
+    it('fills missing argValues with empty object', () => {
+        const m = normalizeMonitor({id: 'x', name: 'Foo', command: 'echo hi'});
+        expect(m.argValues).toEqual({});
+    });
+
+    it('fills missing actions with empty array', () => {
+        const m = normalizeMonitor({id: 'x', name: 'Foo', command: 'echo hi'});
+        expect(m.actions).toEqual([]);
+    });
+
+    it('preserves existing command', () => {
+        const m = normalizeMonitor({id: 'x', name: 'Foo', command: 'echo hi'});
+        expect(m.command).toBe('echo hi');
+    });
+
+    it('preserves existing type', () => {
+        const m = normalizeMonitor({id: 'x', name: 'Foo', command: 'echo hi', type: MonitorType.JAVASCRIPT});
+        expect(m.type).toBe(MonitorType.JAVASCRIPT);
+    });
+
+    it('preserves existing id', () => {
+        const m = normalizeMonitor({id: 'my-id', name: 'Foo', command: 'echo hi'});
+        expect(m.id).toBe('my-id');
+    });
+
+    it('normalizes action missing type to SHELL', () => {
+        const m = normalizeMonitor({
+            id:      'x',
+            name:    'Foo',
+            command: 'echo hi',
+            actions: [{label: 'Do it', command: 'do it'}],
+        });
+        expect(m.actions[0].type).toBe(MonitorType.SHELL);
+    });
+
+    it('normalizes action missing guard to empty string', () => {
+        const m = normalizeMonitor({
+            id:      'x',
+            name:    'Foo',
+            command: 'echo hi',
+            actions: [{label: 'Do it', command: 'do it', type: MonitorType.SHELL}],
+        });
+        expect(m.actions[0].guard).toBe('');
+    });
+
+    it('preserves existing action type and guard', () => {
+        const m = normalizeMonitor({
+            id:      'x',
+            name:    'Foo',
+            command: 'echo hi',
+            actions: [{label: 'Act', command: 'cmd', type: MonitorType.JAVASCRIPT, guard: 'value === "ok"'}],
+        });
+        expect(m.actions[0].type).toBe(MonitorType.JAVASCRIPT);
+        expect(m.actions[0].guard).toBe('value === "ok"');
+    });
+
+    it('generates a fresh id when stored id is missing', () => {
+        const m = normalizeMonitor({name: 'Foo', command: 'echo hi'});
+        expect(typeof m.id).toBe('string');
+        expect(m.id.length).toBeGreaterThan(0);
+    });
+});
+
+describe('deserializeMonitors migration — ISSUE 99', () => {
+    it('fills in missing command for stored monitors', () => {
+        const json = JSON.stringify([{id: 'x', name: 'Old Monitor'}]);
+        const monitors = deserializeMonitors(json);
+        expect(monitors[0].command).toBe('');
+    });
+
+    it('fills in missing intervalExpression for pre-ISSUE-93 monitors', () => {
+        const json = JSON.stringify([{id: 'x', name: 'Old', command: 'echo hi', intervalSeconds: 60}]);
+        const monitors = deserializeMonitors(json);
+        expect(monitors[0].intervalExpression).toBe('');
+    });
+
+    it('normalizes action guard missing from old stored monitor', () => {
+        const json = JSON.stringify([{
+            id:      'x',
+            name:    'RDP',
+            command: 'grdctl status',
+            actions: [{label: 'Enable', command: 'grdctl rdp enable', type: 'shell'}],
+        }]);
+        const monitors = deserializeMonitors(json);
+        expect(monitors[0].actions[0].guard).toBe('');
+    });
+
+    it('preserves existing action guard during migration', () => {
+        const json = JSON.stringify([{
+            id:      'x',
+            name:    'RDP',
+            command: 'grdctl status',
+            actions: [{label: 'Enable', command: 'grdctl rdp enable', type: 'shell', guard: "value === 'disabled'"}],
+        }]);
+        const monitors = deserializeMonitors(json);
+        expect(monitors[0].actions[0].guard).toBe("value === 'disabled'");
+    });
+});
 
 describe('formatAge', () => {
     it('returns "just now" for 0 ms', () => {

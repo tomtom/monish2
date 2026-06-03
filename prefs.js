@@ -127,7 +127,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         top_margin:    4,
         bottom_margin: 4,
     });
-    cmdView.get_buffer().set_text(data.command, -1);
+    cmdView.get_buffer().set_text(data.command ?? '', -1);
     const cmdScroll = new Gtk.ScrolledWindow({
         hexpand:            true,
         min_content_height: 60,
