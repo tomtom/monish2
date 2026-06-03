@@ -105,7 +105,7 @@ describe('PRESET_MONITORS', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
         expect(preset).toBeDefined();
         expect(preset.type).toBe(MonitorType.JAVASCRIPT);
-        expect(preset.intervalSeconds).toBe(0);
+        expect(preset.intervalSeconds).toBe(900);
         expect(preset.showSparkline).toBe(false);
         expect(preset.command).toContain('.credentials.json');
         expect(preset.command).toContain('api.anthropic.com');
@@ -131,7 +131,7 @@ describe('PRESET_MONITORS', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
         expect(preset).toBeDefined();
         expect(preset.type).toBe(MonitorType.JAVASCRIPT);
-        expect(preset.intervalSeconds).toBe(0);
+        expect(preset.intervalSeconds).toBe(900);
         expect(preset.showSparkline).toBe(false);
         expect(preset.command).toContain('openrouter.ai');
         expect(preset.command).toContain('/credits');
@@ -154,11 +154,17 @@ describe('PRESET_MONITORS', () => {
         expect(dangerRe.test('Balance: $9.99\nActivity (30d): 10 req / $2.00')).toBe(false);
     });
 
-    it('Claude Usage and OpenRouter presets are on-demand (intervalSeconds === 0) — ISSUE 88', () => {
+    it('Claude Usage and OpenRouter use smart scheduling via intervalExpression — ISSUE 88/94/95', () => {
+        // ISSUE 88 made these on-demand; ISSUE 94/95 upgraded to dynamic scheduling:
+        // poll every 15 min when the agent process is running, skip otherwise.
         for (const name of ['Claude Usage', 'OpenRouter']) {
             const preset = PRESET_MONITORS.find(p => p.name === name);
             expect(preset).toBeDefined();
-            expect(preset.intervalSeconds).toBe(0);
+            expect(preset.intervalSeconds).toBe(900);
+            expect(typeof preset.intervalExpression).toBe('string');
+            expect(preset.intervalExpression.trim().length).toBeGreaterThan(0);
+            expect(preset.intervalExpression).toContain('AI_AGENT');
+            expect(preset.intervalExpression).toContain('print');
         }
     });
 
@@ -296,6 +302,36 @@ describe('PRESET_MONITORS', () => {
         for (const preset of PRESET_MONITORS) {
             expect(preset.type).toBe(MonitorType.JAVASCRIPT);
         }
+    });
+
+    it('Claude Usage has AI_AGENT arg with ^(claude)$ default — ISSUE 94', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
+        const arg = (preset.args ?? []).find(a => a.name === 'AI_AGENT');
+        expect(arg).toBeDefined();
+        expect(arg.default).toBe('^(claude)$');
+    });
+
+    it('Claude Usage intervalExpression checks /proc comm against AI_AGENT — ISSUE 94', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
+        expect(preset.intervalExpression).toContain('/proc');
+        expect(preset.intervalExpression).toContain('comm');
+        expect(preset.intervalExpression).toContain('AI_AGENT');
+        expect(preset.intervalExpression).toContain('900');
+    });
+
+    it('OpenRouter has AI_AGENT arg with ^(opencode)$ default — ISSUE 95', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
+        const arg = (preset.args ?? []).find(a => a.name === 'AI_AGENT');
+        expect(arg).toBeDefined();
+        expect(arg.default).toBe('^(opencode)$');
+    });
+
+    it('OpenRouter intervalExpression checks /proc comm against AI_AGENT — ISSUE 95', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
+        expect(preset.intervalExpression).toContain('/proc');
+        expect(preset.intervalExpression).toContain('comm');
+        expect(preset.intervalExpression).toContain('AI_AGENT');
+        expect(preset.intervalExpression).toContain('900');
     });
 });
 

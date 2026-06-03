@@ -12,3 +12,5 @@
 91. When a monitor is marked as CAUTION or DANGER, is this still shown in the top bar icon? The icon should be yellow or red (depending on the state) and exclamation marks should be shown for the number of monitors with a special state. #closed/2026-06-03
 92. Tooltips (mouse over value) are still displayed below the menu. If you cannot fix this, remove the tooltips. #closed/2026-06-03
 93. In Monitors: Intervall can be a javascript expressions that returns he planned intervall (pre-jitter). The intervall expression has to the arguments. #closed/2026-06-03
+94. In Claude Usage: If claude is a running process, set the intervall to 15m, set to 0 otherwise. Add a AI Agent argument (a comma-separated list of accepted AI agents with default: `^(claude)$`). Only the basenames are used for matching -- as for the Top CPU processes. #closed/2026-06-03
+95. In OpenRouter Usage: If opencode is a running process, set the intervall to 15m, set to 0 otherwise. Add a AI Agent argument (a comma-separated list of accepted AI agents with default: `^(opencode)$`). Only the basenames are used for matching -- as for the Top CPU processes. #closed/2026-06-03
