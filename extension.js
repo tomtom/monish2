@@ -107,7 +107,6 @@ class MonishIndicator extends PanelMenu.Button {
         this._settings      = settings;
         this._openPrefs     = openPrefs;
         this._timers        = new Map();   // monitorId -> GLib source id (scheduled monitors)
-        this._expiryTimers  = new Map();   // monitorId -> GLib source id (on-demand validity)
         this._ageTimers     = new Map();   // monitorId -> GLib source id (age label refresh)
         this._results       = new Map();   // monitorId -> {value, status}
         this._monitors      = [];          // current monitor config array
@@ -169,7 +168,7 @@ class MonishIndicator extends PanelMenu.Button {
         const _dbg    = this._settings.get_boolean(DEBUG_LOG_KEY);
         const _tStart = _dbg ? GLib.get_monotonic_time() : 0;
 
-        this._stopAllTimers();  // clears _timers and _expiryTimers
+        this._stopAllTimers();  // clears _timers and _ageTimers
         this.menu.removeAll();
         this._menuItems.clear();
         this._results.clear();
@@ -598,12 +597,6 @@ class MonishIndicator extends PanelMenu.Button {
         for (const [id, {value, status}] of this._results) {
             this._setMonitorResult(id, value, status, {skipHistory: true});
         }
-        // On-demand monitors should not show stale values
-        for (const monitor of this._monitors) {
-            if (monitor.onDemand && this._results.has(monitor.id)) {
-                this._results.delete(monitor.id);
-            }
-        }
     }
 
     /**
@@ -635,21 +628,10 @@ class MonishIndicator extends PanelMenu.Button {
 
         const entry = this._menuItems.get(id);
         if (entry) {
-            // On-demand: arm an expiry timer that clears the value after validity window.
             const monitor = this._monitors.find(m => m.id === id);
-            if (monitor?.onDemand) {
-                const validMs  = Math.max(1000, (monitor.onDemandValidSeconds ?? 60) * 1000);
-                const existing = this._expiryTimers.get(id);
-                if (existing) GLib.source_remove(existing);
-                const timerId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, validMs, () => {
-                    this._resetOnDemandMonitor(id);
-                    this._expiryTimers.delete(id);
-                    return GLib.SOURCE_REMOVE;
-                });
-                this._expiryTimers.set(id, timerId);
-            }
 
-            const showSpark = monitor?.showSparkline !== false;
+            // Sparklines are meaningless for on-demand monitors (single data point per click).
+            const showSpark = !monitor?.onDemand && monitor?.showSparkline !== false;
             const sparkline = showSpark
                 ? buildSparklineMarkup(this._history.get(id) ?? [], monitor?.cautionPatterns, monitor?.dangerPatterns)
                 : '';
@@ -776,38 +758,6 @@ class MonishIndicator extends PanelMenu.Button {
         this._updatePanelIcon();
     }
 
-    /**
-     * Called when the validity timer fires.  Clears the stored result so the
-     * panel icon no longer reflects this monitor's last value.
-     *
-     * @param {string} id - Monitor id.
-     */
-    _resetOnDemandMonitor(id) {
-        this._results.delete(id);
-        // Cancel any running age-label refresh timer.
-        const ageId = this._ageTimers.get(id);
-        if (ageId !== undefined) {
-            GLib.source_remove(ageId);
-            this._ageTimers.delete(id);
-        }
-        const entry = this._menuItems.get(id);
-        if (entry) {
-            entry.inlineValueLabel.visible = false;
-            entry.inlineValueLabel.text    = '';
-            entry.sparklineLabel.text      = '';
-            entry.mlValueLabel.visible     = false;
-            entry.mlBox.visible            = false;
-            if (entry.ageLabel) {
-                entry.ageLabel.visible = false;
-                entry.ageLabel.text    = '';
-            }
-            entry.statusIcon.style = null;
-            const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
-            styles.forEach(c => entry.item.remove_style_class_name(c));
-        }
-        this._updatePanelIcon();
-    }
-
     // -----------------------------------------------------------------------
     // Panel icon state
     // -----------------------------------------------------------------------
@@ -862,7 +812,7 @@ class MonishIndicator extends PanelMenu.Button {
     // -----------------------------------------------------------------------
 
     /**
-     * Cancel every active GLib timer (scheduled polls and on-demand expiry).
+     * Cancel every active GLib timer (scheduled polls and age-label refresh).
      * Must be called before destroying the indicator to avoid orphaned sources.
      */
     _stopAllTimers() {
@@ -870,10 +820,6 @@ class MonishIndicator extends PanelMenu.Button {
             GLib.source_remove(sourceId);
         }
         this._timers.clear();
-        for (const sourceId of this._expiryTimers.values()) {
-            GLib.source_remove(sourceId);
-        }
-        this._expiryTimers.clear();
         for (const sourceId of this._ageTimers.values()) {
             GLib.source_remove(sourceId);
         }

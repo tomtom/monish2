@@ -369,16 +369,12 @@ describe('createMonitor', () => {
         expect(createMonitor().onDemand).toBe(false);
     });
 
-    it('defaults onDemandValidSeconds to 60', () => {
-        expect(createMonitor().onDemandValidSeconds).toBe(60);
+    it('does not set onDemandValidSeconds (field removed — ISSUE 96)', () => {
+        expect(createMonitor().onDemandValidSeconds).toBeUndefined();
     });
 
     it('allows overriding onDemand to true', () => {
         expect(createMonitor({onDemand: true}).onDemand).toBe(true);
-    });
-
-    it('allows overriding onDemandValidSeconds', () => {
-        expect(createMonitor({onDemandValidSeconds: 300}).onDemandValidSeconds).toBe(300);
     });
 
     it('defaults description to empty string — ISSUE 43', () => {

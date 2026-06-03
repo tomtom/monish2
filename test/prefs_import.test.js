@@ -144,17 +144,18 @@ describe('extension.js on-demand monitors', () => {
         expect(extensionSource).toContain('monitor.onDemand');
     });
 
-    it('defines _expiryTimers map', () => {
-        expect(extensionSource).toContain('_expiryTimers');
+    it('does not use _expiryTimers (on-demand values no longer auto-expire — ISSUE 96)', () => {
+        expect(extensionSource).not.toContain('_expiryTimers');
     });
 
-    it('defines _resetOnDemandMonitor method', () => {
-        expect(extensionSource).toContain('_resetOnDemandMonitor');
+    it('does not define _resetOnDemandMonitor (values persist until next update — ISSUE 96)', () => {
+        expect(extensionSource).not.toContain('_resetOnDemandMonitor');
     });
 
-    it('defines _resetOnDemandMonitor to clear expired on-demand values', () => {
-        // Update button removed (ISSUE 34); on-demand now triggered by name click.
-        expect(extensionSource).toContain('_resetOnDemandMonitor');
+    it('disables sparklines for on-demand monitors — ISSUE 96', () => {
+        // Sparklines are meaningless for on-demand monitors (single data point per click).
+        expect(extensionSource).toContain('monitor?.onDemand');
+        expect(extensionSource).toContain('showSpark');
     });
 });
 
@@ -178,7 +179,7 @@ describe('extension.js jitter scheduling', () => {
     });
 });
 
-describe('prefs.js on-demand monitor UI — ISSUE 45', () => {
+describe('prefs.js on-demand monitor UI — ISSUE 45 / ISSUE 96', () => {
     it('does not add an On Demand toggle (removed; 0s interval is the signal)', () => {
         // The explicit On Demand switch was replaced by setting interval=0.
         expect(prefsSource).not.toContain('labeledRow(\'On Demand\'');
@@ -188,12 +189,13 @@ describe('prefs.js on-demand monitor UI — ISSUE 45', () => {
         expect(prefsSource).toContain('on-demand');
     });
 
-    it('adds Valid for seconds spinbutton (shown when interval=0)', () => {
-        expect(prefsSource).toContain('onDemandValidSeconds');
+    it('does not have Valid for seconds spinbutton (removed — ISSUE 96)', () => {
+        // On-demand values now persist until the next update; no expiry timer.
+        expect(prefsSource).not.toContain('onDemandValidSeconds');
     });
 
-    it('validForRow visibility tracks intervalSpin value', () => {
-        expect(prefsSource).toContain('intervalSpin.get_value_as_int() === 0');
+    it('does not have validForRow visibility logic (field removed — ISSUE 96)', () => {
+        expect(prefsSource).not.toContain('intervalSpin.get_value_as_int() === 0');
     });
 });
 

@@ -510,25 +510,6 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     });
     content.append(labeledRow('Show Sparkline', sparklineSwitch));
 
-    // ---- Valid for (seconds) — shown only when interval=0 (on-demand) ----
-    const validSecSpin = new Gtk.SpinButton({
-        adjustment: new Gtk.Adjustment({
-            value:          data.onDemandValidSeconds ?? 60,
-            lower:          5,
-            upper:          3600,
-            step_increment: 5,
-        }),
-        numeric: true,
-        hexpand: true,
-    });
-    const validForRow = labeledRow('Valid for (s)', validSecSpin);
-    validForRow.visible = data.intervalSeconds === 0;
-    content.append(validForRow);
-
-    intervalSpin.connect('value-changed', () => {
-        validForRow.visible = intervalSpin.get_value_as_int() === 0;
-    });
-
     // ---- Error label ----
     const errorLabel = new Gtk.Label({
         label:     '',
@@ -562,7 +543,6 @@ function showMonitorEditDialog(parent, monitor, onSave) {
                 cautionPatterns:      splitPatterns(cautionEntry.get_text()),
                 dangerPatterns:       splitPatterns(dangerEntry.get_text()),
                 onDemand:             totalSec === 0,
-                onDemandValidSeconds: validSecSpin.get_value_as_int(),
                 actions:              data.actions ?? [],
                 showSparkline:        sparklineSwitch.active,
             };
