@@ -1157,11 +1157,13 @@ function buildPresetRows(group, settings, refresh) {
         if (addedNames.has(preset.name)) continue;
 
         const extSrc = preset._sourceFile;
-        const row = new Adw.ActionRow({
+        const rowProps = {
             title:    extSrc ? `\u26A0 ${preset.name}` : preset.name,
             subtitle: summarisePreset(preset),
-            tooltip_text: extSrc ?? undefined,
-        });
+        };
+        if (extSrc)
+            rowProps.tooltip_text = extSrc;
+        const row = new Adw.ActionRow(rowProps);
         const addBtn = new Gtk.Button({
             icon_name:    'list-add-symbolic',
             valign:       Gtk.Align.CENTER,
