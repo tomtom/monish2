@@ -1,9 +1,14 @@
-Next number: 85
+Next number: 88
 
 
 # Bugs & Feature Request
 
 ## Current
+
+86. Investigate tmp/claude-usage-api.gjs and add a predefined monitor that retrieves claude usage limits - display 5h and 7d limits in two lines. Set the default loop interval to 30m. By default: CAUTION after 75% and DANGER after 90%.
+87. Investigate tmp/openrouter-usage.gjs and add a predefined monitor that retrieves openrouter (1) balance and (2) activity. Set the default loop interval to 15m. By default: CAUTION if Balance is smaller than 10$ and DANGER if smaller than 5$. Set the default loop interval to 15m.
+
+
 
 ## Open
 

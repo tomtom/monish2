@@ -120,6 +120,42 @@ describe('matchesPattern', () => {
         expect(matchesPattern('[', '[')).toBe(true);
         expect(matchesPattern('x', '[')).toBe(false);
     });
+
+    it('matches time comparison <Xh against "Ah Bm" values — ISSUE 85', () => {
+        expect(matchesPattern('0h 45m', '<1h')).toBe(true);
+        expect(matchesPattern('1h 0m',  '<1h')).toBe(false);
+        expect(matchesPattern('2h 30m', '<3h')).toBe(true);
+        expect(matchesPattern('2h 30m', '<1h')).toBe(false);
+    });
+
+    it('matches time comparison <Xm against "Ah Bm" values — ISSUE 85', () => {
+        expect(matchesPattern('0h 29m', '<30m')).toBe(true);
+        expect(matchesPattern('0h 30m', '<30m')).toBe(false);
+        expect(matchesPattern('1h 0m',  '<30m')).toBe(false);
+    });
+
+    it('matches time comparison against bare "Xh" and "Xm" values — ISSUE 85', () => {
+        expect(matchesPattern('30m', '<1h')).toBe(true);
+        expect(matchesPattern('2h',  '<3h')).toBe(true);
+        expect(matchesPattern('2h',  '<1h')).toBe(false);
+        expect(matchesPattern('29m', '<30m')).toBe(true);
+        expect(matchesPattern('30m', '<30m')).toBe(false);
+    });
+
+    it('returns false for time patterns against non-time values — ISSUE 85', () => {
+        expect(matchesPattern('AC',  '<1h')).toBe(false);
+        expect(matchesPattern('N/A', '<30m')).toBe(false);
+        expect(matchesPattern('75',  '<1h')).toBe(false);
+    });
+
+    it('supports >, >=, <=, = operators for time patterns — ISSUE 85', () => {
+        expect(matchesPattern('2h 0m', '>1h')).toBe(true);
+        expect(matchesPattern('1h 0m', '>1h')).toBe(false);
+        expect(matchesPattern('1h 0m', '>=1h')).toBe(true);
+        expect(matchesPattern('0h 59m', '>=1h')).toBe(false);
+        expect(matchesPattern('1h 0m', '=60m')).toBe(true);
+        expect(matchesPattern('1h 0m', '<=2h')).toBe(true);
+    });
 });
 
 // ---------------------------------------------------------------------------

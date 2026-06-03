@@ -94,6 +94,12 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('current_now');
     });
 
+    it('Battery Time Remaining has CAUTION <1h and DANGER <30m — ISSUE 85', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Battery Time Remaining');
+        expect(preset.cautionPatterns).toContain('<1h');
+        expect(preset.dangerPatterns).toContain('<30m');
+    });
+
     it('CPU Power (RAPL) preset has helpText with setup instructions — ISSUE 68', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'CPU Power (RAPL)');
         expect(typeof preset.helpText).toBe('string');
