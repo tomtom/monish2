@@ -77,3 +77,4 @@
 77. The solution for issue #71 does not work. Undo that change. Remove the respective code. #closed/2026-06-02
 78. Ad ISSUE 74: Make the overlay bigger and more succinct. May draw a box around the indicator icon. #closed/2026-06-02
 79. Ad issue 78: Make the overlay the same color as the indicator icon - or the text. #closed/2026-06-02
+80. In Prefs: Define two directories (/usr/share/monish and ~/.local/share/monish), from where monish reads json predefined monitor definitions (in addition to those provided by the extension itself). These definitions should have the same format as the export file. Add a version number to the export file format. #closed/2026-06-03

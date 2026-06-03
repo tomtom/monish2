@@ -34,6 +34,16 @@ import {PRESET_MONITORS} from './lib/presets.js';
 const MONITOR_TYPE_LABELS = ['Shell', 'JavaScript'];
 const MONITOR_TYPE_VALUES = [MonitorType.SHELL, MonitorType.JAVASCRIPT];
 
+/**
+ * Directories scanned for additional preset definition files (JSON).
+ * System-wide first, then the user-specific XDG data directory.
+ * Built-in presets always win over external ones on name collision.
+ */
+const EXTERNAL_PRESET_DIRS = [
+    '/usr/share/monish',
+    GLib.build_filenamev([GLib.get_user_data_dir(), 'monish']),
+];
+
 // ---------------------------------------------------------------------------
 // Monitor edit dialog
 // ---------------------------------------------------------------------------
@@ -559,7 +569,7 @@ function showExportDialog(settings, parent) {
         try {
             const file = dialog.save_finish(result);
             const monitors = deserializeMonitors(settings.get_string('monitors'));
-            const json = JSON.stringify(monitors, null, 2);
+            const json = JSON.stringify({version: 1, monitors}, null, 2);
             file.replace_contents(
                 new TextEncoder().encode(json),
                 null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null,
@@ -588,9 +598,13 @@ function showImportDialog(settings, parent, refresh) {
             return; // user cancelled or unreadable / invalid JSON
         }
 
-        if (!Array.isArray(parsed)) return;
+        // Accept both legacy bare array and versioned envelope {version, monitors}.
+        const monitorsRaw = Array.isArray(parsed) ? parsed
+            : (parsed?.version && Array.isArray(parsed.monitors)) ? parsed.monitors
+            : null;
+        if (!monitorsRaw) return;
         // Assign fresh IDs so imported monitors never collide with existing ones.
-        const imported = parsed
+        const imported = monitorsRaw
             .filter(m => m.name && m.command)
             .map(m => createMonitor({...m}));
         if (imported.length === 0) return;
@@ -1067,6 +1081,57 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
 }
 
 // ---------------------------------------------------------------------------
+// Helper: external preset loader
+// ---------------------------------------------------------------------------
+
+/**
+ * Load preset definitions from a directory by scanning for *.json files.
+ * Accepts both legacy bare-array exports and the versioned envelope format.
+ * Silently ignores unreadable / invalid files.
+ *
+ * @param {string}      dir      - Absolute path to the directory.
+ * @param {Set<string>} reserved - Preset names that must not be overridden (built-ins).
+ * @returns {object[]} Partial monitor objects suitable for createMonitor().
+ */
+function loadPresetsFromDir(dir, reserved) {
+    const directory = Gio.File.new_for_path(dir);
+    if (!directory.query_exists(null)) return [];
+    let enumerator;
+    try {
+        enumerator = directory.enumerate_children(
+            'standard::name',
+            Gio.FileQueryInfoFlags.NONE, null,
+        );
+    } catch (_) { return []; }
+
+    const presets = [];
+    try {
+        let info;
+        while ((info = enumerator.next_file(null)) !== null) {
+            const name = info.get_name();
+            if (!name.endsWith('.json')) continue;
+            const file = directory.get_child(name);
+            try {
+                const [, bytes] = GLib.file_get_contents(file.get_path());
+                const parsed = JSON.parse(new TextDecoder().decode(bytes));
+                const raw = Array.isArray(parsed) ? parsed
+                    : (parsed?.version && Array.isArray(parsed.monitors)) ? parsed.monitors
+                    : null;
+                if (!raw) continue;
+                for (const m of raw) {
+                    if (!m.name || !m.command) continue;
+                    if (reserved.has(m.name)) continue;
+                    presets.push(m);
+                }
+            } catch (_) { /* skip unreadable / invalid file */ }
+        }
+    } finally {
+        try { enumerator.close(null); } catch (_) {}
+    }
+    return presets;
+}
+
+// ---------------------------------------------------------------------------
 // Helper: build preset rows
 // ---------------------------------------------------------------------------
 
@@ -1082,11 +1147,14 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
  * @returns {Gtk.Widget[]} The rows added to group.
  */
 function buildPresetRows(group, settings, refresh) {
-    const monitors   = deserializeMonitors(settings.get_string('monitors'));
-    const addedNames = new Set(monitors.map(m => m.name));
-    const added      = [];
+    const monitors    = deserializeMonitors(settings.get_string('monitors'));
+    const addedNames  = new Set(monitors.map(m => m.name));
+    const builtInNames = new Set(PRESET_MONITORS.map(p => p.name));
+    const external    = EXTERNAL_PRESET_DIRS.flatMap(dir => loadPresetsFromDir(dir, builtInNames));
+    const allPresets  = [...PRESET_MONITORS, ...external];
+    const added       = [];
 
-    for (const preset of PRESET_MONITORS) {
+    for (const preset of allPresets) {
         if (addedNames.has(preset.name)) continue;
 
         const row = new Adw.ActionRow({

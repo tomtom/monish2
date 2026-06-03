@@ -737,3 +737,60 @@ describe('prefs.js cmdPreview whitespace normalisation — ISSUE 52', () => {
         expect(prefsSource).toMatch(/command\.\S*replace[^.]*\.trim\(\)/);
     });
 });
+
+describe('prefs.js export format versioning — ISSUE 80', () => {
+    it('export wraps monitors in a versioned envelope object', () => {
+        // Old format was a bare JSON array; new format is {version: 1, monitors}.
+        expect(prefsSource).toContain('{version: 1, monitors}');
+    });
+
+    it('import handles both bare array (legacy) and versioned envelope', () => {
+        // Must not break existing exports that are bare arrays.
+        expect(prefsSource).toContain('Array.isArray(parsed)');
+        expect(prefsSource).toContain('parsed.monitors');
+    });
+
+    it('import rejects payloads that are neither array nor versioned envelope', () => {
+        // A plain object without a monitors key should be discarded.
+        expect(prefsSource).toContain('monitorsRaw');
+    });
+});
+
+describe('prefs.js external preset directories — ISSUE 80', () => {
+    it('defines EXTERNAL_PRESET_DIRS constant', () => {
+        expect(prefsSource).toContain('EXTERNAL_PRESET_DIRS');
+    });
+
+    it('EXTERNAL_PRESET_DIRS includes system-wide path /usr/share/monish', () => {
+        expect(prefsSource).toContain('/usr/share/monish');
+    });
+
+    it('EXTERNAL_PRESET_DIRS includes user-local path under get_user_data_dir', () => {
+        // ~/.local/share resolves via XDG_DATA_HOME / GLib.get_user_data_dir().
+        expect(prefsSource).toContain('get_user_data_dir(), \'monish\'');
+    });
+
+    it('defines loadPresetsFromDir function', () => {
+        expect(prefsSource).toContain('function loadPresetsFromDir(');
+    });
+
+    it('loadPresetsFromDir skips presets whose names are in the reserved set', () => {
+        // Built-in wins: external presets with built-in names are silently ignored.
+        expect(prefsSource).toContain('reserved.has(m.name)');
+    });
+
+    it('loadPresetsFromDir handles versioned envelope format from external files', () => {
+        // External files may be created via Export (versioned) or manually (bare array).
+        expect(prefsSource).toContain('parsed.monitors');
+    });
+
+    it('buildPresetRows loads external presets from EXTERNAL_PRESET_DIRS', () => {
+        expect(prefsSource).toContain('loadPresetsFromDir(');
+        expect(prefsSource).toContain('EXTERNAL_PRESET_DIRS');
+    });
+
+    it('buildPresetRows passes built-in names to loadPresetsFromDir as reserved set', () => {
+        // Prevents external files from shadowing built-in presets.
+        expect(prefsSource).toContain('builtInNames');
+    });
+});
