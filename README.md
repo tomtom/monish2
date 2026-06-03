@@ -32,6 +32,9 @@ you can script.
   quick variations.
 - **Localisation** — translatable via gettext (`monish2@thm.link`).
 
+![Example screenshot](Screenshot.png")
+
+
 ## Compatibility
 
 GNOME Shell 45 – 50.
