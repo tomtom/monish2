@@ -28,15 +28,16 @@ describe('PRESET_MONITORS', () => {
         }
     });
 
-    it('every preset has a positive intervalSeconds', () => {
+    it('every preset has a non-negative intervalSeconds (0 = on-demand)', () => {
         for (const preset of PRESET_MONITORS) {
             expect(typeof preset.intervalSeconds).toBe('number');
-            expect(preset.intervalSeconds).toBeGreaterThanOrEqual(1);
+            expect(preset.intervalSeconds).toBeGreaterThanOrEqual(0);
         }
     });
 
-    it(`every preset interval is at least PRESET_MIN_INTERVAL (${PRESET_MIN_INTERVAL}s)`, () => {
+    it(`every timed preset interval is at least PRESET_MIN_INTERVAL (${PRESET_MIN_INTERVAL}s)`, () => {
         for (const preset of PRESET_MONITORS) {
+            if (preset.intervalSeconds === 0) continue; // on-demand — no timer
             expect(preset.intervalSeconds).toBeGreaterThanOrEqual(PRESET_MIN_INTERVAL);
         }
     });
@@ -104,7 +105,7 @@ describe('PRESET_MONITORS', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
         expect(preset).toBeDefined();
         expect(preset.type).toBe(MonitorType.JAVASCRIPT);
-        expect(preset.intervalSeconds).toBe(1800);
+        expect(preset.intervalSeconds).toBe(0);
         expect(preset.showSparkline).toBe(false);
         expect(preset.command).toContain('.credentials.json');
         expect(preset.command).toContain('api.anthropic.com');
@@ -130,7 +131,7 @@ describe('PRESET_MONITORS', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
         expect(preset).toBeDefined();
         expect(preset.type).toBe(MonitorType.JAVASCRIPT);
-        expect(preset.intervalSeconds).toBe(900);
+        expect(preset.intervalSeconds).toBe(0);
         expect(preset.showSparkline).toBe(false);
         expect(preset.command).toContain('openrouter.ai');
         expect(preset.command).toContain('/credits');
@@ -151,6 +152,14 @@ describe('PRESET_MONITORS', () => {
         expect(dangerRe.test('Balance: $0.01\nActivity (30d): 10 req / $2.00')).toBe(true);
         expect(dangerRe.test('Balance: $5.00\nActivity (30d): 10 req / $2.00')).toBe(false);
         expect(dangerRe.test('Balance: $9.99\nActivity (30d): 10 req / $2.00')).toBe(false);
+    });
+
+    it('Claude Usage and OpenRouter presets are on-demand (intervalSeconds === 0) — ISSUE 88', () => {
+        for (const name of ['Claude Usage', 'OpenRouter']) {
+            const preset = PRESET_MONITORS.find(p => p.name === name);
+            expect(preset).toBeDefined();
+            expect(preset.intervalSeconds).toBe(0);
+        }
     });
 
     it('CPU Power (RAPL) preset has helpText with setup instructions — ISSUE 68', () => {
