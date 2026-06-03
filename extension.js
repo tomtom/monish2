@@ -102,6 +102,7 @@ class MonishIndicator extends PanelMenu.Button {
         this._results       = new Map();   // monitorId -> {value, status}
         this._monitors      = [];          // current monitor config array
         this._menuItems     = new Map();   // monitorId -> {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel}
+        this._tooltipSignalIds = [];       // [[actor, signalId], ...] for explicit disconnect on destroy
         this._history       = new Map();   // monitorId -> number[] ring buffer (max SPARKLINE_MAX_VALUES)
         this._appHistory    = new Map();   // monitorId -> Map<appName, number[]> for multi-line per-app sparklines
         this._debugLogPath  = GLib.build_filenamev([extensionPath, 'debug.log']);
@@ -157,6 +158,7 @@ class MonishIndicator extends PanelMenu.Button {
      */
     _buildMenu(firstRunDelay = 0) {
         this._stopAllTimers();  // clears _timers and _expiryTimers
+        this._tooltipSignalIds = [];  // actors destroyed by removeAll() disconnect their own signals
         this.menu.removeAll();
         this._menuItems.clear();
         this._results.clear();
@@ -309,8 +311,8 @@ class MonishIndicator extends PanelMenu.Button {
             const desc = monitor.description;
             for (const lbl of [inlineValueLabel, mlValueLabel, mlBox]) {
                 lbl.reactive = true;
-                lbl.connect('enter-event', () => this._showTooltip(desc));
-                lbl.connect('leave-event', () => this._hideTooltip());
+                this._tooltipSignalIds.push([lbl, lbl.connect('enter-event', () => this._showTooltip(desc))]);
+                this._tooltipSignalIds.push([lbl, lbl.connect('leave-event', () => this._hideTooltip())]);
             }
         }
 
@@ -526,30 +528,34 @@ class MonishIndicator extends PanelMenu.Button {
     /**
      * Restore _results, _history, _appHistory from the state file.
      * Only restores monitors that still exist in the current config.
+     * Uses async IO to avoid blocking the shell compositor thread.
      */
     _loadState() {
-        try {
-            const [ok, bytes] = GLib.file_get_contents(this._stateFilePath);
-            if (!ok) return;
-            const data = JSON.parse(new TextDecoder().decode(bytes));
-            const validIds = new Set(this._monitors.map(m => m.id));
+        const file = Gio.File.new_for_path(this._stateFilePath);
+        file.load_contents_async(null, (_, result) => {
+            try {
+                const [ok, bytes] = file.load_contents_finish(result);
+                if (!ok) return;
+                const data = JSON.parse(new TextDecoder().decode(bytes));
+                const validIds = new Set(this._monitors.map(m => m.id));
 
-            if (data.history) {
-                for (const [id, hist] of Object.entries(data.history)) {
-                    if (validIds.has(id)) this._history.set(id, hist);
+                if (data.history) {
+                    for (const [id, hist] of Object.entries(data.history)) {
+                        if (validIds.has(id)) this._history.set(id, hist);
+                    }
                 }
-            }
-            if (data.appHistory) {
-                for (const [id, perApp] of Object.entries(data.appHistory)) {
-                    if (validIds.has(id)) this._appHistory.set(id, new Map(Object.entries(perApp)));
+                if (data.appHistory) {
+                    for (const [id, perApp] of Object.entries(data.appHistory)) {
+                        if (validIds.has(id)) this._appHistory.set(id, new Map(Object.entries(perApp)));
+                    }
                 }
-            }
-            if (data.results) {
-                for (const [id, result] of Object.entries(data.results)) {
-                    if (validIds.has(id)) this._results.set(id, result);
+                if (data.results) {
+                    for (const [id, res] of Object.entries(data.results)) {
+                        if (validIds.has(id)) this._results.set(id, res);
+                    }
                 }
-            }
-        } catch (_) {}
+            } catch (_) {}
+        });
     }
 
     /** Restore menu item UI from loaded state (history already populated). */
@@ -806,6 +812,9 @@ class MonishIndicator extends PanelMenu.Button {
             this._settings.disconnect(this._jitterChangedId);
             this._jitterChangedId = null;
         }
+        for (const [actor, id] of this._tooltipSignalIds)
+            actor.disconnect(id);
+        this._tooltipSignalIds = [];
         if (this._tooltip) {
             Main.layoutManager.removeChrome(this._tooltip);
             this._tooltip.destroy();

@@ -4,17 +4,19 @@
 #   compile-schemas  Compile GSettings XML into a binary schema cache.
 #   install          Install the extension to the user's GNOME extension dir.
 #   uninstall        Remove the installed extension.
+#   zip              Build a ZIP for upload to extensions.gnome.org.
 #   test             Run Jest unit tests (pure JS logic).
 #   lint             Run ESLint on lib/ and test/.
 #   audit            Check npm dependencies for known vulnerabilities.
 #   test-all         Run lint, audit, and test in sequence.
+#   shexli           Build ZIP and validate it with shexli.
 #   clean            Remove generated artefacts.
 
 UUID        := monish2@thm.link
 INSTALL_DIR := $(HOME)/.local/share/gnome-shell/extensions/$(UUID)
 SCHEMA_DIR  := schemas
 
-.PHONY: all compile-schemas install uninstall test lint audit test-all clean
+.PHONY: all compile-schemas install uninstall zip shexli test lint audit test-all clean
 
 all: compile-schemas
 
@@ -30,6 +32,19 @@ install: compile-schemas
 	      lib icons schemas $(INSTALL_DIR)/
 	@echo "Installed to $(INSTALL_DIR)"
 	@echo "Restart GNOME Shell (Alt+F2 → 'r') or log out to activate."
+
+# Build a ZIP suitable for upload to extensions.gnome.org.
+zip: compile-schemas
+	rm -f $(UUID).shell-extension.zip
+	zip -r $(UUID).shell-extension.zip \
+		metadata.json extension.js prefs.js stylesheet.css \
+		lib icons schemas \
+		--exclude "schemas/gschemas.compiled"
+	@echo "Created $(UUID).shell-extension.zip"
+
+# Validate the packed extension with shexli.
+shexli: zip
+	shexli $(UUID).shell-extension.zip
 
 # Remove the installed extension.
 uninstall:
@@ -55,4 +70,5 @@ test-all: lint audit test
 # Remove compiled schemas and node_modules artefacts.
 clean:
 	rm -f $(SCHEMA_DIR)/gschemas.compiled
+	rm -f $(UUID).shell-extension.zip
 	rm -rf node_modules
