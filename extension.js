@@ -145,11 +145,11 @@ class MonishIndicator extends PanelMenu.Button {
         // React to settings changes (monitors config or jitter percentage)
         this._settingsChangedId = this._settings.connect(
             `changed::${SETTINGS_KEY}`,
-            () => this._reloadMonitors()
+            () => this._reloadMonitors(),
         );
         this._jitterChangedId = this._settings.connect(
             `changed::${JITTER_KEY}`,
-            () => this._reloadMonitors()
+            () => this._reloadMonitors(),
         );
     }
 
@@ -561,7 +561,7 @@ class MonishIndicator extends PanelMenu.Button {
                 results:    Object.fromEntries(this._results),
                 history:    Object.fromEntries(this._history),
                 appHistory: Object.fromEntries(
-                    [...this._appHistory].map(([id, perApp]) => [id, Object.fromEntries(perApp)])
+                    [...this._appHistory].map(([id, perApp]) => [id, Object.fromEntries(perApp)]),
                 ),
             });
             GLib.file_set_contents(this._stateFilePath, new TextEncoder().encode(data));
@@ -869,7 +869,7 @@ export default class MonishExtension extends Extension {
         this._indicator = new MonishIndicator(
             this._settings,
             () => this.openPreferences(),
-            this.path
+            this.path,
         );
         Main.panel.addToStatusArea(this.uuid, this._indicator);
         /* DEBUG_ONLY_BEGIN */

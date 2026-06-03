@@ -901,8 +901,8 @@ describe('evaluateGuard', () => {
     });
 
     it('matches /regex/ — true when value matches', () => {
-        expect(evaluateGuard("matches /^disabled$/", 'disabled')).toBe(true);
-        expect(evaluateGuard("matches /^disabled$/", 'enabled')).toBe(false);
+        expect(evaluateGuard('matches /^disabled$/', 'disabled')).toBe(true);
+        expect(evaluateGuard('matches /^disabled$/', 'enabled')).toBe(false);
     });
 
     it('matches /regex/i — case-insensitive', () => {

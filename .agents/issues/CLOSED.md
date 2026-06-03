@@ -17,3 +17,8 @@
 96. In Monitors list: on-demand monitors are immediatly removed when sparkline's valid argument is 0 - even when sparklines are disabled. Disable sparklines for on-demand values. Remove the "valid for (s)" field. Never remove the on-demand value. Keep it until the next update. #closed/2026-06-03
 97. Review https://gjs.guide/extensions/review-guidelines/review-guidelines.html and https://gjs.guide/extensions/ and summarize the most important points in docs/GnomeExtensionGuidelines.md. Check whether the monish extension adheres to these guidelines. #closed/2026-06-03
 98. The values of on-demand monitors are seemingly not persisted across lock/unlock events - at least they are not displayed in the monitor-value list. Persist these values like the other monitor values. #closed/2026-06-03
+99. The Gnome RDP monitor cannot be edited. #closed/2026-06-03
+101. Ad `new Function()` in the Shell process (`extension.js`): implement a simple safe expression parser for the common cases, i.e., select a monitor (default: self) and check whether the value matches a regexp. Change the Gnome RDP preset accordingly. #closed/2026-06-03
+102. Ad **3. Conditional `log()` in the Shell process**: Strip debug logging code from the zip. Ad **4. Debug log written to extension install directory**: irrelevant once stripped. #closed/2026-06-03
+103. Ad **7. `gettext-domain` set but unused**: Add placeholder `po/` directory; add localizations for all important European languages; change code to pick up language setting. #closed/2026-06-03
+104. Add `"session-modes": ["user"]` to metadata.json. #closed/2026-06-03
