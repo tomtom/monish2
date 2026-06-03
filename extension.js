@@ -828,9 +828,8 @@ class MonishIndicator extends PanelMenu.Button {
                       || worst === MonitorStatus.DANGER
                       || worst === MonitorStatus.ERROR;
         this._errorBadge.visible = alerting;
-        if (alerting && color) {
-            this._errorBadge.style = `color: ${color};`;
-        }
+        // Always reset style so a previous colour does not bleed when alerting ends.
+        this._errorBadge.style = (alerting && color) ? `color: ${color};` : null;
         // Use as many exclamation marks as there are CAUTION/DANGER monitors
         const alertCount = countAlertStatuses(statuses);
         this._errorBadge.text = alertCount > 0 ? '!'.repeat(alertCount) : '!';

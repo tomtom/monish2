@@ -5,7 +5,6 @@ Next number: 92
 
 ## Current
 
-91. When a monitor is marked as CAUTION or DANGER, is this still shown in the top bar icon? The icon should be yellow or red (depending on the state) and exclamation marks should be shown for the number of monitors with a special state.
 
 
 
