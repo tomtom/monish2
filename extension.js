@@ -37,6 +37,7 @@ import {
     SPARKLINE_MAX_VALUES,
     injectArgs,
     formatAge,
+    evaluateGuard,
 } from './lib/monitor.js';
 import {executeCommand, executeJavaScript} from './lib/executor.js';
 
@@ -714,12 +715,7 @@ class MonishIndicator extends PanelMenu.Button {
             // show/hide accordingly.  Buttons with no guard are always visible.
             for (const {btn, guard} of (entry.actionBtns ?? [])) {
                 if (!guard) continue;
-                try {
-                    // eslint-disable-next-line no-new-func
-                    btn.visible = Boolean(new Function('value', `return (${guard})`)(value));
-                } catch (_) {
-                    btn.visible = true; // malformed guard → always show
-                }
+                btn.visible = evaluateGuard(guard, value);
             }
 
             // Age / timestamp label — only for on-demand monitors.

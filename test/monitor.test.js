@@ -17,6 +17,7 @@ import {
     validateMonitor,
     createMonitor,
     normalizeMonitor,
+    evaluateGuard,
     formatError,
     splitInterval,
     toSeconds,
@@ -885,6 +886,80 @@ describe('deserializeMonitors migration — ISSUE 99', () => {
         }]);
         const monitors = deserializeMonitors(json);
         expect(monitors[0].actions[0].guard).toBe("value === 'disabled'");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// evaluateGuard — ISSUE 101
+// ---------------------------------------------------------------------------
+
+describe('evaluateGuard', () => {
+    it('returns true for empty/null guard', () => {
+        expect(evaluateGuard('', 'foo')).toBe(true);
+        expect(evaluateGuard(null, 'foo')).toBe(true);
+        expect(evaluateGuard(undefined, 'foo')).toBe(true);
+    });
+
+    it('matches /regex/ — true when value matches', () => {
+        expect(evaluateGuard("matches /^disabled$/", 'disabled')).toBe(true);
+        expect(evaluateGuard("matches /^disabled$/", 'enabled')).toBe(false);
+    });
+
+    it('matches /regex/i — case-insensitive', () => {
+        expect(evaluateGuard('matches /DISABLED/i', 'disabled')).toBe(true);
+    });
+
+    it('not matches /regex/ — negated regex', () => {
+        expect(evaluateGuard('not matches /^enabled$/', 'disabled')).toBe(true);
+        expect(evaluateGuard('not matches /^enabled$/', 'enabled')).toBe(false);
+    });
+
+    it("matches 'str' — exact equality (single quotes)", () => {
+        expect(evaluateGuard("matches 'disabled'", 'disabled')).toBe(true);
+        expect(evaluateGuard("matches 'disabled'", 'enabled')).toBe(false);
+    });
+
+    it('matches "str" — exact equality (double quotes)', () => {
+        expect(evaluateGuard('matches "disabled"', 'disabled')).toBe(true);
+        expect(evaluateGuard('matches "disabled"', 'enabled')).toBe(false);
+    });
+
+    it("not matches 'str' — negated equality", () => {
+        expect(evaluateGuard("not matches 'enabled'", 'disabled')).toBe(true);
+        expect(evaluateGuard("not matches 'enabled'", 'enabled')).toBe(false);
+    });
+
+    it("legacy: value === 'str'", () => {
+        expect(evaluateGuard("value === 'disabled'", 'disabled')).toBe(true);
+        expect(evaluateGuard("value === 'disabled'", 'enabled')).toBe(false);
+    });
+
+    it("legacy: value !== 'str'", () => {
+        expect(evaluateGuard("value !== 'enabled'", 'disabled')).toBe(true);
+        expect(evaluateGuard("value !== 'enabled'", 'enabled')).toBe(false);
+    });
+
+    it('legacy double-quote forms', () => {
+        expect(evaluateGuard('value === "disabled"', 'disabled')).toBe(true);
+        expect(evaluateGuard('value !== "enabled"', 'disabled')).toBe(true);
+    });
+
+    it('unrecognised expression always returns true', () => {
+        expect(evaluateGuard('some_random_expr()', 'value')).toBe(true);
+    });
+
+    it('invalid regex in matches returns true (safe fallback)', () => {
+        expect(evaluateGuard('matches /[invalid/', 'value')).toBe(true);
+    });
+
+    it('Gnome RDP Enable guard: show when disabled', () => {
+        expect(evaluateGuard("matches 'disabled'", 'disabled')).toBe(true);
+        expect(evaluateGuard("matches 'disabled'", 'enabled')).toBe(false);
+    });
+
+    it('Gnome RDP Disable guard: show when enabled', () => {
+        expect(evaluateGuard("matches 'enabled'", 'enabled')).toBe(true);
+        expect(evaluateGuard("matches 'enabled'", 'disabled')).toBe(false);
     });
 });
 

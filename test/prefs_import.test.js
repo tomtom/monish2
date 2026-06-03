@@ -623,8 +623,11 @@ describe('action button guard — ISSUE 64', () => {
         expect(extensionSource).toContain('action.guard');
     });
 
-    it('extension uses new Function to evaluate guard safely', () => {
-        expect(extensionSource).toContain('new Function');
+    it('extension uses evaluateGuard() instead of new Function — ISSUE 101', () => {
+        // new Function() replaced by evaluateGuard() from lib/monitor.js to avoid
+        // dynamic code execution in the Shell process (GNOME extension guidelines).
+        expect(extensionSource).toContain('evaluateGuard');
+        expect(extensionSource).not.toContain('new Function');
     });
 
     it('Gnome RDP Enable action has guard so it only shows when disabled', () => {
