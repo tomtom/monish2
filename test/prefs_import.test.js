@@ -181,7 +181,7 @@ describe('extension.js jitter scheduling', () => {
 describe('prefs.js on-demand monitor UI — ISSUE 45', () => {
     it('does not add an On Demand toggle (removed; 0s interval is the signal)', () => {
         // The explicit On Demand switch was replaced by setting interval=0.
-        expect(prefsSource).not.toContain("labeledRow('On Demand'");
+        expect(prefsSource).not.toContain('labeledRow(\'On Demand\'');
     });
 
     it('interval hint documents 0 as on-demand', () => {
@@ -499,7 +499,7 @@ describe('debug logging — ISSUE 30', () => {
 
 describe('action commands — ISSUE 50', () => {
     it('prefs edit dialog has an Actions section', () => {
-        expect(prefsSource).toContain("'Actions'");
+        expect(prefsSource).toContain('\'Actions\'');
     });
 
     it('prefs deep-copies actions on dialog open', () => {
@@ -548,7 +548,7 @@ describe('prefs.js help dialog transient parent — ISSUE 75', () => {
 
 describe('prefs.js description field — ISSUE 66', () => {
     it('edit dialog has a Description labeled row', () => {
-        expect(prefsSource).toContain("labeledRow('Description'");
+        expect(prefsSource).toContain('labeledRow(\'Description\'');
     });
 
     it('edit dialog initialises description from data.description', () => {
@@ -576,7 +576,7 @@ describe('prefs.js monitor export/import — ISSUE 65', () => {
 
     it('export serialises monitors as pretty-printed JSON', () => {
         expect(prefsSource).toContain('JSON.stringify');
-        expect(prefsSource).toContain("null, 2");
+        expect(prefsSource).toContain('null, 2');
     });
 
     it('export uses Gtk.FileDialog.save to pick destination', () => {
@@ -628,7 +628,7 @@ describe('action button guard — ISSUE 64', () => {
     it('Gnome RDP Enable action has guard so it only shows when disabled', () => {
         // Import checked via presets.test.js; here we verify the source contains the pattern.
         // The preset guard expression matches the monitor value.
-        expect(extensionSource).toContain("action.guard");
+        expect(extensionSource).toContain('action.guard');
     });
 });
 
@@ -721,7 +721,7 @@ describe('extension.js multi-line value right-aligned — ISSUE 76', () => {
     });
 
     it('lineVal uses monish-monitor-value CSS class to match single-line value alignment', () => {
-        expect(extensionSource).toContain(`monitor-value`);
+        expect(extensionSource).toContain('monitor-value');
         expect(extensionSource).toContain('lineVal');
     });
 
