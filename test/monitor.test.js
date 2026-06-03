@@ -681,6 +681,17 @@ describe('injectArgs', () => {
 // createMonitor args defaults
 // ---------------------------------------------------------------------------
 
+describe('createMonitor intervalExpression default', () => {
+    it('defaults intervalExpression to empty string', () => {
+        expect(createMonitor().intervalExpression).toBe('');
+    });
+
+    it('preserves intervalExpression override', () => {
+        const m = createMonitor({intervalExpression: 'print(300)'});
+        expect(m.intervalExpression).toBe('print(300)');
+    });
+});
+
 describe('createMonitor args / argValues defaults', () => {
     it('initialises args to empty array', () => {
         expect(createMonitor().args).toEqual([]);

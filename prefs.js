@@ -450,6 +450,35 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     });
     content.append(intervalHint);
 
+    // ---- Interval Expression ----
+    const exprView = new Gtk.TextView({
+        wrap_mode:     Gtk.WrapMode.WORD_CHAR,
+        hexpand:       true,
+        monospace:     true,
+        left_margin:   4,
+        right_margin:  4,
+        top_margin:    4,
+        bottom_margin: 4,
+    });
+    exprView.get_buffer().set_text(data.intervalExpression ?? '', -1);
+    const exprScroll = new Gtk.ScrolledWindow({
+        hexpand:            true,
+        min_content_height: 48,
+        max_content_height: 96,
+    });
+    exprScroll.set_child(exprView);
+    const exprFrame = new Gtk.Frame();
+    exprFrame.set_child(exprScroll);
+    content.append(labeledRow('Interval Expr', exprFrame));
+
+    const exprHint = new Gtk.Label({
+        label:       'Optional JS expression. Must print() an interval in seconds. Access arguments as const NAME. Return 0 to skip this poll (re-checked every 60 s).',
+        xalign:      0,
+        wrap:        true,
+        css_classes: ['caption', 'dim-label'],
+    });
+    content.append(exprHint);
+
     // ---- Output regex ----
     const regexEntry = new Gtk.Entry({
         placeholder_text: 'Optional: capture group 1 used as value',
@@ -518,6 +547,9 @@ function showMonitorEditDialog(parent, monitor, onSave) {
 
             const totalSec = toSeconds(intervalSpin.get_value_as_int(), 'seconds');
 
+            const exprBuf  = exprView.get_buffer();
+            const exprText = exprBuf.get_text(exprBuf.get_start_iter(), exprBuf.get_end_iter(), false).trim();
+
             const updated = {
                 ...data,
                 name:                 nameEntry.get_text().trim(),
@@ -525,6 +557,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
                 command:              cmd,
                 type:                 MONITOR_TYPE_VALUES[typeDropDown.get_selected()] ?? MonitorType.SHELL,
                 intervalSeconds:      totalSec,
+                intervalExpression:   exprText,
                 outputRegex:          regexEntry.get_text().trim(),
                 cautionPatterns:      splitPatterns(cautionEntry.get_text()),
                 dangerPatterns:       splitPatterns(dangerEntry.get_text()),

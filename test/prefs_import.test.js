@@ -800,3 +800,22 @@ describe('prefs.js external preset directories — ISSUE 80', () => {
         expect(prefsSource).toMatch(/\\u26A0|\u26A0/);
     });
 });
+
+describe('extension.js interval expression \u2014 ISSUE 93', () => {
+    it('defines _resolveInterval method', () => {
+        expect(extensionSource).toContain('_resolveInterval');
+    });
+
+    it('defines EXPR_RECHECK_MS constant', () => {
+        expect(extensionSource).toContain('EXPR_RECHECK_MS');
+    });
+
+    it('_scheduleNextRun calls _resolveInterval', () => {
+        expect(extensionSource).toContain('_resolveInterval(monitor)');
+    });
+
+    it('prefs edit dialog includes interval expression field', () => {
+        expect(prefsSource).toContain('intervalExpression');
+        expect(prefsSource).toContain('Interval Expr');
+    });
+});
