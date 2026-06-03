@@ -781,9 +781,9 @@ describe('prefs.js external preset directories — ISSUE 80', () => {
         expect(prefsSource).toContain('function loadPresetsFromDir(');
     });
 
-    it('loadPresetsFromDir skips presets whose names are in the reserved set', () => {
-        // Built-in wins: external presets with built-in names are silently ignored.
-        expect(prefsSource).toContain('reserved.has(m.name)');
+    it('loadPresetsFromDir attaches _sourceFile to loaded presets', () => {
+        // Track which JSON file each external preset came from.
+        expect(prefsSource).toContain('_sourceFile');
     });
 
     it('loadPresetsFromDir handles versioned envelope format from external files', () => {
@@ -796,8 +796,8 @@ describe('prefs.js external preset directories — ISSUE 80', () => {
         expect(prefsSource).toContain('EXTERNAL_PRESET_DIRS');
     });
 
-    it('buildPresetRows passes built-in names to loadPresetsFromDir as reserved set', () => {
-        // Prevents external files from shadowing built-in presets.
-        expect(prefsSource).toContain('builtInNames');
+    it('buildPresetRows shows CAUTION badge for external presets', () => {
+        // \u26A0 = \u26A0  WARNING SIGN unicode character.
+        expect(prefsSource).toMatch(/\\u26A0|\u26A0/);
     });
 });

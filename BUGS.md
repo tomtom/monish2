@@ -1,9 +1,12 @@
-Next number: 82
+Next number: 84
 
 
 # Bugs & Feature Request
 
 ## Current
+83. Create a README.md file that explains the purpose of this gnome extension and the functionality that is relevant to endusers. State that it was originally developed for and tested on Fedora 44.
+
+
 
 ## Open
 

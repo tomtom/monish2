@@ -1087,13 +1087,13 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
 /**
  * Load preset definitions from a directory by scanning for *.json files.
  * Accepts both legacy bare-array exports and the versioned envelope format.
+ * Each returned preset has a _sourceFile field with the JSON filename.
  * Silently ignores unreadable / invalid files.
  *
- * @param {string}      dir      - Absolute path to the directory.
- * @param {Set<string>} reserved - Preset names that must not be overridden (built-ins).
+ * @param {string} dir - Absolute path to the directory.
  * @returns {object[]} Partial monitor objects suitable for createMonitor().
  */
-function loadPresetsFromDir(dir, reserved) {
+function loadPresetsFromDir(dir) {
     const directory = Gio.File.new_for_path(dir);
     if (!directory.query_exists(null)) return [];
     let enumerator;
@@ -1120,7 +1120,7 @@ function loadPresetsFromDir(dir, reserved) {
                 if (!raw) continue;
                 for (const m of raw) {
                     if (!m.name || !m.command) continue;
-                    if (reserved.has(m.name)) continue;
+                    m._sourceFile = name;
                     presets.push(m);
                 }
             } catch (_) { /* skip unreadable / invalid file */ }
@@ -1149,17 +1149,18 @@ function loadPresetsFromDir(dir, reserved) {
 function buildPresetRows(group, settings, refresh) {
     const monitors    = deserializeMonitors(settings.get_string('monitors'));
     const addedNames  = new Set(monitors.map(m => m.name));
-    const builtInNames = new Set(PRESET_MONITORS.map(p => p.name));
-    const external    = EXTERNAL_PRESET_DIRS.flatMap(dir => loadPresetsFromDir(dir, builtInNames));
+    const external    = EXTERNAL_PRESET_DIRS.flatMap(dir => loadPresetsFromDir(dir));
     const allPresets  = [...PRESET_MONITORS, ...external];
     const added       = [];
 
     for (const preset of allPresets) {
         if (addedNames.has(preset.name)) continue;
 
+        const extSrc = preset._sourceFile;
         const row = new Adw.ActionRow({
-            title:    preset.name,
+            title:    extSrc ? `\u26A0 ${preset.name}` : preset.name,
             subtitle: summarisePreset(preset),
+            tooltip_text: extSrc ?? undefined,
         });
         const addBtn = new Gtk.Button({
             icon_name:    'list-add-symbolic',
