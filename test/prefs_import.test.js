@@ -632,15 +632,14 @@ describe('action button guard — ISSUE 64', () => {
     });
 });
 
-describe('extension.js tooltip position above menu — ISSUE 69', () => {
-    it('_showTooltip does not place tooltip below the cursor (no py + 12)', () => {
-        // Positioning below the pointer (py + 12) hides the tooltip under the menu.
-        // The fix places it above the cursor so it is always visible.
+describe('extension.js tooltip position above menu — ISSUE 69 / ISSUE 92', () => {
+    it('does not use the broken py+12 positioning that placed tooltip below the menu', () => {
+        // Custom floating tooltip removed in ISSUE 92; native tooltip_text used instead.
         expect(extensionSource).not.toContain('py + 12');
     });
 
-    it('_showTooltip positions tooltip above cursor using preferred height', () => {
-        expect(extensionSource).toContain('get_preferred_height');
+    it('does not define _showTooltip (custom tooltip removed)', () => {
+        expect(extensionSource).not.toContain('_showTooltip');
     });
 });
 

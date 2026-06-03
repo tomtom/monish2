@@ -107,16 +107,11 @@ class MonishIndicator extends PanelMenu.Button {
         this._results       = new Map();   // monitorId -> {value, status}
         this._monitors      = [];          // current monitor config array
         this._menuItems     = new Map();   // monitorId -> {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel}
-        this._tooltipSignalIds = [];       // [[actor, signalId], ...] for explicit disconnect on destroy
         this._history       = new Map();   // monitorId -> number[] ring buffer (max SPARKLINE_MAX_VALUES)
         this._appHistory    = new Map();   // monitorId -> Map<appName, number[]> for multi-line per-app sparklines
         this._debugLogPath  = GLib.build_filenamev([extensionPath, 'debug.log']);
         this._stateFileDir  = GLib.build_filenamev([GLib.get_user_runtime_dir(), 'monish2']);
         this._stateFilePath = GLib.build_filenamev([this._stateFileDir, 'state.json']);
-
-        // Floating tooltip widget shown when hovering over a monitor value
-        this._tooltip = new St.Label({style_class: `${CSS_PREFIX}-tooltip`, visible: false});
-        Main.layoutManager.addTopChrome(this._tooltip);
 
         // Panel icon + optional error badge
         this._panelBox = new St.BoxLayout({style_class: `${CSS_PREFIX}-panel-box`});
@@ -170,7 +165,6 @@ class MonishIndicator extends PanelMenu.Button {
         const _tStart = _dbg ? GLib.get_monotonic_time() : 0;
 
         this._stopAllTimers();  // clears _timers and _expiryTimers
-        this._tooltipSignalIds = [];  // actors destroyed by removeAll() disconnect their own signals
         this.menu.removeAll();
         this._menuItems.clear();
         this._results.clear();
@@ -216,28 +210,6 @@ class MonishIndicator extends PanelMenu.Button {
             const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
             log(`[monish2] _buildMenu(): ${ms} ms, ${enabled.length} enabled monitor(s)`);
         }
-    }
-
-    /**
-     * Position and show the shared tooltip label near the current pointer.
-     * Placed ABOVE the cursor so it is never hidden by the menu below.
-     * No-ops when text is empty so monitors without descriptions stay silent.
-     *
-     * @param {string} text - Description text to display.
-     */
-    _showTooltip(text) {
-        if (!text) return;
-        this._tooltip.text = text;
-        const [px, py] = global.get_pointer();
-        // Measure natural height so the tooltip clears the pointer vertically.
-        const [, tooltipH] = this._tooltip.get_preferred_height(-1);
-        this._tooltip.set_position(px + 12, py - (tooltipH || 24) - 12);
-        this._tooltip.visible = true;
-    }
-
-    /** Hide the shared tooltip label. */
-    _hideTooltip() {
-        this._tooltip.visible = false;
     }
 
     /**
@@ -323,14 +295,9 @@ class MonishIndicator extends PanelMenu.Button {
             style_class: `${CSS_PREFIX}-monitor-multiline-box`,
         });
 
-        // Show description as a tooltip when hovering over value labels.
+        // Show description as a native tooltip on the name label.
         if (monitor.description) {
-            const desc = monitor.description;
-            for (const lbl of [inlineValueLabel, mlValueLabel, mlBox]) {
-                lbl.reactive = true;
-                this._tooltipSignalIds.push([lbl, lbl.connect('enter-event', () => this._showTooltip(desc))]);
-                this._tooltipSignalIds.push([lbl, lbl.connect('leave-event', () => this._hideTooltip())]);
-            }
+            nameLabel.tooltip_text = monitor.description;
         }
 
         // Actions drop-down: shown when the status icon is clicked.
@@ -883,14 +850,6 @@ class MonishIndicator extends PanelMenu.Button {
         if (this._jitterChangedId) {
             this._settings.disconnect(this._jitterChangedId);
             this._jitterChangedId = null;
-        }
-        for (const [actor, id] of this._tooltipSignalIds)
-            actor.disconnect(id);
-        this._tooltipSignalIds = [];
-        if (this._tooltip) {
-            Main.layoutManager.removeChrome(this._tooltip);
-            this._tooltip.destroy();
-            this._tooltip = null;
         }
         super.destroy();
     }

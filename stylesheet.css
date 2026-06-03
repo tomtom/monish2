@@ -74,16 +74,6 @@
     color: #3465a4;
 }
 
-/* Floating tooltip shown when hovering over a monitor's value */
-.monish-tooltip {
-    background-color: rgba(0, 0, 0, 0.75);
-    color: #ffffff;
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 0.9em;
-    max-width: 300px;
-}
-
 /* Age / timestamp shown beneath on-demand monitor values */
 .monish-monitor-age {
     font-size: 0.8em;
