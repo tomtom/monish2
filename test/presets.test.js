@@ -100,6 +100,59 @@ describe('PRESET_MONITORS', () => {
         expect(preset.dangerPatterns).toContain('<30m');
     });
 
+    it('Claude Usage preset exists with correct structure — ISSUE 86', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
+        expect(preset).toBeDefined();
+        expect(preset.type).toBe(MonitorType.JAVASCRIPT);
+        expect(preset.intervalSeconds).toBe(1800);
+        expect(preset.showSparkline).toBe(false);
+        expect(preset.command).toContain('.credentials.json');
+        expect(preset.command).toContain('api.anthropic.com');
+        expect(preset.command).toContain('five_hour');
+        expect(preset.command).toContain('seven_day');
+    });
+
+    it('Claude Usage CAUTION pattern matches 75–100%, DANGER matches 90–100% — ISSUE 86', () => {
+        const p = PRESET_MONITORS.find(pr => pr.name === 'Claude Usage');
+        const cautionRe = new RegExp(p.cautionPatterns[0]);
+        const dangerRe  = new RegExp(p.dangerPatterns[0]);
+        // CAUTION: ≥75%
+        expect(cautionRe.test('5h: 75%\n7d: 50%')).toBe(true);
+        expect(cautionRe.test('5h: 80%\n7d: 60%')).toBe(true);
+        expect(cautionRe.test('5h: 74%\n7d: 74%')).toBe(false);
+        // DANGER: ≥90%
+        expect(dangerRe.test('5h: 90%\n7d: 50%')).toBe(true);
+        expect(dangerRe.test('5h: 100%\n7d: 50%')).toBe(true);
+        expect(dangerRe.test('5h: 89%\n7d: 89%')).toBe(false);
+    });
+
+    it('OpenRouter preset exists with correct structure — ISSUE 87', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
+        expect(preset).toBeDefined();
+        expect(preset.type).toBe(MonitorType.JAVASCRIPT);
+        expect(preset.intervalSeconds).toBe(900);
+        expect(preset.showSparkline).toBe(false);
+        expect(preset.command).toContain('openrouter.ai');
+        expect(preset.command).toContain('/credits');
+        expect(preset.command).toContain('/activity');
+        expect(preset.command).toContain('Balance: $');
+    });
+
+    it('OpenRouter CAUTION pattern matches balance <$10, DANGER <$5 — ISSUE 87', () => {
+        const p = PRESET_MONITORS.find(pr => pr.name === 'OpenRouter');
+        const cautionRe = new RegExp(p.cautionPatterns[0]);
+        const dangerRe  = new RegExp(p.dangerPatterns[0]);
+        // CAUTION: balance $0–$9.99
+        expect(cautionRe.test('Balance: $8.50\nActivity (30d): 10 req / $2.00')).toBe(true);
+        expect(cautionRe.test('Balance: $0.50\nActivity (30d): 10 req / $2.00')).toBe(true);
+        expect(cautionRe.test('Balance: $10.00\nActivity (30d): 10 req / $2.00')).toBe(false);
+        // DANGER: balance $0–$4.99
+        expect(dangerRe.test('Balance: $4.99\nActivity (30d): 10 req / $2.00')).toBe(true);
+        expect(dangerRe.test('Balance: $0.01\nActivity (30d): 10 req / $2.00')).toBe(true);
+        expect(dangerRe.test('Balance: $5.00\nActivity (30d): 10 req / $2.00')).toBe(false);
+        expect(dangerRe.test('Balance: $9.99\nActivity (30d): 10 req / $2.00')).toBe(false);
+    });
+
     it('CPU Power (RAPL) preset has helpText with setup instructions — ISSUE 68', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'CPU Power (RAPL)');
         expect(typeof preset.helpText).toBe('string');
