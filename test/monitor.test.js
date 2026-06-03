@@ -553,10 +553,15 @@ describe('buildSparkline', () => {
         expect(spark[2]).toBe(SPARKLINE_CHARS[7]);
     });
 
-    it('all-equal values produce mid-height bars', () => {
+    it('all-equal non-zero values produce mid-height bars', () => {
         const spark = buildSparkline([42, 42, 42]);
         // All bars must be the same character at mid level (index 3 = ▄)
         expect(spark).toBe(SPARKLINE_CHARS[3].repeat(3));
+    });
+
+    it('all-zero values produce minimum-height bars', () => {
+        const spark = buildSparkline([0, 0, 0]);
+        expect(spark).toBe(SPARKLINE_CHARS[0].repeat(3));
     });
 
     it('length equals number of input values', () => {

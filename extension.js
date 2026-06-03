@@ -34,7 +34,7 @@ import {
     jitteredInterval,
     formatError,
     extractNumber,
-    buildSparkline,
+    buildSparklineMarkup,
     SPARKLINE_MAX_VALUES,
     injectArgs,
 } from './lib/monitor.js';
@@ -609,7 +609,9 @@ class MonishIndicator extends PanelMenu.Button {
             }
 
             const showSpark = monitor?.showSparkline !== false;
-            const sparkline = showSpark ? buildSparkline(this._history.get(id) ?? []) : '';
+            const sparkline = showSpark
+                ? buildSparklineMarkup(this._history.get(id) ?? [], monitor?.cautionPatterns, monitor?.dangerPatterns)
+                : '';
             const isMulti   = value.includes('\n');
 
             if (isMulti) {
@@ -626,7 +628,9 @@ class MonishIndicator extends PanelMenu.Button {
                         if (hist.length > SPARKLINE_MAX_VALUES) hist.shift();
                         perApp.set(appName, hist);
                     }
-                    const spark = showSpark ? buildSparkline(perApp.get(appName) ?? []) : '';
+                    const spark = showSpark
+                        ? buildSparklineMarkup(perApp.get(appName) ?? [], monitor?.cautionPatterns, monitor?.dangerPatterns)
+                        : '';
                     return {appName, appVal, spark};
                 });
                 this._appHistory.set(id, perApp);
@@ -652,9 +656,9 @@ class MonishIndicator extends PanelMenu.Button {
                         style_class: `${CSS_PREFIX}-monitor-value`,
                     });
                     const lineSpark = new St.Label({
-                        text:        spark,
                         style_class: `${CSS_PREFIX}-monitor-sparkline`,
                     });
+                    lineSpark.get_clutter_text().set_markup(spark);
                     lineRow.add_child(lineText);
                     lineRow.add_child(lineVal);
                     lineRow.add_child(lineSpark);
@@ -669,7 +673,7 @@ class MonishIndicator extends PanelMenu.Button {
                 // Sparkline goes into the dedicated right-aligned sparklineLabel widget.
                 entry.inlineValueLabel.visible  = true;
                 entry.inlineValueLabel.text     = value;
-                entry.sparklineLabel.text       = sparkline;
+                entry.sparklineLabel.get_clutter_text().set_markup(sparkline);
                 entry.mlValueLabel.visible      = false;
                 entry.mlValueLabel.text         = '';
                 entry.mlBox.visible             = false;
