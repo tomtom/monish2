@@ -192,8 +192,6 @@ class MonishIndicator extends PanelMenu.Button {
             }
         }
 
-        this._applyRestoredState();
-
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         const settingsItem = new PopupMenu.PopupMenuItem('Settings');
@@ -560,9 +558,13 @@ class MonishIndicator extends PanelMenu.Button {
     }
 
     /**
-     * Restore _results, _history, _appHistory from the state file.
-     * Only restores monitors that still exist in the current config.
-     * Uses async IO to avoid blocking the shell compositor thread.
+     * Restore _results, _history, _appHistory from the state file, then apply
+     * the restored results to the menu UI via _applyRestoredState().
+     * Called from _buildMenu() after menu items are created.  The async
+     * callback is guaranteed to run after _buildMenu() finishes (next event
+     * loop tick), so _menuItems is fully populated when the callback executes.
+     * On-demand monitors have no polling timer, so applying state here is the
+     * only way their last value is visible after a lock/unlock cycle.
      */
     _loadState() {
         const file = Gio.File.new_for_path(this._stateFilePath);
@@ -588,6 +590,7 @@ class MonishIndicator extends PanelMenu.Button {
                         if (validIds.has(id)) this._results.set(id, res);
                     }
                 }
+                this._applyRestoredState();
             } catch (_) {}
         });
     }
