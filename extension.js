@@ -37,6 +37,7 @@ import {
     buildSparklineMarkup,
     SPARKLINE_MAX_VALUES,
     injectArgs,
+    formatAge,
 } from './lib/monitor.js';
 import {executeCommand, executeJavaScript} from './lib/executor.js';
 
@@ -52,6 +53,9 @@ const JITTER_KEY = 'jitter-percent';
 
 /** Settings key for the debug-logging toggle. */
 const DEBUG_LOG_KEY = 'debug-logging';
+
+/** Settings key for on-demand monitor time display mode. */
+const ON_DEMAND_TIME_KEY = 'on-demand-time-display';
 
 /** CSS class prefix applied to indicator and menu items for status colouring. */
 const CSS_PREFIX = 'monish';
@@ -99,6 +103,7 @@ class MonishIndicator extends PanelMenu.Button {
         this._openPrefs     = openPrefs;
         this._timers        = new Map();   // monitorId -> GLib source id (scheduled monitors)
         this._expiryTimers  = new Map();   // monitorId -> GLib source id (on-demand validity)
+        this._ageTimers     = new Map();   // monitorId -> GLib source id (age label refresh)
         this._results       = new Map();   // monitorId -> {value, status}
         this._monitors      = [];          // current monitor config array
         this._menuItems     = new Map();   // monitorId -> {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel}
@@ -346,16 +351,24 @@ class MonishIndicator extends PanelMenu.Button {
             });
         }
 
+        // Age / timestamp label for on-demand monitors, shown below the value.
+        const ageLabel = new St.Label({
+            text:        '',
+            style_class: `${CSS_PREFIX}-monitor-age`,
+            visible:     false,
+        });
+
         textBox.add_child(headerBox);
         textBox.add_child(mlValueLabel);
         textBox.add_child(mlBox);
+        textBox.add_child(ageLabel);
         textBox.add_child(actionsBox);
 
         item.add_child(statusIconWidget);
         item.add_child(textBox);
 
         this.menu.addMenuItem(item);
-        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, mlBox, sparklineLabel, actionsBox, actionBtns});
+        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel, mlBox, sparklineLabel, ageLabel, actionsBox, actionBtns});
     }
 
     // -----------------------------------------------------------------------
@@ -596,7 +609,7 @@ class MonishIndicator extends PanelMenu.Button {
             }
         }
 
-        this._results.set(id, {value, status});
+        this._results.set(id, {value, status, collectedAt: Date.now()});
 
         const entry = this._menuItems.get(id);
         if (entry) {
@@ -701,6 +714,40 @@ class MonishIndicator extends PanelMenu.Button {
                     btn.visible = true; // malformed guard → always show
                 }
             }
+
+            // Age / timestamp label — only for on-demand monitors.
+            if (monitor?.onDemand && entry.ageLabel) {
+                const timeDisplay = this._settings.get_string(ON_DEMAND_TIME_KEY);
+                if (timeDisplay === 'timestamp') {
+                    const d = new Date();
+                    const hh = String(d.getHours()).padStart(2, '0');
+                    const mm = String(d.getMinutes()).padStart(2, '0');
+                    const ss = String(d.getSeconds()).padStart(2, '0');
+                    entry.ageLabel.text    = `${hh}:${mm}:${ss}`;
+                    entry.ageLabel.visible = true;
+                } else if (timeDisplay === 'age') {
+                    entry.ageLabel.text    = formatAge(0);
+                    entry.ageLabel.visible = true;
+                    // Cancel any previous age-update timer for this monitor.
+                    const prev = this._ageTimers.get(id);
+                    if (prev !== undefined) GLib.source_remove(prev);
+                    // Refresh label every 30 s until the monitor expires.
+                    const ageId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 30_000, () => {
+                        const res = this._results.get(id);
+                        const ageLbl = this._menuItems.get(id)?.ageLabel;
+                        if (!res?.collectedAt || !ageLbl) {
+                            this._ageTimers.delete(id);
+                            return GLib.SOURCE_REMOVE;
+                        }
+                        ageLbl.text = formatAge(Date.now() - res.collectedAt);
+                        return GLib.SOURCE_CONTINUE;
+                    });
+                    this._ageTimers.set(id, ageId);
+                } else {
+                    entry.ageLabel.visible = false;
+                    entry.ageLabel.text    = '';
+                }
+            }
         }
 
         this._saveState();
@@ -715,6 +762,12 @@ class MonishIndicator extends PanelMenu.Button {
      */
     _resetOnDemandMonitor(id) {
         this._results.delete(id);
+        // Cancel any running age-label refresh timer.
+        const ageId = this._ageTimers.get(id);
+        if (ageId !== undefined) {
+            GLib.source_remove(ageId);
+            this._ageTimers.delete(id);
+        }
         const entry = this._menuItems.get(id);
         if (entry) {
             entry.inlineValueLabel.visible = false;
@@ -722,6 +775,10 @@ class MonishIndicator extends PanelMenu.Button {
             entry.sparklineLabel.text      = '';
             entry.mlValueLabel.visible     = false;
             entry.mlBox.visible            = false;
+            if (entry.ageLabel) {
+                entry.ageLabel.visible = false;
+                entry.ageLabel.text    = '';
+            }
             entry.statusIcon.style = null;
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));
@@ -796,6 +853,10 @@ class MonishIndicator extends PanelMenu.Button {
             GLib.source_remove(sourceId);
         }
         this._expiryTimers.clear();
+        for (const sourceId of this._ageTimers.values()) {
+            GLib.source_remove(sourceId);
+        }
+        this._ageTimers.clear();
     }
 
     /**

@@ -25,6 +25,7 @@ import {
     SPARKLINE_MAX_VALUES,
     injectArgs,
     countAlertStatuses,
+    formatAge,
 } from '../lib/monitor.js';
 
 import {describe, it, expect} from '@jest/globals';
@@ -742,5 +743,31 @@ describe('countAlertStatuses', () => {
         expect(countAlertStatuses([
             MonitorStatus.NORMAL, MonitorStatus.CAUTION, MonitorStatus.DANGER, MonitorStatus.PENDING,
         ])).toBe(2);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// formatAge
+// ---------------------------------------------------------------------------
+
+describe('formatAge', () => {
+    it('returns "just now" for 0 ms', () => {
+        expect(formatAge(0)).toBe('just now');
+    });
+
+    it('returns "just now" for durations under 60 s', () => {
+        expect(formatAge(59_000)).toBe('just now');
+        expect(formatAge(1_000)).toBe('just now');
+    });
+
+    it('returns "N min ago" for 1–59 minutes', () => {
+        expect(formatAge(60_000)).toBe('1 min ago');
+        expect(formatAge(5 * 60_000)).toBe('5 min ago');
+        expect(formatAge(59 * 60_000)).toBe('59 min ago');
+    });
+
+    it('returns "N h ago" for 60+ minutes', () => {
+        expect(formatAge(60 * 60_000)).toBe('1 h ago');
+        expect(formatAge(3 * 60 * 60_000)).toBe('3 h ago');
     });
 });

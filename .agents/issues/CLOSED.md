@@ -1,0 +1,10 @@
+80. In Prefs: Define two directories (/usr/share/monish and ~/.local/share/monish), from where monish reads json predefined monitor definitions (in addition to those provided by the extension itself). These definitions should have the same format as the export file. Add a version number to the export file format. #closed/2026-06-03
+81. In the monitors menu/list: Drop the overlays as status indicators. Just use the indicator icon's color to indicate the status. #closed/2026-06-03
+82. For predefined monitors from external json files: Add a CAUTION badge (as unicode character) to the name. On mouse over, show the filename that is the source for the predefined monitor. Don't hide external predefinitions with the same name as an internal predefined monitor. Show all predefined monitors. #closed/2026-06-03
+83. Create a README.md file that explains the purpose of this gnome extension and the functionality that is relevant to endusers. State that it was originally developed for and tested on Fedora 44. #closed/2026-06-03
+84. Add a make shexli target that create the zip and then runs `shexli monish2@thm.link.shell-extension.zip`.  Run that make target and fix all problems. #closed/2026-06-03
+85. In the Battery Time Remaining preset: By default: CAUTION if less than 1h, DANGER if less than 30m. #closed/2026-06-03
+86. Investigate tmp/claude-usage-api.gjs and add a predefined monitor that retrieves claude usage limits - display 5h and 7d limits in two lines. Set the default loop interval to 30m. By default: CAUTION after 75% and DANGER after 90%. #closed/2026-06-03
+87. Investigate tmp/openrouter-usage.gjs and add a predefined monitor that retrieves openrouter (1) balance and (2) activity. Set the default loop interval to 15m. By default: CAUTION if Balance is smaller than 10$ and DANGER if smaller than 5$. #closed/2026-06-03
+88. In Claude Usage and OpenRouter presets: make them on-demand (no automatic interval) by default. #closed/2026-06-03
+89. For monitors that are set to on-demand, display the values age or the time stamp when the data was last collected (make this a user choice in Prefs). #closed/2026-06-03
