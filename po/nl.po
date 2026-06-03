@@ -1,0 +1,239 @@
+# Dutch translation for monish2 GNOME Shell Extension
+# Copyright (C) 2024 Tom Link
+# This file is distributed under the same license as the monish2 package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: monish2@thm.link\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-03 00:00+0000\n"
+"PO-Revision-Date: 2026-06-03 00:00+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: Dutch\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "No monitors configured"
+msgstr "Geen monitors geconfigureerd"
+
+msgid "Settings"
+msgstr "Instellingen"
+
+msgid "Shell"
+msgstr "Shell"
+
+msgid "JavaScript"
+msgstr "JavaScript"
+
+msgid "Add Monitor"
+msgstr "Monitor toevoegen"
+
+msgid "Edit Monitor"
+msgstr "Monitor bewerken"
+
+msgid "Cancel"
+msgstr "Annuleren"
+
+msgid "Save"
+msgstr "Opslaan"
+
+msgid "Name"
+msgstr "Naam"
+
+msgid "e.g. CPU Usage"
+msgstr "bijv. CPU-gebruik"
+
+msgid "Optional: what this monitor measures"
+msgstr "Optioneel: wat deze monitor meet"
+
+msgid "Setup instructions…"
+msgstr "Installatie-instructies…"
+
+msgid "Command / Script"
+msgstr "Opdracht / Script"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Arguments"
+msgstr "Argumenten"
+
+msgid "+ Add"
+msgstr "+ Toevoegen"
+
+msgid "JS: injected as const NAME = value  ·  Shell: injected as export NAME=value"
+msgstr "JS: ingespoten als const NAME = value  ·  Shell: ingespoten als export NAME=value"
+
+msgid "value"
+msgstr "waarde"
+
+msgid "Add Argument"
+msgstr "Argument toevoegen"
+
+msgid "Add"
+msgstr "Toevoegen"
+
+msgid "Identifier, e.g. EXCLUDE (no spaces)"
+msgstr "Identificator, bijv. EXCLUDE (geen spaties)"
+
+msgid "Display label, e.g. Exclude processes"
+msgstr "Weergavelabel, bijv. Processen uitsluiten"
+
+msgid "Label"
+msgstr "Label"
+
+msgid "Actions"
+msgstr "Acties"
+
+msgid "Commands run on demand from the monitor icon in the menu."
+msgstr "Opdrachten uitgevoerd op aanvraag via het monitorpictogram in het menu."
+
+msgid "Action label"
+msgstr "Actielabel"
+
+msgid "Command or script"
+msgstr "Opdracht of script"
+
+msgid "JS condition on value (e.g. value === 'disabled')"
+msgstr "JS-voorwaarde op waarde (bijv. value === 'disabled')"
+
+msgid "Interval (s)"
+msgstr "Interval (s)"
+
+msgid "Set to 0 for on-demand (click the monitor name to refresh manually)."
+msgstr "Stel in op 0 voor op aanvraag (klik op de monitornaam om handmatig te vernieuwen)."
+
+msgid "Interval Expr"
+msgstr "Interval-expr."
+
+msgid "Optional JS expression. Must print() an interval in seconds. Access arguments as const NAME. Return 0 to skip this poll (re-checked every 60 s)."
+msgstr "Optionele JS-expressie. Moet print() aanroepen met een interval in seconden. Toegang tot argumenten als const NAME. Retourneer 0 om deze poll over te slaan (elke 60 s opnieuw gecontroleerd)."
+
+msgid "Optional: capture group 1 used as value"
+msgstr "Optioneel: vastleggroep 1 wordt als waarde gebruikt"
+
+msgid "Output Regex"
+msgstr "Uitvoer-regex"
+
+msgid "e.g. >70  or  60-80  (comma-separated)"
+msgstr "bijv. >70  of  60-80  (kommagescheiden)"
+
+msgid "Caution Patterns"
+msgstr "Waarschuwingspatronen"
+
+msgid "e.g. >90  or  critical (comma-separated)"
+msgstr "bijv. >90  of  kritiek  (kommagescheiden)"
+
+msgid "Danger Patterns"
+msgstr "Gevaarpatronen"
+
+msgid "Show Sparkline"
+msgstr "Sparkline tonen"
+
+msgid "Export Monitors"
+msgstr "Monitors exporteren"
+
+msgid "Import Monitors"
+msgstr "Monitors importeren"
+
+msgid "Append"
+msgstr "Toevoegen"
+
+msgid "Replace All"
+msgstr "Alles vervangen"
+
+msgid "Monitors"
+msgstr "Monitors"
+
+msgid "My Monitors"
+msgstr "Mijn monitors"
+
+msgid "Monitors are executed on their configured interval."
+msgstr "Monitors worden uitgevoerd op hun geconfigureerde interval."
+
+msgid "Click a preset to add it to your monitor list."
+msgstr "Klik op een voorinstelling om deze toe te voegen aan uw monitorlijst."
+
+msgid "Add Preset"
+msgstr "Voorinstelling toevoegen"
+
+msgid "Schedule Settings"
+msgstr "Planning-instellingen"
+
+msgid "Applied globally to all scheduled monitors."
+msgstr "Globaal toegepast op alle geplande monitors."
+
+msgid "Schedule Jitter (%)"
+msgstr "Planning-jitter (%)"
+
+msgid "Random ±% offset on each poll interval — set to 0 for exact timing"
+msgstr "Willekeurige ±%-offset op elk pollinterval — stel in op 0 voor exacte timing"
+
+msgid "On-demand time display"
+msgstr "Tijdweergave op aanvraag"
+
+msgid "Show collection time beneath on-demand monitor values"
+msgstr "Verzameltijd onder op-aanvraag-monitorwaarden tonen"
+
+msgid "None"
+msgstr "Geen"
+
+msgid "Age (relative)"
+msgstr "Leeftijd (relatief)"
+
+msgid "Timestamp (HH:MM:SS)"
+msgstr "Tijdstempel (HH:MM:SS)"
+
+msgid "Debug Logging"
+msgstr "Foutopsporingslogboek"
+
+msgid "Debug Log"
+msgstr "Foutopsporingslogboek"
+
+msgid "View the debug log file"
+msgstr "Foutopsporingslogboekbestand bekijken"
+
+msgid "View Log"
+msgstr "Logboek bekijken"
+
+msgid "Clear Log"
+msgstr "Logboek wissen"
+
+msgid "Setup Instructions"
+msgstr "Installatie-instructies"
+
+msgid "Close"
+msgstr "Sluiten"
+
+msgid "No monitors yet"
+msgstr "Nog geen monitors"
+
+msgid "Use \"Add Monitor\" or a preset below."
+msgstr "Gebruik «Monitor toevoegen» of een voorinstelling hieronder."
+
+msgid "Move up"
+msgstr "Omhoog verplaatsen"
+
+msgid "Move down"
+msgstr "Omlaag verplaatsen"
+
+msgid "Edit"
+msgstr "Bewerken"
+
+msgid "Duplicate"
+msgstr "Dupliceren"
+
+msgid "Delete"
+msgstr "Verwijderen"
+
+msgid "Add to my monitors"
+msgstr "Toevoegen aan mijn monitors"
+
+msgid "All presets added"
+msgstr "Alle voorinstellingen toegevoegd"
+
+msgid "Every available preset is already in your monitors."
+msgstr "Alle beschikbare voorinstellingen zijn al in uw monitors."

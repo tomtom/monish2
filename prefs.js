@@ -26,12 +26,14 @@ import {
 } from './lib/monitor.js';
 import {PRESET_MONITORS} from './lib/presets.js';
 
+const _ = (str) => GLib.dgettext('monish2@thm.link', str);
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
 /** Monitor type labels shown in the Type dropdown (index matches MonitorType values). */
-const MONITOR_TYPE_LABELS = ['Shell', 'JavaScript'];
+const MONITOR_TYPE_LABELS = [_('Shell'), _('JavaScript')];
 const MONITOR_TYPE_VALUES = [MonitorType.SHELL, MonitorType.JAVASCRIPT];
 
 /**
@@ -69,14 +71,14 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         : createMonitor();
 
     const dialog = new Gtk.Dialog({
-        title:           isNew ? 'Add Monitor' : 'Edit Monitor',
+        title:           isNew ? _('Add Monitor') : _('Edit Monitor'),
         transient_for:   parent,
         modal:           true,
         default_width:   520,
         resizable:       false,
     });
-    dialog.add_button('Cancel', Gtk.ResponseType.CANCEL);
-    const saveBtn = dialog.add_button('Save', Gtk.ResponseType.OK);
+    dialog.add_button(_('Cancel'), Gtk.ResponseType.CANCEL);
+    const saveBtn = dialog.add_button(_('Save'), Gtk.ResponseType.OK);
     saveBtn.add_css_class('suggested-action');
 
     const content = dialog.get_content_area();
@@ -88,15 +90,15 @@ function showMonitorEditDialog(parent, monitor, onSave) {
 
     // ---- Name ----
     const nameEntry = new Gtk.Entry({
-        placeholder_text: 'e.g. CPU Usage',
+        placeholder_text: _('e.g. CPU Usage'),
         text:             data.name,
         hexpand:          true,
     });
-    content.append(labeledRow('Name', nameEntry));
+    content.append(labeledRow(_('Name'), nameEntry));
 
     // ---- Description ----
     const descEntry = new Gtk.Entry({
-        placeholder_text: 'Optional: what this monitor measures',
+        placeholder_text: _('Optional: what this monitor measures'),
         text:             data.description ?? '',
         hexpand:          true,
     });
@@ -105,7 +107,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     // ---- Setup link (only for monitors that ship setup instructions) ----
     if (data.helpText) {
         const helpLink = new Gtk.Label({
-            label:       '<a href="#">Setup instructions…</a>',
+            label:       `<a href="#">${_('Setup instructions…')}</a>`,
             use_markup:  true,
             xalign:      0,
             css_classes: ['caption', 'dim-label'],
@@ -136,7 +138,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     cmdScroll.set_child(cmdView);
     const cmdFrame = new Gtk.Frame();
     cmdFrame.set_child(cmdScroll);
-    content.append(labeledRow('Command / Script', cmdFrame));
+    content.append(labeledRow(_('Command / Script'), cmdFrame));
 
     // ---- Type ----
     const typeDropDown = new Gtk.DropDown({
@@ -144,18 +146,18 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     });
     const typeIdx = MONITOR_TYPE_VALUES.indexOf(data.type ?? MonitorType.SHELL);
     typeDropDown.set_selected(typeIdx >= 0 ? typeIdx : 0);
-    content.append(labeledRow('Type', typeDropDown));
+    content.append(labeledRow(_('Type'), typeDropDown));
 
     // ---- Arguments ----
     const argsHeaderBox = new Gtk.Box({spacing: 8, hexpand: true});
     const argsTitle = new Gtk.Label({
-        label:       'Arguments',
+        label:       _('Arguments'),
         xalign:      0,
         hexpand:     true,
         css_classes: ['heading'],
     });
     const addArgBtn = new Gtk.Button({
-        label:       '+ Add',
+        label:       _('+ Add'),
         css_classes: ['flat'],
         valign:      Gtk.Align.CENTER,
     });
@@ -164,7 +166,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     content.append(argsHeaderBox);
 
     const argsHint = new Gtk.Label({
-        label:       'JS: injected as const NAME = value  ·  Shell: injected as export NAME=value',
+        label:       _('JS: injected as const NAME = value  ·  Shell: injected as export NAME=value'),
         xalign:      0,
         wrap:        true,
         css_classes: ['caption', 'dim-label'],
@@ -205,7 +207,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         const valueEntry = new Gtk.Entry({
             text:             (data.argValues ?? {})[arg.name] ?? '',
             hexpand:          true,
-            placeholder_text: 'value',
+            placeholder_text: _('value'),
         });
         valueEntry.connect('changed', () => {
             if (!data.argValues) data.argValues = {};
@@ -254,14 +256,14 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     // "Add Argument" — opens a small modal dialog for name + label
     addArgBtn.connect('clicked', () => {
         const addDlg = new Gtk.Dialog({
-            title:         'Add Argument',
+            title:         _('Add Argument'),
             transient_for: parent,
             modal:         true,
             default_width: 360,
             resizable:     false,
         });
-        addDlg.add_button('Cancel', Gtk.ResponseType.CANCEL);
-        addDlg.add_button('Add', Gtk.ResponseType.OK).add_css_class('suggested-action');
+        addDlg.add_button(_('Cancel'), Gtk.ResponseType.CANCEL);
+        addDlg.add_button(_('Add'), Gtk.ResponseType.OK).add_css_class('suggested-action');
 
         const dlgContent = addDlg.get_content_area();
         dlgContent.margin_top    = 12;
@@ -271,15 +273,15 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         dlgContent.spacing       = 8;
 
         const argNameEntry = new Gtk.Entry({
-            placeholder_text: 'Identifier, e.g. EXCLUDE (no spaces)',
+            placeholder_text: _('Identifier, e.g. EXCLUDE (no spaces)'),
             hexpand:          true,
         });
         const argLabelEntry = new Gtk.Entry({
-            placeholder_text: 'Display label, e.g. Exclude processes',
+            placeholder_text: _('Display label, e.g. Exclude processes'),
             hexpand:          true,
         });
-        dlgContent.append(labeledRow('Name', argNameEntry));
-        dlgContent.append(labeledRow('Label', argLabelEntry));
+        dlgContent.append(labeledRow(_('Name'), argNameEntry));
+        dlgContent.append(labeledRow(_('Label'), argLabelEntry));
 
         addDlg.connect('response', (_d, resp) => {
             if (resp === Gtk.ResponseType.OK) {
@@ -306,13 +308,13 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     // ---- Actions ----
     const actionsHeaderBox = new Gtk.Box({spacing: 8, hexpand: true});
     const actionsTitle = new Gtk.Label({
-        label:       'Actions',
+        label:       _('Actions'),
         xalign:      0,
         hexpand:     true,
         css_classes: ['heading'],
     });
     const addActionBtn = new Gtk.Button({
-        label:       '+ Add',
+        label:       _('+ Add'),
         css_classes: ['flat'],
         valign:      Gtk.Align.CENTER,
     });
@@ -321,7 +323,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     content.append(actionsHeaderBox);
 
     const actionsHint = new Gtk.Label({
-        label:       'Commands run on demand from the monitor icon in the menu.',
+        label:       _('Commands run on demand from the monitor icon in the menu.'),
         xalign:      0,
         wrap:        true,
         css_classes: ['caption', 'dim-label'],
@@ -345,7 +347,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         const topRow = new Gtk.Box({spacing: 8, hexpand: true});
         const labelEntry = new Gtk.Entry({
             text:             action.label ?? '',
-            placeholder_text: 'Action label',
+            placeholder_text: _('Action label'),
             hexpand:          true,
         });
         labelEntry.connect('changed', () => {
@@ -377,7 +379,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
 
         const cmdEntry = new Gtk.Entry({
             text:             action.command ?? '',
-            placeholder_text: 'Command or script',
+            placeholder_text: _('Command or script'),
             hexpand:          true,
             monospace:        true,
         });
@@ -389,7 +391,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         // Empty = always show the button.
         const guardEntry = new Gtk.Entry({
             text:             action.guard ?? '',
-            placeholder_text: "JS condition on value (e.g. value === 'disabled')",
+            placeholder_text: _("JS condition on value (e.g. value === 'disabled')"),
             hexpand:          true,
             monospace:        true,
         });
@@ -440,10 +442,10 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         hexpand:  true,
     });
     intervalSpin.set_value(data.intervalSeconds);
-    content.append(labeledRow('Interval (s)', intervalSpin));
+    content.append(labeledRow(_('Interval (s)'), intervalSpin));
 
     const intervalHint = new Gtk.Label({
-        label:       'Set to 0 for on-demand (click the monitor name to refresh manually).',
+        label:       _('Set to 0 for on-demand (click the monitor name to refresh manually).'),
         xalign:      0,
         wrap:        true,
         css_classes: ['caption', 'dim-label'],
@@ -469,10 +471,10 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     exprScroll.set_child(exprView);
     const exprFrame = new Gtk.Frame();
     exprFrame.set_child(exprScroll);
-    content.append(labeledRow('Interval Expr', exprFrame));
+    content.append(labeledRow(_('Interval Expr'), exprFrame));
 
     const exprHint = new Gtk.Label({
-        label:       'Optional JS expression. Must print() an interval in seconds. Access arguments as const NAME. Return 0 to skip this poll (re-checked every 60 s).',
+        label:       _('Optional JS expression. Must print() an interval in seconds. Access arguments as const NAME. Return 0 to skip this poll (re-checked every 60 s).'),
         xalign:      0,
         wrap:        true,
         css_classes: ['caption', 'dim-label'],
@@ -481,34 +483,34 @@ function showMonitorEditDialog(parent, monitor, onSave) {
 
     // ---- Output regex ----
     const regexEntry = new Gtk.Entry({
-        placeholder_text: 'Optional: capture group 1 used as value',
+        placeholder_text: _('Optional: capture group 1 used as value'),
         text:             data.outputRegex ?? '',
         hexpand:          true,
     });
-    content.append(labeledRow('Output Regex', regexEntry));
+    content.append(labeledRow(_('Output Regex'), regexEntry));
 
     // ---- Caution patterns ----
     const cautionEntry = new Gtk.Entry({
-        placeholder_text: 'e.g. >70  or  60-80  (comma-separated)',
+        placeholder_text: _('e.g. >70  or  60-80  (comma-separated)'),
         text:             (data.cautionPatterns ?? []).join(', '),
         hexpand:          true,
     });
-    content.append(labeledRow('Caution Patterns', cautionEntry));
+    content.append(labeledRow(_('Caution Patterns'), cautionEntry));
 
     // ---- Danger patterns ----
     const dangerEntry = new Gtk.Entry({
-        placeholder_text: 'e.g. >90  or  critical (comma-separated)',
+        placeholder_text: _('e.g. >90  or  critical (comma-separated)'),
         text:             (data.dangerPatterns ?? []).join(', '),
         hexpand:          true,
     });
-    content.append(labeledRow('Danger Patterns', dangerEntry));
+    content.append(labeledRow(_('Danger Patterns'), dangerEntry));
 
     // ---- Show Sparkline toggle ----
     const sparklineSwitch = new Gtk.Switch({
         active: data.showSparkline !== false,
         valign: Gtk.Align.CENTER,
     });
-    content.append(labeledRow('Show Sparkline', sparklineSwitch));
+    content.append(labeledRow(_('Show Sparkline'), sparklineSwitch));
 
     // ---- Error label ----
     const errorLabel = new Gtk.Label({
@@ -575,7 +577,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
  */
 function showExportDialog(settings, parent) {
     const dialog = new Gtk.FileDialog({
-        title:        'Export Monitors',
+        title:        _('Export Monitors'),
         initial_name: 'monitors.json',
     });
     dialog.save(parent, null, (_src, result) => {
@@ -600,7 +602,7 @@ function showExportDialog(settings, parent) {
  * @param {function():void} refresh - Called after monitors are updated.
  */
 function showImportDialog(settings, parent, refresh) {
-    const openDialog = new Gtk.FileDialog({title: 'Import Monitors'});
+    const openDialog = new Gtk.FileDialog({title: _('Import Monitors')});
     openDialog.open(parent, null, (_src, result) => {
         let parsed;
         try {
@@ -624,15 +626,15 @@ function showImportDialog(settings, parent, refresh) {
 
         // Ask the user whether to append or replace.
         const askDlg = new Gtk.Dialog({
-            title:         'Import Monitors',
+            title:         _('Import Monitors'),
             transient_for: parent,
             modal:         true,
         });
         const RESP_APPEND  = 1;
         const RESP_REPLACE = 2;
-        askDlg.add_button('Cancel',      Gtk.ResponseType.CANCEL);
-        askDlg.add_button('Append',      RESP_APPEND).add_css_class('suggested-action');
-        askDlg.add_button('Replace All', RESP_REPLACE);
+        askDlg.add_button(_('Cancel'),      Gtk.ResponseType.CANCEL);
+        askDlg.add_button(_('Append'),      RESP_APPEND).add_css_class('suggested-action');
+        askDlg.add_button(_('Replace All'), RESP_REPLACE);
 
         const lbl = new Gtk.Label({
             label:         `Found ${imported.length} monitor(s). Add to existing or replace all?`,
@@ -673,18 +675,19 @@ export default class MonishPreferences extends ExtensionPreferences {
      * @param {Adw.PreferencesWindow} window
      */
     fillPreferencesWindow(window) {
+        this.initTranslations('monish2@thm.link');
         const settings = this.getSettings();
 
         const page = new Adw.PreferencesPage({
-            title:     'Monitors',
+            title:     _('Monitors'),
             icon_name: 'utilities-system-monitor-symbolic',
         });
         window.add(page);
 
         // ---- My Monitors group ----
         const monitorsGroup = new Adw.PreferencesGroup({
-            title:       'My Monitors',
-            description: 'Monitors are executed on their configured interval.',
+            title:       _('My Monitors'),
+            description: _('Monitors are executed on their configured interval.'),
         });
         page.add(monitorsGroup);
 
@@ -701,9 +704,9 @@ export default class MonishPreferences extends ExtensionPreferences {
             margin_end:    12,
         });
 
-        const addBtn = new Gtk.Button({label: '+ Add', css_classes: ['suggested-action']});
-        const exportBtn = new Gtk.Button({label: 'Export'});
-        const importBtn = new Gtk.Button({label: 'Import'});
+        const addBtn = new Gtk.Button({label: _('+ Add'), css_classes: ['suggested-action']});
+        const exportBtn = new Gtk.Button({label: _('Export Monitors')});
+        const importBtn = new Gtk.Button({label: _('Import Monitors')});
 
         actionsBox.append(addBtn);
         actionsBox.append(exportBtn);
@@ -756,8 +759,8 @@ export default class MonishPreferences extends ExtensionPreferences {
 
         // ---- Presets group ----
         const presetsGroup = new Adw.PreferencesGroup({
-            title:       'Add Preset',
-            description: 'Click a preset to add it to your monitor list.',
+            title:       _('Add Preset'),
+            description: _('Click a preset to add it to your monitor list.'),
         });
         page.add(presetsGroup);
 
@@ -775,14 +778,14 @@ export default class MonishPreferences extends ExtensionPreferences {
 
         // ---- Schedule Settings group ----
         const scheduleGroup = new Adw.PreferencesGroup({
-            title:       'Schedule Settings',
-            description: 'Applied globally to all scheduled monitors.',
+            title:       _('Schedule Settings'),
+            description: _('Applied globally to all scheduled monitors.'),
         });
         page.add(scheduleGroup);
 
         const jitterRow = new Adw.ActionRow({
-            title:    'Schedule Jitter (%)',
-            subtitle: 'Random ±% offset on each poll interval — set to 0 for exact timing',
+            title:    _('Schedule Jitter (%)'),
+            subtitle: _('Random ±% offset on each poll interval — set to 0 for exact timing'),
         });
         const jitterSpin = new Gtk.SpinButton({
             adjustment: new Gtk.Adjustment({
@@ -805,11 +808,11 @@ export default class MonishPreferences extends ExtensionPreferences {
 
         // ---- On-demand time display ----
         const timeDisplayRow = new Adw.ActionRow({
-            title:    'On-demand time display',
-            subtitle: 'Show collection time beneath on-demand monitor values',
+            title:    _('On-demand time display'),
+            subtitle: _('Show collection time beneath on-demand monitor values'),
         });
         const TIME_DISPLAY_VALUES  = ['none', 'age', 'timestamp'];
-        const TIME_DISPLAY_LABELS  = ['None', 'Age (relative)', 'Timestamp (HH:MM:SS)'];
+        const TIME_DISPLAY_LABELS  = [_('None'), _('Age (relative)'), _('Timestamp (HH:MM:SS)')];
         const timeDisplayDrop = new Gtk.DropDown({
             model:  Gtk.StringList.new(TIME_DISPLAY_LABELS),
             valign: Gtk.Align.CENTER,
@@ -827,7 +830,7 @@ export default class MonishPreferences extends ExtensionPreferences {
 
         // ---- Debug logging toggle ----
         const debugRow = new Adw.ActionRow({
-            title:    'Debug Logging',
+            title:    _('Debug Logging'),
             subtitle: 'Log command executions to debug.log; also logs startup timing to the journal (journalctl -b | grep [monish2])',
         });
         const debugToggle = new Gtk.Switch({
@@ -842,11 +845,11 @@ export default class MonishPreferences extends ExtensionPreferences {
 
         // ---- View log button ----
         const logRow = new Adw.ActionRow({
-            title:    'Debug Log',
-            subtitle: 'View the debug log file',
+            title:    _('Debug Log'),
+            subtitle: _('View the debug log file'),
         });
         const viewLogBtn = new Gtk.Button({
-            label:       'View Log',
+            label:       _('View Log'),
             valign:      Gtk.Align.CENTER,
             css_classes: ['flat'],
         });
@@ -888,7 +891,7 @@ function showDebugLogWindow(parent, logPath) {
     scroll.set_child(view);
 
     const clearBtn = new Gtk.Button({
-        label:       'Clear Log',
+        label:       _('Clear Log'),
         css_classes: ['destructive-action'],
     });
     clearBtn.connect('clicked', () => {
@@ -909,7 +912,7 @@ function showDebugLogWindow(parent, logPath) {
     toolbarView.set_content(scroll);
 
     const win = new Adw.Window({
-        title:          'Debug Log',
+        title:          _('Debug Log'),
         transient_for:  parent,
         modal:          false,
         default_width:  720,
@@ -944,13 +947,13 @@ function showHelpDialog(parent, text) {
     });
 
     const dialog = new Gtk.Dialog({
-        title:         'Setup Instructions',
+        title:         _('Setup Instructions'),
         transient_for: parent,
         modal:         true,
         default_width: 560,
         resizable:     false,
     });
-    dialog.add_button('Close', Gtk.ResponseType.CLOSE);
+    dialog.add_button(_('Close'), Gtk.ResponseType.CLOSE);
     dialog.get_content_area().append(label);
     dialog.connect('response', () => dialog.destroy());
     dialog.present();
@@ -979,8 +982,8 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
 
     if (monitors.length === 0) {
         const emptyRow = new Adw.ActionRow({
-            title:     'No monitors yet',
-            subtitle:  'Use "Add Monitor" or a preset below.',
+            title:     _('No monitors yet'),
+            subtitle:  _('Use "Add Monitor" or a preset below.'),
             sensitive: false,
         });
         group.add(emptyRow);
@@ -1025,7 +1028,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             icon_name:    'go-up-symbolic',
             valign:       Gtk.Align.CENTER,
             css_classes:  ['flat'],
-            tooltip_text: 'Move up',
+            tooltip_text: _('Move up'),
             sensitive:    !isFirst,
         });
         upBtn.connect('clicked', () => {
@@ -1043,7 +1046,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             icon_name:    'go-down-symbolic',
             valign:       Gtk.Align.CENTER,
             css_classes:  ['flat'],
-            tooltip_text: 'Move down',
+            tooltip_text: _('Move down'),
             sensitive:    !isLast,
         });
         downBtn.connect('clicked', () => {
@@ -1061,7 +1064,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             icon_name:   'document-edit-symbolic',
             valign:      Gtk.Align.CENTER,
             css_classes: ['flat'],
-            tooltip_text: 'Edit',
+            tooltip_text: _('Edit'),
         });
         editBtn.connect('clicked', () => {
             showMonitorEditDialog(parentWindow, monitor, (updated) => {
@@ -1075,7 +1078,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             icon_name:   'edit-copy-symbolic',
             valign:      Gtk.Align.CENTER,
             css_classes: ['flat'],
-            tooltip_text: 'Duplicate',
+            tooltip_text: _('Duplicate'),
         });
         dupBtn.connect('clicked', () => {
             const all = deserializeMonitors(settings.get_string('monitors'));
@@ -1093,7 +1096,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             icon_name:   'user-trash-symbolic',
             valign:      Gtk.Align.CENTER,
             css_classes: ['flat', 'destructive-action'],
-            tooltip_text: 'Delete',
+            tooltip_text: _('Delete'),
         });
         delBtn.connect('clicked', () => {
             const all = deserializeMonitors(settings.get_string('monitors'));
@@ -1203,7 +1206,7 @@ function buildPresetRows(group, settings, refresh) {
             icon_name:    'list-add-symbolic',
             valign:       Gtk.Align.CENTER,
             css_classes:  ['flat'],
-            tooltip_text: 'Add to my monitors',
+            tooltip_text: _('Add to my monitors'),
         });
         addBtn.connect('clicked', () => {
             const current = deserializeMonitors(settings.get_string('monitors'));
@@ -1219,8 +1222,8 @@ function buildPresetRows(group, settings, refresh) {
 
     if (added.length === 0) {
         const emptyRow = new Adw.ActionRow({
-            title:     'All presets added',
-            subtitle:  'Every available preset is already in your monitors.',
+            title:     _('All presets added'),
+            subtitle:  _('Every available preset is already in your monitors.'),
             sensitive: false,
         });
         group.add(emptyRow);

@@ -31,4 +31,9 @@ describe('metadata.json', () => {
             expect(typeof v).toBe('string');
         }
     });
+
+    it('declares session-modes: ["user"] — ISSUE 104', () => {
+        // Prevents EGO validator warning about unset session-modes.
+        expect(metadata['session-modes']).toEqual(['user']);
+    });
 });

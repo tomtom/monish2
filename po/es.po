@@ -1,0 +1,239 @@
+# Spanish translation for monish2 GNOME Shell Extension
+# Copyright (C) 2024 Tom Link
+# This file is distributed under the same license as the monish2 package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: monish2@thm.link\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-03 00:00+0000\n"
+"PO-Revision-Date: 2026-06-03 00:00+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "No monitors configured"
+msgstr "No hay monitores configurados"
+
+msgid "Settings"
+msgstr "Configuración"
+
+msgid "Shell"
+msgstr "Shell"
+
+msgid "JavaScript"
+msgstr "JavaScript"
+
+msgid "Add Monitor"
+msgstr "Agregar monitor"
+
+msgid "Edit Monitor"
+msgstr "Editar monitor"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "e.g. CPU Usage"
+msgstr "p. ej. Uso de CPU"
+
+msgid "Optional: what this monitor measures"
+msgstr "Opcional: qué mide este monitor"
+
+msgid "Setup instructions…"
+msgstr "Instrucciones de configuración…"
+
+msgid "Command / Script"
+msgstr "Comando / Script"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Arguments"
+msgstr "Argumentos"
+
+msgid "+ Add"
+msgstr "+ Agregar"
+
+msgid "JS: injected as const NAME = value  ·  Shell: injected as export NAME=value"
+msgstr "JS: inyectado como const NAME = value  ·  Shell: inyectado como export NAME=value"
+
+msgid "value"
+msgstr "valor"
+
+msgid "Add Argument"
+msgstr "Agregar argumento"
+
+msgid "Add"
+msgstr "Agregar"
+
+msgid "Identifier, e.g. EXCLUDE (no spaces)"
+msgstr "Identificador, p. ej. EXCLUDE (sin espacios)"
+
+msgid "Display label, e.g. Exclude processes"
+msgstr "Etiqueta de visualización, p. ej. Excluir procesos"
+
+msgid "Label"
+msgstr "Etiqueta"
+
+msgid "Actions"
+msgstr "Acciones"
+
+msgid "Commands run on demand from the monitor icon in the menu."
+msgstr "Comandos ejecutados bajo demanda desde el icono de monitor en el menú."
+
+msgid "Action label"
+msgstr "Etiqueta de acción"
+
+msgid "Command or script"
+msgstr "Comando o script"
+
+msgid "JS condition on value (e.g. value === 'disabled')"
+msgstr "Condición JS sobre el valor (p. ej. value === 'disabled')"
+
+msgid "Interval (s)"
+msgstr "Intervalo (s)"
+
+msgid "Set to 0 for on-demand (click the monitor name to refresh manually)."
+msgstr "Establecer en 0 para bajo demanda (hacer clic en el nombre del monitor para actualizar manualmente)."
+
+msgid "Interval Expr"
+msgstr "Expr. de intervalo"
+
+msgid "Optional JS expression. Must print() an interval in seconds. Access arguments as const NAME. Return 0 to skip this poll (re-checked every 60 s)."
+msgstr "Expresión JS opcional. Debe llamar a print() con un intervalo en segundos. Acceder a los argumentos como const NAME. Devolver 0 para omitir este sondeo (revisado nuevamente cada 60 s)."
+
+msgid "Optional: capture group 1 used as value"
+msgstr "Opcional: el grupo de captura 1 se usa como valor"
+
+msgid "Output Regex"
+msgstr "Regex de salida"
+
+msgid "e.g. >70  or  60-80  (comma-separated)"
+msgstr "p. ej. >70  o  60-80  (separados por comas)"
+
+msgid "Caution Patterns"
+msgstr "Patrones de precaución"
+
+msgid "e.g. >90  or  critical (comma-separated)"
+msgstr "p. ej. >90  o  crítico  (separados por comas)"
+
+msgid "Danger Patterns"
+msgstr "Patrones de peligro"
+
+msgid "Show Sparkline"
+msgstr "Mostrar sparkline"
+
+msgid "Export Monitors"
+msgstr "Exportar monitores"
+
+msgid "Import Monitors"
+msgstr "Importar monitores"
+
+msgid "Append"
+msgstr "Añadir"
+
+msgid "Replace All"
+msgstr "Reemplazar todo"
+
+msgid "Monitors"
+msgstr "Monitores"
+
+msgid "My Monitors"
+msgstr "Mis monitores"
+
+msgid "Monitors are executed on their configured interval."
+msgstr "Los monitores se ejecutan en su intervalo configurado."
+
+msgid "Click a preset to add it to your monitor list."
+msgstr "Hacer clic en un preajuste para agregarlo a la lista de monitores."
+
+msgid "Add Preset"
+msgstr "Agregar preajuste"
+
+msgid "Schedule Settings"
+msgstr "Configuración de programación"
+
+msgid "Applied globally to all scheduled monitors."
+msgstr "Aplicado globalmente a todos los monitores programados."
+
+msgid "Schedule Jitter (%)"
+msgstr "Fluctuación de programación (%)"
+
+msgid "Random ±% offset on each poll interval — set to 0 for exact timing"
+msgstr "Desplazamiento aleatorio ±% en cada intervalo de sondeo — establecer en 0 para temporización exacta"
+
+msgid "On-demand time display"
+msgstr "Visualización de tiempo bajo demanda"
+
+msgid "Show collection time beneath on-demand monitor values"
+msgstr "Mostrar el tiempo de recopilación bajo los valores del monitor bajo demanda"
+
+msgid "None"
+msgstr "Ninguno"
+
+msgid "Age (relative)"
+msgstr "Antigüedad (relativa)"
+
+msgid "Timestamp (HH:MM:SS)"
+msgstr "Marca de tiempo (HH:MM:SS)"
+
+msgid "Debug Logging"
+msgstr "Registro de depuración"
+
+msgid "Debug Log"
+msgstr "Registro de depuración"
+
+msgid "View the debug log file"
+msgstr "Ver el archivo de registro de depuración"
+
+msgid "View Log"
+msgstr "Ver registro"
+
+msgid "Clear Log"
+msgstr "Borrar registro"
+
+msgid "Setup Instructions"
+msgstr "Instrucciones de configuración"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "No monitors yet"
+msgstr "Aún no hay monitores"
+
+msgid "Use \"Add Monitor\" or a preset below."
+msgstr "Usar «Agregar monitor» o un preajuste a continuación."
+
+msgid "Move up"
+msgstr "Mover arriba"
+
+msgid "Move down"
+msgstr "Mover abajo"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Duplicate"
+msgstr "Duplicar"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Add to my monitors"
+msgstr "Agregar a mis monitores"
+
+msgid "All presets added"
+msgstr "Todos los preajustes agregados"
+
+msgid "Every available preset is already in your monitors."
+msgstr "Todos los preajustes disponibles ya están en sus monitores."

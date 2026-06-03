@@ -41,6 +41,8 @@ import {
 } from './lib/monitor.js';
 import {executeCommand, executeJavaScript} from './lib/executor.js';
 
+const _ = (str) => GLib.dgettext('monish2@thm.link', str);
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -189,7 +191,7 @@ class MonishIndicator extends PanelMenu.Button {
         const enabled  = this._monitors.filter(m => m.enabled);
 
         if (enabled.length === 0) {
-            const empty = new PopupMenu.PopupMenuItem('No monitors configured', {reactive: false});
+            const empty = new PopupMenu.PopupMenuItem(_('No monitors configured'), {reactive: false});
             this.menu.addMenuItem(empty);
         } else {
             for (const monitor of enabled) {
@@ -199,7 +201,7 @@ class MonishIndicator extends PanelMenu.Button {
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-        const settingsItem = new PopupMenu.PopupMenuItem('Settings');
+        const settingsItem = new PopupMenu.PopupMenuItem(_('Settings'));
         settingsItem.connect('activate', () => {
             this.menu.close();
             this._openPrefs();
@@ -858,6 +860,7 @@ class MonishIndicator extends PanelMenu.Button {
 export default class MonishExtension extends Extension {
 
     enable() {
+        this.initTranslations('monish2@thm.link');
         this._settings  = this.getSettings();
         /* DEBUG_ONLY_BEGIN */
         const _dbg    = this._settings.get_boolean(DEBUG_LOG_KEY);

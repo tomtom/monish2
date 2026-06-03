@@ -1,0 +1,239 @@
+# Finnish translation for monish2 GNOME Shell Extension
+# Copyright (C) 2024 Tom Link
+# This file is distributed under the same license as the monish2 package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: monish2@thm.link\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-03 00:00+0000\n"
+"PO-Revision-Date: 2026-06-03 00:00+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: Finnish\n"
+"Language: fi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "No monitors configured"
+msgstr "Ei määritettyjä monitoreja"
+
+msgid "Settings"
+msgstr "Asetukset"
+
+msgid "Shell"
+msgstr "Shell"
+
+msgid "JavaScript"
+msgstr "JavaScript"
+
+msgid "Add Monitor"
+msgstr "Lisää monitori"
+
+msgid "Edit Monitor"
+msgstr "Muokkaa monitoria"
+
+msgid "Cancel"
+msgstr "Peruuta"
+
+msgid "Save"
+msgstr "Tallenna"
+
+msgid "Name"
+msgstr "Nimi"
+
+msgid "e.g. CPU Usage"
+msgstr "esim. Suorittimen käyttö"
+
+msgid "Optional: what this monitor measures"
+msgstr "Valinnainen: mitä tämä monitori mittaa"
+
+msgid "Setup instructions…"
+msgstr "Asennusohjeet…"
+
+msgid "Command / Script"
+msgstr "Komento / Skripti"
+
+msgid "Type"
+msgstr "Tyyppi"
+
+msgid "Arguments"
+msgstr "Argumentit"
+
+msgid "+ Add"
+msgstr "+ Lisää"
+
+msgid "JS: injected as const NAME = value  ·  Shell: injected as export NAME=value"
+msgstr "JS: injektoitu muodossa const NAME = value  ·  Shell: injektoitu muodossa export NAME=value"
+
+msgid "value"
+msgstr "arvo"
+
+msgid "Add Argument"
+msgstr "Lisää argumentti"
+
+msgid "Add"
+msgstr "Lisää"
+
+msgid "Identifier, e.g. EXCLUDE (no spaces)"
+msgstr "Tunniste, esim. EXCLUDE (ei välilyöntejä)"
+
+msgid "Display label, e.g. Exclude processes"
+msgstr "Näyttötunniste, esim. Sulje pois prosessit"
+
+msgid "Label"
+msgstr "Tunniste"
+
+msgid "Actions"
+msgstr "Toiminnot"
+
+msgid "Commands run on demand from the monitor icon in the menu."
+msgstr "Komennot suoritetaan pyydettäessä valikon monitorikuvakkeesta."
+
+msgid "Action label"
+msgstr "Toimintotunniste"
+
+msgid "Command or script"
+msgstr "Komento tai skripti"
+
+msgid "JS condition on value (e.g. value === 'disabled')"
+msgstr "JS-ehto arvolle (esim. value === 'disabled')"
+
+msgid "Interval (s)"
+msgstr "Aikaväli (s)"
+
+msgid "Set to 0 for on-demand (click the monitor name to refresh manually)."
+msgstr "Aseta 0 pyydettäessä-tilaan (napsauta monitorin nimeä päivittääksesi manuaalisesti)."
+
+msgid "Interval Expr"
+msgstr "Aikaväliilmaisu"
+
+msgid "Optional JS expression. Must print() an interval in seconds. Access arguments as const NAME. Return 0 to skip this poll (re-checked every 60 s)."
+msgstr "Valinnainen JS-ilmaisu. Täytyy kutsua print()-funktiota aikavälin sekunneilla. Pääsy argumentteihin muodossa const NAME. Palauta 0 ohittaaksesi tämän kyselyn (tarkistetaan uudelleen joka 60. s)."
+
+msgid "Optional: capture group 1 used as value"
+msgstr "Valinnainen: sieppausryhmä 1 käytetään arvona"
+
+msgid "Output Regex"
+msgstr "Tulosteen regex"
+
+msgid "e.g. >70  or  60-80  (comma-separated)"
+msgstr "esim. >70  tai  60-80  (pilkuilla erotettu)"
+
+msgid "Caution Patterns"
+msgstr "Varoitusmallit"
+
+msgid "e.g. >90  or  critical (comma-separated)"
+msgstr "esim. >90  tai  kriittinen  (pilkuilla erotettu)"
+
+msgid "Danger Patterns"
+msgstr "Vaaramallit"
+
+msgid "Show Sparkline"
+msgstr "Näytä sparkline"
+
+msgid "Export Monitors"
+msgstr "Vie monitorit"
+
+msgid "Import Monitors"
+msgstr "Tuo monitorit"
+
+msgid "Append"
+msgstr "Liitä"
+
+msgid "Replace All"
+msgstr "Korvaa kaikki"
+
+msgid "Monitors"
+msgstr "Monitorit"
+
+msgid "My Monitors"
+msgstr "Omat monitorit"
+
+msgid "Monitors are executed on their configured interval."
+msgstr "Monitorit suoritetaan määritetyllä aikavälillä."
+
+msgid "Click a preset to add it to your monitor list."
+msgstr "Napsauta esiasettamaa lisätäksesi sen monitorilistaasi."
+
+msgid "Add Preset"
+msgstr "Lisää esiasetus"
+
+msgid "Schedule Settings"
+msgstr "Aikatauluasetukset"
+
+msgid "Applied globally to all scheduled monitors."
+msgstr "Sovelletaan globaalisti kaikkiin aikataulutettuihin monitoreihin."
+
+msgid "Schedule Jitter (%)"
+msgstr "Aikataulun jitter (%)"
+
+msgid "Random ±% offset on each poll interval — set to 0 for exact timing"
+msgstr "Satunnainen ±%-poikkeama jokaisella kyselyaikavälillä — aseta 0 tarkalle ajoitukselle"
+
+msgid "On-demand time display"
+msgstr "Pyydettäessä-aikaesitys"
+
+msgid "Show collection time beneath on-demand monitor values"
+msgstr "Näytä keräysaika pyydettäessä-monitoriarvojen alla"
+
+msgid "None"
+msgstr "Ei mitään"
+
+msgid "Age (relative)"
+msgstr "Ikä (suhteellinen)"
+
+msgid "Timestamp (HH:MM:SS)"
+msgstr "Aikaleima (HH:MM:SS)"
+
+msgid "Debug Logging"
+msgstr "Virheenkorjausloki"
+
+msgid "Debug Log"
+msgstr "Virheenkorjausloki"
+
+msgid "View the debug log file"
+msgstr "Tarkastele virheenkorjauslokitiedostoa"
+
+msgid "View Log"
+msgstr "Tarkastele lokia"
+
+msgid "Clear Log"
+msgstr "Tyhjennä loki"
+
+msgid "Setup Instructions"
+msgstr "Asennusohjeet"
+
+msgid "Close"
+msgstr "Sulje"
+
+msgid "No monitors yet"
+msgstr "Ei vielä monitoreja"
+
+msgid "Use \"Add Monitor\" or a preset below."
+msgstr "Käytä «Lisää monitori» -toimintoa tai alla olevaa esiasetusta."
+
+msgid "Move up"
+msgstr "Siirrä ylös"
+
+msgid "Move down"
+msgstr "Siirrä alas"
+
+msgid "Edit"
+msgstr "Muokkaa"
+
+msgid "Duplicate"
+msgstr "Kopioi"
+
+msgid "Delete"
+msgstr "Poista"
+
+msgid "Add to my monitors"
+msgstr "Lisää omiin monitoreihin"
+
+msgid "All presets added"
+msgstr "Kaikki esiasetukset lisätty"
+
+msgid "Every available preset is already in your monitors."
+msgstr "Kaikki saatavilla olevat esiasetukset ovat jo monitoriteissasi."

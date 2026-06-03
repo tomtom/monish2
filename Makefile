@@ -16,36 +16,45 @@ UUID        := monish2@thm.link
 INSTALL_DIR := $(HOME)/.local/share/gnome-shell/extensions/$(UUID)
 SCHEMA_DIR  := schemas
 
-.PHONY: all compile-schemas install uninstall zip shexli test lint audit test-all clean
+.PHONY: all compile-schemas compile-translations install uninstall zip shexli test lint audit test-all clean
 
-all: compile-schemas
+all: compile-schemas compile-translations
 
 # Compile the GSettings schema so GNOME Shell can load it.
 # Prerequisite: glib-compile-schemas must be installed.
 compile-schemas:
 	glib-compile-schemas $(SCHEMA_DIR)/
 
+# Compile .po files to binary .mo files for each language.
+# Prerequisite: msgfmt (gettext) must be installed.
+compile-translations:
+	@for po in po/*.po; do \
+		lang=$$(basename $$po .po); \
+		mkdir -p locale/$$lang/LC_MESSAGES; \
+		msgfmt -o locale/$$lang/LC_MESSAGES/$(UUID).mo $$po; \
+	done
+
 # Install extension files into the user's GNOME Shell extension directory.
-install: compile-schemas
+install: compile-schemas compile-translations
 	mkdir -p $(INSTALL_DIR)
 	cp -r metadata.json extension.js prefs.js stylesheet.css \
-	      lib icons schemas $(INSTALL_DIR)/
+	      lib icons schemas locale $(INSTALL_DIR)/
 	@echo "Installed to $(INSTALL_DIR)"
 	@echo "Restart GNOME Shell (Alt+F2 → 'r') or log out to activate."
 
 # Build a ZIP suitable for upload to extensions.gnome.org.
 # Debug-only code (/* DEBUG_ONLY_BEGIN */ … /* DEBUG_ONLY_END */) is stripped
 # from extension.js so the distribution build has no log() calls.
-zip: compile-schemas
+zip: compile-schemas compile-translations
 	rm -f $(UUID).shell-extension.zip
 	$(eval DISTDIR := $(shell mktemp -d))
 	sed '/\/\* DEBUG_ONLY_BEGIN \*\//,/\/\* DEBUG_ONLY_END \*\//d' \
 		extension.js > $(DISTDIR)/extension.js
 	cp metadata.json prefs.js stylesheet.css $(DISTDIR)/
-	cp -r lib icons schemas $(DISTDIR)/
+	cp -r lib icons schemas locale $(DISTDIR)/
 	rm -f $(DISTDIR)/schemas/gschemas.compiled
 	cd $(DISTDIR) && zip -r $(CURDIR)/$(UUID).shell-extension.zip \
-		metadata.json extension.js prefs.js stylesheet.css lib icons schemas
+		metadata.json extension.js prefs.js stylesheet.css lib icons schemas locale
 	rm -rf $(DISTDIR)
 	@echo "Created $(UUID).shell-extension.zip"
 
@@ -74,8 +83,9 @@ audit:
 test-all: lint audit test
 	@echo "All checks passed."
 
-# Remove compiled schemas and node_modules artefacts.
+# Remove compiled schemas, compiled translations, and node_modules artefacts.
 clean:
 	rm -f $(SCHEMA_DIR)/gschemas.compiled
 	rm -f $(UUID).shell-extension.zip
 	rm -rf node_modules
+	rm -rf locale

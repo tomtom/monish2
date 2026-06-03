@@ -1,0 +1,239 @@
+# Swedish translation for monish2 GNOME Shell Extension
+# Copyright (C) 2024 Tom Link
+# This file is distributed under the same license as the monish2 package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: monish2@thm.link\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-03 00:00+0000\n"
+"PO-Revision-Date: 2026-06-03 00:00+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: Swedish\n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "No monitors configured"
+msgstr "Inga monitorer konfigurerade"
+
+msgid "Settings"
+msgstr "Inställningar"
+
+msgid "Shell"
+msgstr "Shell"
+
+msgid "JavaScript"
+msgstr "JavaScript"
+
+msgid "Add Monitor"
+msgstr "Lägg till monitor"
+
+msgid "Edit Monitor"
+msgstr "Redigera monitor"
+
+msgid "Cancel"
+msgstr "Avbryt"
+
+msgid "Save"
+msgstr "Spara"
+
+msgid "Name"
+msgstr "Namn"
+
+msgid "e.g. CPU Usage"
+msgstr "t.ex. CPU-användning"
+
+msgid "Optional: what this monitor measures"
+msgstr "Valfritt: vad denna monitor mäter"
+
+msgid "Setup instructions…"
+msgstr "Installationsanvisningar…"
+
+msgid "Command / Script"
+msgstr "Kommando / Skript"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Arguments"
+msgstr "Argument"
+
+msgid "+ Add"
+msgstr "+ Lägg till"
+
+msgid "JS: injected as const NAME = value  ·  Shell: injected as export NAME=value"
+msgstr "JS: injiceras som const NAME = value  ·  Shell: injiceras som export NAME=value"
+
+msgid "value"
+msgstr "värde"
+
+msgid "Add Argument"
+msgstr "Lägg till argument"
+
+msgid "Add"
+msgstr "Lägg till"
+
+msgid "Identifier, e.g. EXCLUDE (no spaces)"
+msgstr "Identifierare, t.ex. EXCLUDE (inga mellanslag)"
+
+msgid "Display label, e.g. Exclude processes"
+msgstr "Visningsetikett, t.ex. Exkludera processer"
+
+msgid "Label"
+msgstr "Etikett"
+
+msgid "Actions"
+msgstr "Åtgärder"
+
+msgid "Commands run on demand from the monitor icon in the menu."
+msgstr "Kommandon som körs på begäran från monitorikonen i menyn."
+
+msgid "Action label"
+msgstr "Åtgärdsetikett"
+
+msgid "Command or script"
+msgstr "Kommando eller skript"
+
+msgid "JS condition on value (e.g. value === 'disabled')"
+msgstr "JS-villkor på värdet (t.ex. value === 'disabled')"
+
+msgid "Interval (s)"
+msgstr "Intervall (s)"
+
+msgid "Set to 0 for on-demand (click the monitor name to refresh manually)."
+msgstr "Ange 0 för på begäran (klicka på monitornamnet för att uppdatera manuellt)."
+
+msgid "Interval Expr"
+msgstr "Intervalluttryck"
+
+msgid "Optional JS expression. Must print() an interval in seconds. Access arguments as const NAME. Return 0 to skip this poll (re-checked every 60 s)."
+msgstr "Valfritt JS-uttryck. Måste anropa print() med ett intervall i sekunder. Åtkomst till argument som const NAME. Returnera 0 för att hoppa över denna polling (kontrolleras på nytt var 60:e s)."
+
+msgid "Optional: capture group 1 used as value"
+msgstr "Valfritt: fångstgrupp 1 används som värde"
+
+msgid "Output Regex"
+msgstr "Utdata-regex"
+
+msgid "e.g. >70  or  60-80  (comma-separated)"
+msgstr "t.ex. >70  eller  60-80  (kommaseparerat)"
+
+msgid "Caution Patterns"
+msgstr "Varningmönster"
+
+msgid "e.g. >90  or  critical (comma-separated)"
+msgstr "t.ex. >90  eller  kritisk  (kommaseparerat)"
+
+msgid "Danger Patterns"
+msgstr "Faromönster"
+
+msgid "Show Sparkline"
+msgstr "Visa sparkline"
+
+msgid "Export Monitors"
+msgstr "Exportera monitorer"
+
+msgid "Import Monitors"
+msgstr "Importera monitorer"
+
+msgid "Append"
+msgstr "Lägg till"
+
+msgid "Replace All"
+msgstr "Ersätt alla"
+
+msgid "Monitors"
+msgstr "Monitorer"
+
+msgid "My Monitors"
+msgstr "Mina monitorer"
+
+msgid "Monitors are executed on their configured interval."
+msgstr "Monitorer körs på sitt konfigurerade intervall."
+
+msgid "Click a preset to add it to your monitor list."
+msgstr "Klicka på en förinställning för att lägga till den i din monitorlista."
+
+msgid "Add Preset"
+msgstr "Lägg till förinställning"
+
+msgid "Schedule Settings"
+msgstr "Schemainställningar"
+
+msgid "Applied globally to all scheduled monitors."
+msgstr "Tillämpas globalt på alla schemalagda monitorer."
+
+msgid "Schedule Jitter (%)"
+msgstr "Schemajitter (%)"
+
+msgid "Random ±% offset on each poll interval — set to 0 for exact timing"
+msgstr "Slumpmässig ±%-förskjutning på varje pollintervall — ange 0 för exakt timing"
+
+msgid "On-demand time display"
+msgstr "Tidsvisning på begäran"
+
+msgid "Show collection time beneath on-demand monitor values"
+msgstr "Visa insamlingstid under på-begäran-monitorvärden"
+
+msgid "None"
+msgstr "Ingen"
+
+msgid "Age (relative)"
+msgstr "Ålder (relativ)"
+
+msgid "Timestamp (HH:MM:SS)"
+msgstr "Tidsstämpel (HH:MM:SS)"
+
+msgid "Debug Logging"
+msgstr "Felsökningsloggning"
+
+msgid "Debug Log"
+msgstr "Felsökningslogg"
+
+msgid "View the debug log file"
+msgstr "Visa felsökningsloggfilen"
+
+msgid "View Log"
+msgstr "Visa logg"
+
+msgid "Clear Log"
+msgstr "Rensa logg"
+
+msgid "Setup Instructions"
+msgstr "Installationsanvisningar"
+
+msgid "Close"
+msgstr "Stäng"
+
+msgid "No monitors yet"
+msgstr "Inga monitorer än"
+
+msgid "Use \"Add Monitor\" or a preset below."
+msgstr "Använd «Lägg till monitor» eller en förinställning nedan."
+
+msgid "Move up"
+msgstr "Flytta upp"
+
+msgid "Move down"
+msgstr "Flytta ned"
+
+msgid "Edit"
+msgstr "Redigera"
+
+msgid "Duplicate"
+msgstr "Duplicera"
+
+msgid "Delete"
+msgstr "Ta bort"
+
+msgid "Add to my monitors"
+msgstr "Lägg till i mina monitorer"
+
+msgid "All presets added"
+msgstr "Alla förinställningar tillagda"
+
+msgid "Every available preset is already in your monitors."
+msgstr "Alla tillgängliga förinställningar finns redan i dina monitorer."

@@ -9,7 +9,7 @@
  * This test guards against accidental reversion to the old (broken) path.
  */
 
-import {readFileSync} from 'fs';
+import {readFileSync, existsSync, readdirSync} from 'fs';
 import {fileURLToPath} from 'url';
 import {dirname, join} from 'path';
 import {describe, it, expect} from '@jest/globals';
@@ -838,5 +838,36 @@ describe('extension.js interval expression \u2014 ISSUE 93', () => {
     it('prefs edit dialog includes interval expression field', () => {
         expect(prefsSource).toContain('intervalExpression');
         expect(prefsSource).toContain('Interval Expr');
+    });
+});
+
+describe('i18n \u2014 translation infrastructure', () => {
+    it('extension.js uses GLib.dgettext for translations', () => {
+        expect(extensionSource).toContain('GLib.dgettext');
+    });
+
+    it('prefs.js uses GLib.dgettext for translations', () => {
+        expect(prefsSource).toContain('GLib.dgettext');
+    });
+
+    it('extension.js calls initTranslations in enable()', () => {
+        expect(extensionSource).toContain('initTranslations');
+    });
+
+    it('prefs.js calls initTranslations in fillPreferencesWindow()', () => {
+        expect(prefsSource).toContain('initTranslations');
+    });
+
+    it('po/monish2@thm.link.pot template file exists', () => {
+        const potPath = join(__dirname, '..', 'po', 'monish2@thm.link.pot');
+        expect(existsSync(potPath)).toBe(true);
+    });
+
+    it('at least 5 .po locale files exist in po/', () => {
+        const poDir = join(__dirname, '..', 'po');
+        const poFiles = existsSync(poDir)
+            ? readdirSync(poDir).filter(f => f.endsWith('.po'))
+            : [];
+        expect(poFiles.length).toBeGreaterThanOrEqual(5);
     });
 });

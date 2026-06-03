@@ -1,0 +1,250 @@
+# GNOME Shell Extension monish2 - Translation Template
+# Copyright (C) 2024 Tom Link
+# This file is distributed under the same license as the monish2 package.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: monish2@thm.link\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-03 00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. extension.js
+msgid "No monitors configured"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+#. prefs.js — MONITOR_TYPE_LABELS
+msgid "Shell"
+msgstr ""
+
+msgid "JavaScript"
+msgstr ""
+
+#. prefs.js — showMonitorEditDialog
+msgid "Add Monitor"
+msgstr ""
+
+msgid "Edit Monitor"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "e.g. CPU Usage"
+msgstr ""
+
+msgid "Optional: what this monitor measures"
+msgstr ""
+
+msgid "Setup instructions…"
+msgstr ""
+
+msgid "Command / Script"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Arguments"
+msgstr ""
+
+msgid "+ Add"
+msgstr ""
+
+msgid "JS: injected as const NAME = value  ·  Shell: injected as export NAME=value"
+msgstr ""
+
+msgid "value"
+msgstr ""
+
+msgid "Add Argument"
+msgstr ""
+
+msgid "Add"
+msgstr ""
+
+msgid "Identifier, e.g. EXCLUDE (no spaces)"
+msgstr ""
+
+msgid "Display label, e.g. Exclude processes"
+msgstr ""
+
+msgid "Label"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Commands run on demand from the monitor icon in the menu."
+msgstr ""
+
+msgid "Action label"
+msgstr ""
+
+msgid "Command or script"
+msgstr ""
+
+msgid "JS condition on value (e.g. value === 'disabled')"
+msgstr ""
+
+msgid "Interval (s)"
+msgstr ""
+
+msgid "Set to 0 for on-demand (click the monitor name to refresh manually)."
+msgstr ""
+
+msgid "Interval Expr"
+msgstr ""
+
+msgid "Optional JS expression. Must print() an interval in seconds. Access arguments as const NAME. Return 0 to skip this poll (re-checked every 60 s)."
+msgstr ""
+
+msgid "Optional: capture group 1 used as value"
+msgstr ""
+
+msgid "Output Regex"
+msgstr ""
+
+msgid "e.g. >70  or  60-80  (comma-separated)"
+msgstr ""
+
+msgid "Caution Patterns"
+msgstr ""
+
+msgid "e.g. >90  or  critical (comma-separated)"
+msgstr ""
+
+msgid "Danger Patterns"
+msgstr ""
+
+msgid "Show Sparkline"
+msgstr ""
+
+#. prefs.js — showExportDialog / showImportDialog
+msgid "Export Monitors"
+msgstr ""
+
+msgid "Import Monitors"
+msgstr ""
+
+msgid "Append"
+msgstr ""
+
+msgid "Replace All"
+msgstr ""
+
+#. prefs.js — fillPreferencesWindow
+msgid "Monitors"
+msgstr ""
+
+msgid "My Monitors"
+msgstr ""
+
+msgid "Monitors are executed on their configured interval."
+msgstr ""
+
+msgid "Click a preset to add it to your monitor list."
+msgstr ""
+
+msgid "Add Preset"
+msgstr ""
+
+msgid "Schedule Settings"
+msgstr ""
+
+msgid "Applied globally to all scheduled monitors."
+msgstr ""
+
+msgid "Schedule Jitter (%)"
+msgstr ""
+
+msgid "Random ±% offset on each poll interval — set to 0 for exact timing"
+msgstr ""
+
+msgid "On-demand time display"
+msgstr ""
+
+msgid "Show collection time beneath on-demand monitor values"
+msgstr ""
+
+msgid "None"
+msgstr ""
+
+msgid "Age (relative)"
+msgstr ""
+
+msgid "Timestamp (HH:MM:SS)"
+msgstr ""
+
+msgid "Debug Logging"
+msgstr ""
+
+msgid "Debug Log"
+msgstr ""
+
+msgid "View the debug log file"
+msgstr ""
+
+msgid "View Log"
+msgstr ""
+
+msgid "Clear Log"
+msgstr ""
+
+#. prefs.js — showDebugLogWindow
+#. (title reuses "Debug Log" above)
+
+#. prefs.js — showHelpDialog
+msgid "Setup Instructions"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+#. prefs.js — buildMonitorRows
+msgid "No monitors yet"
+msgstr ""
+
+msgid "Use \"Add Monitor\" or a preset below."
+msgstr ""
+
+msgid "Move up"
+msgstr ""
+
+msgid "Move down"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Duplicate"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+#. prefs.js — buildPresetRows
+msgid "Add to my monitors"
+msgstr ""
+
+msgid "All presets added"
+msgstr ""
+
+msgid "Every available preset is already in your monitors."
+msgstr ""
