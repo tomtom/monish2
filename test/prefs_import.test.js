@@ -497,6 +497,22 @@ describe('debug logging — ISSUE 30', () => {
     it('prefs opens a log viewer via showDebugLogWindow', () => {
         expect(prefsSource).toContain('showDebugLogWindow');
     });
+
+    it('debug code is wrapped in DEBUG_ONLY_BEGIN/END markers for zip stripping — ISSUE 102', () => {
+        // The Makefile zip target strips everything between these markers so the
+        // distribution build contains no log() calls or debug infrastructure.
+        expect(extensionSource).toContain('/* DEBUG_ONLY_BEGIN */');
+        expect(extensionSource).toContain('/* DEBUG_ONLY_END */');
+    });
+
+    it('DEBUG_LOG_KEY constant is inside a debug marker block — ISSUE 102', () => {
+        // If stripped, the constant must be absent so there are no reference errors.
+        const beginIdx = extensionSource.indexOf('/* DEBUG_ONLY_BEGIN */');
+        const endIdx   = extensionSource.indexOf('/* DEBUG_ONLY_END */');
+        const keyIdx   = extensionSource.indexOf('DEBUG_LOG_KEY =');
+        expect(keyIdx).toBeGreaterThan(beginIdx);
+        expect(keyIdx).toBeLessThan(endIdx);
+    });
 });
 
 describe('action commands — ISSUE 50', () => {

@@ -51,8 +51,10 @@ const SETTINGS_KEY = 'monitors';
 /** Settings key that holds the global schedule jitter percentage. */
 const JITTER_KEY = 'jitter-percent';
 
+/* DEBUG_ONLY_BEGIN */
 /** Settings key for the debug-logging toggle. */
 const DEBUG_LOG_KEY = 'debug-logging';
+/* DEBUG_ONLY_END */
 
 /** Settings key for on-demand monitor time display mode. */
 const ON_DEMAND_TIME_KEY = 'on-demand-time-display';
@@ -114,7 +116,7 @@ class MonishIndicator extends PanelMenu.Button {
         this._menuItems     = new Map();   // monitorId -> {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel}
         this._history       = new Map();   // monitorId -> number[] ring buffer (max SPARKLINE_MAX_VALUES)
         this._appHistory    = new Map();   // monitorId -> Map<appName, number[]> for multi-line per-app sparklines
-        this._debugLogPath  = GLib.build_filenamev([extensionPath, 'debug.log']);
+        /* DEBUG_ONLY_BEGIN */ this._debugLogPath  = GLib.build_filenamev([extensionPath, 'debug.log']); /* DEBUG_ONLY_END */
         this._stateFileDir  = GLib.build_filenamev([GLib.get_user_runtime_dir(), 'monish2']);
         this._stateFilePath = GLib.build_filenamev([this._stateFileDir, 'state.json']);
 
@@ -166,8 +168,10 @@ class MonishIndicator extends PanelMenu.Button {
      *   triggered by settings changes so new values appear immediately.
      */
     _buildMenu(firstRunDelay = 0) {
+        /* DEBUG_ONLY_BEGIN */
         const _dbg    = this._settings.get_boolean(DEBUG_LOG_KEY);
         const _tStart = _dbg ? GLib.get_monotonic_time() : 0;
+        /* DEBUG_ONLY_END */
 
         this._stopAllTimers();  // clears _timers and _ageTimers
         this.menu.removeAll();
@@ -209,10 +213,12 @@ class MonishIndicator extends PanelMenu.Button {
 
         this._updatePanelIcon();
 
+        /* DEBUG_ONLY_BEGIN */
         if (_dbg) {
             const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
             log(`[monish2] _buildMenu(): ${ms} ms, ${enabled.length} enabled monitor(s)`);
         }
+        /* DEBUG_ONLY_END */
     }
 
     /**
@@ -489,11 +495,11 @@ class MonishIndicator extends PanelMenu.Button {
             const value  = parseValue(stdout, monitor.outputRegex);
             const status = evaluateStatus(value, monitor.cautionPatterns, monitor.dangerPatterns);
             this._setMonitorResult(monitor.id, value, status);
-            this._appendDebugLog(monitor, value);
+            /* DEBUG_ONLY_BEGIN */ this._appendDebugLog(monitor, value); /* DEBUG_ONLY_END */
         } catch (e) {
             const errStr = formatError(e);
             this._setMonitorResult(monitor.id, errStr, MonitorStatus.ERROR);
-            this._appendDebugLog(monitor, `error: ${errStr}`);
+            /* DEBUG_ONLY_BEGIN */ this._appendDebugLog(monitor, `error: ${errStr}`); /* DEBUG_ONLY_END */
         }
     }
 
@@ -514,6 +520,7 @@ class MonishIndicator extends PanelMenu.Button {
         await this._runMonitor(monitor);
     }
 
+    /* DEBUG_ONLY_BEGIN */
     /**
      * Append one log entry to the debug log file when debug logging is enabled.
      * No-ops when the setting is off or on any write failure.
@@ -532,6 +539,7 @@ class MonishIndicator extends PanelMenu.Button {
             stream.close(null);
         } catch (_) {}
     }
+    /* DEBUG_ONLY_END */
 
     // -----------------------------------------------------------------------
     // State persistence (/run/user/$UID/monish2/state.json, RAM-backed tmpfs)
@@ -851,18 +859,22 @@ export default class MonishExtension extends Extension {
 
     enable() {
         this._settings  = this.getSettings();
+        /* DEBUG_ONLY_BEGIN */
         const _dbg    = this._settings.get_boolean(DEBUG_LOG_KEY);
         const _tStart = _dbg ? GLib.get_monotonic_time() : 0;
+        /* DEBUG_ONLY_END */
         this._indicator = new MonishIndicator(
             this._settings,
             () => this.openPreferences(),
             this.path
         );
         Main.panel.addToStatusArea(this.uuid, this._indicator);
+        /* DEBUG_ONLY_BEGIN */
         if (_dbg) {
             const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
             log(`[monish2] enable(): ${ms} ms total, ${this._indicator._monitors.length} monitor(s) configured`);
         }
+        /* DEBUG_ONLY_END */
     }
 
     disable() {

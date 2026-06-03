@@ -34,12 +34,19 @@ install: compile-schemas
 	@echo "Restart GNOME Shell (Alt+F2 → 'r') or log out to activate."
 
 # Build a ZIP suitable for upload to extensions.gnome.org.
+# Debug-only code (/* DEBUG_ONLY_BEGIN */ … /* DEBUG_ONLY_END */) is stripped
+# from extension.js so the distribution build has no log() calls.
 zip: compile-schemas
 	rm -f $(UUID).shell-extension.zip
-	zip -r $(UUID).shell-extension.zip \
-		metadata.json extension.js prefs.js stylesheet.css \
-		lib icons schemas \
-		--exclude "schemas/gschemas.compiled"
+	$(eval DISTDIR := $(shell mktemp -d))
+	sed '/\/\* DEBUG_ONLY_BEGIN \*\//,/\/\* DEBUG_ONLY_END \*\//d' \
+		extension.js > $(DISTDIR)/extension.js
+	cp metadata.json prefs.js stylesheet.css $(DISTDIR)/
+	cp -r lib icons schemas $(DISTDIR)/
+	rm -f $(DISTDIR)/schemas/gschemas.compiled
+	cd $(DISTDIR) && zip -r $(CURDIR)/$(UUID).shell-extension.zip \
+		metadata.json extension.js prefs.js stylesheet.css lib icons schemas
+	rm -rf $(DISTDIR)
 	@echo "Created $(UUID).shell-extension.zip"
 
 # Validate the packed extension with shexli.
