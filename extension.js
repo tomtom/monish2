@@ -62,14 +62,12 @@ const CSS_PREFIX = 'monish';
  */
 const STARTUP_GRACE_MS = 10_000;
 
-/** Symbolic icon names for each monitor status in the popup menu rows. */
-const STATUS_ICONS = {
-    [MonitorStatus.PENDING]: 'content-loading-symbolic',
-    [MonitorStatus.NORMAL]:  'emblem-ok-symbolic',
-    [MonitorStatus.CAUTION]: 'dialog-warning-symbolic',
-    [MonitorStatus.DANGER]:  'dialog-error-symbolic',
-    [MonitorStatus.ERROR]:   'dialog-warning-symbolic',
+/** Base icon for each monitor type in the popup menu rows. */
+const BASE_ICONS = {
+    plain:   'media-record-symbolic',  // dot — plain monitors (no actions)
+    actions: 'open-menu-symbolic',     // hamburger — monitors with action buttons
 };
+
 
 /** Icon colour per status; applied as inline style to bypass panel theme specificity. */
 const STATUS_COLORS = {
@@ -243,18 +241,21 @@ class MonishIndicator extends PanelMenu.Button {
 
         const hasActions = (monitor.actions ?? []).length > 0;
 
-        // statusIcon always shows the real monitor status via STATUS_ICONS.
-        // For action monitors a border class is added to signal interactivity.
-        const statusIcon = new St.Icon({
-            icon_name:   STATUS_ICONS[MonitorStatus.PENDING],
-            icon_size:   16,
-            style_class: `${CSS_PREFIX}-status-icon`,
-            y_align:     Clutter.ActorAlign.START,
+        // Container stacks the base icon and a small status-badge overlay.
+        // Using a BinLayout widget (not the icon directly) gives a reliable
+        // click target for action monitors on all GNOME Shell versions.
+        const iconBox = new St.Widget({
+            layout_manager: new Clutter.BinLayout(),
+            style_class:    `${CSS_PREFIX}-status-icon`,
+            y_align:        Clutter.ActorAlign.START,
         });
-        if (hasActions) {
-            statusIcon.add_style_class_name(`${CSS_PREFIX}-action-icon`);
-        }
-        const statusIconWidget = statusIcon;
+        // Base icon: big dot for plain monitors, hamburger for action monitors.
+        const statusIcon = new St.Icon({
+            icon_name: hasActions ? BASE_ICONS.actions : BASE_ICONS.plain,
+            icon_size: 16,
+        });
+        iconBox.add_child(statusIcon);
+        const statusIconWidget = iconBox;
 
         // Name is a button so it receives clicks, changes cursor, and handles hover.
         // x_expand pushes the value and sparkline labels to the right edge of the row.
@@ -674,14 +675,10 @@ class MonishIndicator extends PanelMenu.Button {
                 entry.mlBox.visible             = false;
             }
 
-            entry.statusIcon.icon_name = STATUS_ICONS[status] ?? STATUS_ICONS[MonitorStatus.NORMAL];
+            entry.statusIcon.style = STATUS_COLORS[status] ? `color: ${STATUS_COLORS[status]};` : null;
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));
             entry.item.add_style_class_name(`${CSS_PREFIX}-status-${status}`);
-            if (entry.statusIcon.has_style_class_name(`${CSS_PREFIX}-action-icon`)) {
-                const borderColor = STATUS_COLORS[status];
-                entry.statusIcon.style = borderColor ? `border-color: ${borderColor};` : null;
-            }
 
             // Evaluate each action button's guard with the current value and
             // show/hide accordingly.  Buttons with no guard are always visible.
@@ -715,9 +712,7 @@ class MonishIndicator extends PanelMenu.Button {
             entry.sparklineLabel.text      = '';
             entry.mlValueLabel.visible     = false;
             entry.mlBox.visible            = false;
-            entry.statusIcon.icon_name = STATUS_ICONS[MonitorStatus.PENDING];
-            if (entry.statusIcon.has_style_class_name(`${CSS_PREFIX}-action-icon`))
-                entry.statusIcon.style = null;
+            entry.statusIcon.style = null;
             const styles = Object.values(MonitorStatus).map(s => `${CSS_PREFIX}-status-${s}`);
             styles.forEach(c => entry.item.remove_style_class_name(c));
         }

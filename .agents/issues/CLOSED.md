@@ -1,0 +1,2 @@
+80. In Prefs: Define two directories (/usr/share/monish and ~/.local/share/monish), from where monish reads json predefined monitor definitions (in addition to those provided by the extension itself). These definitions should have the same format as the export file. Add a version number to the export file format. #closed/2026-06-03
+81. In the monitors menu/list: Drop the overlays as status indicators. Just use the indicator icon's color to indicate the status. #closed/2026-06-03

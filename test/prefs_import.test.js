@@ -644,31 +644,38 @@ describe('extension.js tooltip position above menu — ISSUE 69', () => {
     });
 });
 
-describe('extension.js action monitors use overlay dot — ISSUE 74', () => {
+describe('extension.js action monitors use icon colour — ISSUE 81', () => {
     it('does not use view-more-symbolic (three-dots) for action monitors', () => {
-        // ISSUE 74: interactivity is signalled by a dot overlay, not the ⋮ icon.
         expect(extensionSource).not.toContain('view-more-symbolic');
     });
 
-    it('does not define ACTION_STATUS_ICONS (replaced by overlay approach)', () => {
+    it('does not define ACTION_STATUS_ICONS', () => {
         expect(extensionSource).not.toContain('ACTION_STATUS_ICONS');
     });
 
-    it('does not use actualStatusIcon (single icon now suffices)', () => {
-        // Previously two icons were shown; now one icon with a dot overlay.
+    it('does not use actualStatusIcon (single icon suffices)', () => {
         expect(extensionSource).not.toContain('actualStatusIcon');
     });
 
-    it('uses monish-action-icon CSS class for the border on action monitors', () => {
-        expect(extensionSource).toContain('action-icon');
+    it('defines BASE_ICONS for plain vs action monitors', () => {
+        // ISSUE 81: dot for plain monitors, hamburger for action monitors.
+        expect(extensionSource).toContain('BASE_ICONS');
     });
 
-    it('does not use BinLayout (box border replaces dot overlay)', () => {
-        expect(extensionSource).not.toContain('BinLayout');
+    it('uses BinLayout container as click target for action monitors', () => {
+        // BinLayout widget gives a reliable click area without an overlay badge.
+        expect(extensionSource).toContain('BinLayout');
     });
 
-    it('statusIcon always uses STATUS_ICONS (real status, not a toggle glyph)', () => {
-        expect(extensionSource).toContain('STATUS_ICONS[MonitorStatus.PENDING]');
+    it('does not define STATUS_OVERLAY_ICONS (overlay approach removed)', () => {
+        // ISSUE 81: status is shown via icon colour, not an overlay badge.
+        expect(extensionSource).not.toContain('STATUS_OVERLAY_ICONS');
+    });
+
+    it('applies STATUS_COLORS inline style directly to statusIcon', () => {
+        // Inline style bypasses panel theme specificity, same pattern as panel icon.
+        expect(extensionSource).toContain('entry.statusIcon.style');
+        expect(extensionSource).toContain('STATUS_COLORS[status]');
     });
 });
 

@@ -1,10 +1,9 @@
-Next number: 81
+Next number: 82
 
 
 # Bugs & Feature Request
 
 ## Current
-
 
 ## Open
 

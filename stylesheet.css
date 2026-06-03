@@ -57,17 +57,7 @@
     margin-left: 6px;
 }
 
-/* Border drawn around the status icon for monitors that have action buttons.
-   Signals interactivity without replacing the real status glyph. */
-.monish-action-icon {
-    border: 1.5px solid #729fcf;
-    border-radius: 3px;
-    padding: 1px;
-    margin-left: -2.5px;   /* pull left so icon content aligns with non-action rows */
-    margin-right: 3.5px;   /* border+padding on right = 2.5px; 6px gap - 2.5px = 3.5px keeps text aligned */
-}
-
-/* Action buttons panel — shown when the status icon is clicked */
+/* Action buttons panel — shown when the status icon (hamburger) is clicked */
 .monish-actions-box {
     padding-top: 4px;
 }
