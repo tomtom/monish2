@@ -5,7 +5,6 @@ Next number: 98
 
 ## Current
 
-97. Review https://gjs.guide/extensions/review-guidelines/review-guidelines.html and https://gjs.guide/extensions/ and summarize the most important points in docs/GnomeExtensionGuidelines.md. Check whether the monish extension adheres to these guidelines.
 
 
 
