@@ -157,11 +157,18 @@ class MonishIndicator extends PanelMenu.Button {
      * (Re)build the popup menu from the current monitor configuration.
      * Destroys existing menu items and GLib timers first.
      *
+     * When debug-logging is enabled, logs the wall time of this call and the
+     * per-monitor widget-creation loop to the GNOME journal.  Check with:
+     *   journalctl -b --no-pager | grep '\[monish2\]'
+     *
      * @param {number} [firstRunDelay=0] - Milliseconds to wait before the first
      *   monitor poll. Pass STARTUP_GRACE_MS on initial build; use 0 for reloads
      *   triggered by settings changes so new values appear immediately.
      */
     _buildMenu(firstRunDelay = 0) {
+        const _dbg    = this._settings.get_boolean(DEBUG_LOG_KEY);
+        const _tStart = _dbg ? GLib.get_monotonic_time() : 0;
+
         this._stopAllTimers();  // clears _timers and _expiryTimers
         this._tooltipSignalIds = [];  // actors destroyed by removeAll() disconnect their own signals
         this.menu.removeAll();
@@ -204,6 +211,11 @@ class MonishIndicator extends PanelMenu.Button {
         }
 
         this._updatePanelIcon();
+
+        if (_dbg) {
+            const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
+            log(`[monish2] _buildMenu(): ${ms} ms, ${enabled.length} enabled monitor(s)`);
+        }
     }
 
     /**
@@ -893,12 +905,18 @@ export default class MonishExtension extends Extension {
 
     enable() {
         this._settings  = this.getSettings();
+        const _dbg    = this._settings.get_boolean(DEBUG_LOG_KEY);
+        const _tStart = _dbg ? GLib.get_monotonic_time() : 0;
         this._indicator = new MonishIndicator(
             this._settings,
             () => this.openPreferences(),
             this.path
         );
         Main.panel.addToStatusArea(this.uuid, this._indicator);
+        if (_dbg) {
+            const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
+            log(`[monish2] enable(): ${ms} ms total, ${this._indicator._monitors.length} monitor(s) configured`);
+        }
     }
 
     disable() {

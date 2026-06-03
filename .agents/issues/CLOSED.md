@@ -8,3 +8,4 @@
 87. Investigate tmp/openrouter-usage.gjs and add a predefined monitor that retrieves openrouter (1) balance and (2) activity. Set the default loop interval to 15m. By default: CAUTION if Balance is smaller than 10$ and DANGER if smaller than 5$. #closed/2026-06-03
 88. In Claude Usage and OpenRouter presets: make them on-demand (no automatic interval) by default. #closed/2026-06-03
 89. For monitors that are set to on-demand, display the values age or the time stamp when the data was last collected (make this a user choice in Prefs). #closed/2026-06-03
+90. After login, it takes a very long time until the desktop shows up. Investigate what in the extension could cause this. If you cannot find out the reason, develop a debugging strategy to solve this issue. #closed/2026-06-03
