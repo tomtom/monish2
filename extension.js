@@ -170,6 +170,7 @@ class MonishIndicator extends PanelMenu.Button {
     _buildMenu(firstRunDelay = 0) {
         const _dbg    = this._settings.get_boolean(DEBUG_LOG_KEY);
         const _tStart = _dbg ? GLib.get_monotonic_time() : 0;
+        if (_dbg) log(`[monish2] _buildMenu(): start`);
 
         this._stopAllTimers();
         this.menu.removeAll();
@@ -182,9 +183,17 @@ class MonishIndicator extends PanelMenu.Button {
         // downstream code uses monitor.onDemand regardless of how old data was stored.
         this._monitors = deserializeMonitors(this._settings.get_string(SETTINGS_KEY))
             .map(m => ({...m, onDemand: m.onDemand || m.intervalSeconds === 0}));
+        if (_dbg) {
+            const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
+            log(`[monish2] _buildMenu(): deserialize: ${ms} ms, ${this._monitors.length} monitor(s)`);
+        }
 
         this._loadState();
         const enabled  = this._monitors.filter(m => m.enabled);
+        if (_dbg) {
+            const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
+            log(`[monish2] _buildMenu(): loadState: ${ms} ms, ${enabled.length} enabled`);
+        }
 
         if (enabled.length === 0) {
             const empty = new PopupMenu.PopupMenuItem(_('No monitors configured'), {reactive: false});
@@ -193,6 +202,10 @@ class MonishIndicator extends PanelMenu.Button {
             for (const monitor of enabled) {
                 this._addMonitorMenuItem(monitor);
             }
+        }
+        if (_dbg) {
+            const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
+            log(`[monish2] _buildMenu(): menu items: ${ms} ms`);
         }
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -230,7 +243,7 @@ class MonishIndicator extends PanelMenu.Button {
 
         if (_dbg) {
             const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
-            log(`[monish2] _buildMenu(): ${ms} ms, ${enabled.length} enabled monitor(s)`);
+            log(`[monish2] _buildMenu(): done: ${ms} ms, ${enabled.length} enabled monitor(s)`);
         }
     }
 
@@ -831,15 +844,20 @@ export default class MonishExtension extends Extension {
         this._settings  = this.getSettings();
         const _dbg    = this._settings.get_boolean(DEBUG_LOG_KEY);
         const _tStart = _dbg ? GLib.get_monotonic_time() : 0;
+        if (_dbg) log(`[monish2] enable(): start`);
         this._indicator = new MonishIndicator(
             this._settings,
             () => this.openPreferences(),
             this.path,
         );
+        if (_dbg) {
+            const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
+            log(`[monish2] enable(): indicator ready: ${ms} ms`);
+        }
         Main.panel.addToStatusArea(this.uuid, this._indicator);
         if (_dbg) {
             const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
-            log(`[monish2] enable(): ${ms} ms total, ${this._indicator._monitors.length} monitor(s) configured`);
+            log(`[monish2] enable(): done: ${ms} ms total, ${this._indicator._monitors.length} monitor(s)`);
         }
     }
 

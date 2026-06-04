@@ -1,3 +1,5 @@
+139. Startup timing log had only a single entry; add per-phase checkpoints. #closed/2026-06-04
+138. Single shared 60s stale-check timer for on-demand monitors. #closed/2026-06-04 #SHELVED
 137. Debug logging: Log to system journal instead of file; remove DEBUG_ONLY stripping from ZIP build. #closed/2026-06-04
 136. In Prefs: Replace "Schedule Settings" with "Options". #closed/2026-06-04
 135. In Prefs: Fix journalctl grep hint — [monish2] was a character class, not a literal string. #closed/2026-06-04
