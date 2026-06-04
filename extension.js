@@ -36,8 +36,7 @@ import {
     buildSparklineMarkup,
     SPARKLINE_MAX_VALUES,
     injectArgs,
-    formatAge,
-    evaluateGuard,
+        evaluateGuard,
 } from './lib/monitor.js';
 import {executeCommand, executeJavaScript} from './lib/executor.js';
 
@@ -57,9 +56,6 @@ const JITTER_KEY = 'jitter-percent';
 /** Settings key for the debug-logging toggle. */
 const DEBUG_LOG_KEY = 'debug-logging';
 /* DEBUG_ONLY_END */
-
-/** Settings key for on-demand monitor time display mode. */
-const ON_DEMAND_TIME_KEY = 'on-demand-time-display';
 
 /** CSS class prefix applied to indicator and menu items for status colouring. */
 const CSS_PREFIX = 'monish';
@@ -112,7 +108,6 @@ class MonishIndicator extends PanelMenu.Button {
         this._settings      = settings;
         this._openPrefs     = openPrefs;
         this._timers        = new Map();   // monitorId -> GLib source id (scheduled monitors)
-        this._ageTimers     = new Map();   // monitorId -> GLib source id (age label refresh)
         this._results       = new Map();   // monitorId -> {value, status}
         this._monitors      = [];          // current monitor config array
         this._menuItems     = new Map();   // monitorId -> {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel}
@@ -181,7 +176,7 @@ class MonishIndicator extends PanelMenu.Button {
         const _tStart = _dbg ? GLib.get_monotonic_time() : 0;
         /* DEBUG_ONLY_END */
 
-        this._stopAllTimers();  // clears _timers and _ageTimers
+        this._stopAllTimers();
         this.menu.removeAll();
         this._menuItems.clear();
         this._results.clear();
@@ -377,24 +372,16 @@ class MonishIndicator extends PanelMenu.Button {
             });
         }
 
-        // Age / timestamp label for on-demand monitors, shown below the value.
-        const ageLabel = new St.Label({
-            text:        '',
-            style_class: `${CSS_PREFIX}-monitor-age`,
-            visible:     false,
-        });
-
         textBox.add_child(headerBox);
         textBox.add_child(mlValueLabel);
         textBox.add_child(mlBox);
-        textBox.add_child(ageLabel);
         textBox.add_child(actionsBox);
 
         item.add_child(statusIconWidget);
         item.add_child(textBox);
 
         this.menu.addMenuItem(item);
-        this._menuItems.set(monitor.id, {item, statusIcon, staleIconLabel, nameLabel, inlineValueLabel, mlValueLabel, mlBox, sparklineLabel, ageLabel, actionsBox, actionBtns});
+        this._menuItems.set(monitor.id, {item, statusIcon, staleIconLabel, nameLabel, inlineValueLabel, mlValueLabel, mlBox, sparklineLabel, actionsBox, actionBtns});
     }
 
     // -----------------------------------------------------------------------
@@ -636,8 +623,8 @@ class MonishIndicator extends PanelMenu.Button {
             }
         }
 
-        // When restoring state (skipHistory), keep the original collectedAt so the
-        // on-demand age label shows the real data age, not "just now" from restore time.
+        // When restoring state (skipHistory), keep the original collectedAt so stale
+        // detection reflects the real data age, not "just now" from restore time.
         const collectedAt = skipHistory
             ? (this._results.get(id)?.collectedAt ?? Date.now())
             : Date.now();
@@ -737,44 +724,6 @@ class MonishIndicator extends PanelMenu.Button {
                 btn.visible = evaluateGuard(guard, value);
             }
 
-            // Age / timestamp label — only for on-demand monitors.
-            if (monitor?.onDemand && entry.ageLabel) {
-                const timeDisplay = this._settings.get_string(ON_DEMAND_TIME_KEY);
-                if (timeDisplay === 'timestamp') {
-                    const d = new Date();
-                    const hh = String(d.getHours()).padStart(2, '0');
-                    const mm = String(d.getMinutes()).padStart(2, '0');
-                    const ss = String(d.getSeconds()).padStart(2, '0');
-                    entry.ageLabel.text    = `${hh}:${mm}:${ss}`;
-                    entry.ageLabel.visible = true;
-                } else if (timeDisplay === 'age') {
-                    entry.ageLabel.text    = formatAge(0);
-                    entry.ageLabel.visible = true;
-                    // Cancel any previous age-update timer for this monitor.
-                    const prev = this._ageTimers.get(id);
-                    if (prev !== undefined) GLib.source_remove(prev);
-                    // Refresh label every 60 s; stop once the value goes stale.
-                    const ageId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 60_000, () => {
-                        const res = this._results.get(id);
-                        const ageLbl = this._menuItems.get(id)?.ageLabel;
-                        if (!res?.collectedAt || !ageLbl) {
-                            this._ageTimers.delete(id);
-                            return GLib.SOURCE_REMOVE;
-                        }
-                        if (Date.now() - res.collectedAt >= STALE_THRESHOLD_MS) {
-                            this._ageTimers.delete(id);
-                            this._updateStaleBadges();
-                            return GLib.SOURCE_REMOVE;
-                        }
-                        ageLbl.text = formatAge(Date.now() - res.collectedAt);
-                        return GLib.SOURCE_CONTINUE;
-                    });
-                    this._ageTimers.set(id, ageId);
-                } else {
-                    entry.ageLabel.visible = false;
-                    entry.ageLabel.text    = '';
-                }
-            }
         }
 
         this._saveState();
@@ -855,7 +804,7 @@ class MonishIndicator extends PanelMenu.Button {
     // -----------------------------------------------------------------------
 
     /**
-     * Cancel every active GLib timer (scheduled polls and age-label refresh).
+     * Cancel every active GLib timer (scheduled polls).
      * Must be called before destroying the indicator to avoid orphaned sources.
      */
     _stopAllTimers() {
@@ -863,10 +812,6 @@ class MonishIndicator extends PanelMenu.Button {
             GLib.source_remove(sourceId);
         }
         this._timers.clear();
-        for (const sourceId of this._ageTimers.values()) {
-            GLib.source_remove(sourceId);
-        }
-        this._ageTimers.clear();
     }
 
     /**

@@ -84,12 +84,6 @@
     font-weight: bold;
 }
 
-/* Age / timestamp shown beneath on-demand monitor values */
-.monish-monitor-age {
-    font-size: 0.8em;
-    color: #9a9996;
-    font-style: italic;
-}
 
 /* Row background tints per status */
 .monish-status-caution .monish-monitor-value {

@@ -56,27 +56,6 @@
       </description>
     </key>
 
-    <!--
-      on-demand-time-display: controls what time information is shown beneath
-      the value of on-demand monitors after their value has been collected.
-        none      — show only the value (default)
-        age       — show relative time since collection ("3 min ago"), updated every 30 s
-        timestamp — show the absolute time of collection ("14:05:32")
-    -->
-    <key name="on-demand-time-display" type="s">
-      <choices>
-        <choice value="none"/>
-        <choice value="age"/>
-        <choice value="timestamp"/>
-      </choices>
-      <default>'none'</default>
-      <summary>On-demand monitor time display</summary>
-      <description>
-        Controls what time information is shown for on-demand monitors after
-        their value has been collected.
-      </description>
-    </key>
-
   </schema>
 
 </schemalist>

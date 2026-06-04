@@ -812,28 +812,6 @@ export default class MonishPreferences extends ExtensionPreferences {
         jitterRow.add_suffix(jitterSpin);
         scheduleGroup.add(jitterRow);
 
-        // ---- On-demand time display ----
-        const timeDisplayRow = new Adw.ActionRow({
-            title:    _('On-demand time display'),
-            subtitle: _('Show collection time beneath on-demand monitor values'),
-        });
-        const TIME_DISPLAY_VALUES  = ['none', 'age', 'timestamp'];
-        const TIME_DISPLAY_LABELS  = [_('None'), _('Age (relative)'), _('Timestamp (HH:MM:SS)')];
-        const timeDisplayDrop = new Gtk.DropDown({
-            model:  Gtk.StringList.new(TIME_DISPLAY_LABELS),
-            valign: Gtk.Align.CENTER,
-        });
-        const currentTd = settings.get_string('on-demand-time-display');
-        timeDisplayDrop.set_selected(Math.max(0, TIME_DISPLAY_VALUES.indexOf(currentTd)));
-        timeDisplayDrop.connect('notify::selected', () => {
-            settings.set_string(
-                'on-demand-time-display',
-                TIME_DISPLAY_VALUES[timeDisplayDrop.get_selected()] ?? 'none',
-            );
-        });
-        timeDisplayRow.add_suffix(timeDisplayDrop);
-        scheduleGroup.add(timeDisplayRow);
-
         // ---- Debug logging toggle ----
         const debugRow = new Adw.ActionRow({
             title:    _('Debug Logging'),

@@ -5,7 +5,6 @@ Next number: 138
 
 ## Current
 
-133. In Prefs: Do we still need the "On-demand time display" option or could it be removed?
 134. In Prefs: Remove the debug log file, when debug logging is turned off.
 135. In Prefs: The text below "Debug Logging" says "journalctl -b | grep [monish2]". This is wrong, because "[monish2]" prints all lines matching at least one of these characters. I assume you meant "journalctl -b | grep monish2". That said the logging of startup timing is useless in its present form since the log contains just a single entry.
 136. In Prefs: Replace "Schedule Settings" with "Options".
