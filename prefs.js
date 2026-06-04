@@ -963,6 +963,12 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
     const monitors = deserializeMonitors(settings.get_string('monitors'));
     const added = [];
 
+    // Build name→preset map once for update-button detection below.
+    const externalPresets = EXTERNAL_PRESET_DIRS.flatMap(dir => loadPresetsFromDir(dir));
+    const presetByName = new Map(
+        [...PRESET_MONITORS, ...externalPresets].map(p => [p.name, p]),
+    );
+
     if (monitors.length === 0) {
         const emptyRow = new Adw.ActionRow({
             title:     _('No monitors yet'),
@@ -1069,6 +1075,57 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             }
         });
 
+        // Reset-to-preset button — only visible when a matching preset exists
+        // and its command differs from the monitor's current command.
+        const matchingPreset = presetByName.get(monitor.name);
+        const updateBtn = (matchingPreset && matchingPreset.command !== monitor.command)
+            ? new Gtk.Button({
+                icon_name:    'view-refresh-symbolic',
+                valign:       Gtk.Align.CENTER,
+                css_classes:  ['flat'],
+                tooltip_text: _('Reset to preset'),
+            })
+            : null;
+        if (updateBtn) {
+            updateBtn.connect('clicked', () => {
+                const confirmDlg = new Gtk.Dialog({
+                    title:         _('Reset to Preset'),
+                    transient_for: parentWindow,
+                    modal:         true,
+                });
+                confirmDlg.add_button(_('Cancel'), Gtk.ResponseType.CANCEL);
+                const okBtn = confirmDlg.add_button(_('Reset'), Gtk.ResponseType.OK);
+                okBtn.add_css_class('destructive-action');
+                const lbl = new Gtk.Label({
+                    label:         _('This will overwrite your changes to this monitor. Continue?'),
+                    wrap:          true,
+                    xalign:        0,
+                    margin_top:    12,
+                    margin_bottom: 12,
+                    margin_start:  16,
+                    margin_end:    16,
+                });
+                confirmDlg.get_content_area().append(lbl);
+                confirmDlg.connect('response', (_d, resp) => {
+                    if (resp === Gtk.ResponseType.OK) {
+                        mutateMonitor(settings, monitor.id, m => ({
+                            ...m,
+                            command:         matchingPreset.command,
+                            type:            matchingPreset.type            ?? m.type,
+                            intervalSeconds: matchingPreset.intervalSeconds ?? m.intervalSeconds,
+                            outputRegex:     matchingPreset.outputRegex     ?? m.outputRegex,
+                            cautionPatterns: matchingPreset.cautionPatterns ?? m.cautionPatterns,
+                            dangerPatterns:  matchingPreset.dangerPatterns  ?? m.dangerPatterns,
+                            description:     matchingPreset.description     ?? m.description,
+                        }));
+                        refresh(monitor.id);
+                    }
+                    confirmDlg.destroy();
+                });
+                confirmDlg.present();
+            });
+        }
+
         // Duplicate button — inserts a copy immediately after this row
         const dupBtn = new Gtk.Button({
             icon_name:   'edit-copy-symbolic',
@@ -1104,6 +1161,7 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         row.add_suffix(upBtn);
         row.add_suffix(downBtn);
         row.add_suffix(editBtn);
+        if (updateBtn) row.add_suffix(updateBtn);
         row.add_suffix(dupBtn);
         row.add_suffix(delBtn);
         row._monitorId = monitor.id;

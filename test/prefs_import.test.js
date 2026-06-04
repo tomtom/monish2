@@ -106,6 +106,30 @@ describe('prefs.js duplicate action', () => {
     });
 });
 
+describe('prefs.js preset update button', () => {
+    it('builds presetByName map inside buildMonitorRows', () => {
+        expect(prefsSource).toContain('const presetByName = new Map(');
+    });
+
+    it('detects command mismatch against matching preset', () => {
+        expect(prefsSource).toContain("matchingPreset.command !== monitor.command");
+    });
+
+    it('creates view-refresh-symbolic update button', () => {
+        expect(prefsSource).toContain("'view-refresh-symbolic'");
+        expect(prefsSource).toContain("'Reset to preset'");
+    });
+
+    it('applies preset fields on confirm and keeps id/name/enabled', () => {
+        expect(prefsSource).toContain('command:         matchingPreset.command');
+        expect(prefsSource).toContain('intervalSeconds: matchingPreset.intervalSeconds');
+    });
+
+    it('warns user before overwriting changes', () => {
+        expect(prefsSource).toContain('This will overwrite your changes to this monitor');
+    });
+});
+
 describe('extension.js startup grace period', () => {
     it('defines STARTUP_GRACE_MS constant', () => {
         expect(extensionSource).toContain('STARTUP_GRACE_MS');
