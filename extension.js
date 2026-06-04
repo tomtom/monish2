@@ -643,7 +643,12 @@ class MonishIndicator extends PanelMenu.Button {
             }
         }
 
-        this._results.set(id, {value, status, collectedAt: Date.now()});
+        // When restoring state (skipHistory), keep the original collectedAt so the
+        // on-demand age label shows the real data age, not "just now" from restore time.
+        const collectedAt = skipHistory
+            ? (this._results.get(id)?.collectedAt ?? Date.now())
+            : Date.now();
+        this._results.set(id, {value, status, collectedAt});
 
         const entry = this._menuItems.get(id);
         if (entry) {

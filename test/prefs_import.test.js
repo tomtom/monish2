@@ -839,6 +839,15 @@ describe('extension.js interval expression \u2014 ISSUE 93', () => {
         expect(prefsSource).toContain('Interval Expr');
     });
 
+    it('_setMonitorResult preserves collectedAt when skipHistory is true \u2014 ISSUE 110', () => {
+        // When _applyRestoredState calls _setMonitorResult({skipHistory:true}),
+        // the original collectedAt from the state file must be preserved so the
+        // on-demand age label shows the real age, not "just now".
+        expect(extensionSource).toContain('skipHistory');
+        // The fix: use existing collectedAt when restoring, Date.now() otherwise.
+        expect(extensionSource).toMatch(/skipHistory.*collectedAt|collectedAt.*skipHistory/s);
+    });
+
     it('_resolveInterval has plain-number fast path (no subprocess) \u2014 ISSUE 109', () => {
         // Avoids spawning a GJS subprocess for trivial expressions like "60" or "0",
         // which is the common case after ISSUE 108 (expression field defaults to number).
