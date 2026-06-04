@@ -70,6 +70,12 @@ const CSS_PREFIX = 'monish';
  */
 const STARTUP_GRACE_MS = 10_000;
 
+/** Badge appended to an on-demand monitor name when its last value is stale. */
+const STALE_BADGE = ' ❓';
+
+/** Age threshold (ms) above which an on-demand monitor's value is considered stale. */
+const STALE_THRESHOLD_MS = 15 * 60 * 1000;
+
 /** Base icon for each monitor type in the popup menu rows. */
 const BASE_ICONS = {
     plain:   'media-record-symbolic',  // dot — plain monitors (no actions)
@@ -145,6 +151,12 @@ class MonishIndicator extends PanelMenu.Button {
             `changed::${JITTER_KEY}`,
             () => this._reloadMonitors(),
         );
+
+        // Update stale badges whenever the menu is opened.
+        this._menuOpenId = this.menu.connect('open-state-changed', (_menu, isOpen) => {
+            if (!isOpen) return;
+            this._updateStaleBadges();
+        });
     }
 
     // -----------------------------------------------------------------------
@@ -608,6 +620,10 @@ class MonishIndicator extends PanelMenu.Button {
         if (entry) {
             const monitor = this._monitors.find(m => m.id === id);
 
+            // Clear stale badge immediately when fresh data arrives.
+            if (monitor?.onDemand && entry.nameLabel)
+                entry.nameLabel.label = monitor.name;
+
             // Sparklines are meaningless for on-demand monitors (single data point per click).
             const showSpark = !monitor?.onDemand && monitor?.showSparkline !== false;
             const sparkline = showSpark
@@ -768,6 +784,23 @@ class MonishIndicator extends PanelMenu.Button {
         this._errorBadge.text = alertCount > 0 ? '!'.repeat(alertCount) : '!';
     }
 
+    /**
+     * Set or clear the stale badge on every on-demand monitor that has a stored result.
+     * Called when the menu opens so the badge reflects the age at the moment the user looks.
+     */
+    _updateStaleBadges() {
+        const now = Date.now();
+        for (const monitor of this._monitors) {
+            if (!monitor.onDemand) continue;
+            const entry = this._menuItems.get(monitor.id);
+            if (!entry) continue;
+            const res = this._results.get(monitor.id);
+            if (!res?.collectedAt) continue;
+            const stale = (now - res.collectedAt) >= STALE_THRESHOLD_MS;
+            entry.nameLabel.label = monitor.name + (stale ? STALE_BADGE : '');
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Settings reload
     // -----------------------------------------------------------------------
@@ -812,6 +845,10 @@ class MonishIndicator extends PanelMenu.Button {
         if (this._jitterChangedId) {
             this._settings.disconnect(this._jitterChangedId);
             this._jitterChangedId = null;
+        }
+        if (this._menuOpenId) {
+            this.menu.disconnect(this._menuOpenId);
+            this._menuOpenId = null;
         }
         super.destroy();
     }

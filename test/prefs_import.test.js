@@ -933,6 +933,36 @@ describe('i18n \u2014 translation infrastructure', () => {
     });
 });
 
+describe('extension.js stale badge — ISSUE 115', () => {
+    it('defines STALE_BADGE constant', () => {
+        expect(extensionSource).toContain('STALE_BADGE');
+    });
+
+    it('defines STALE_THRESHOLD_MS as 15 minutes', () => {
+        expect(extensionSource).toContain('STALE_THRESHOLD_MS');
+        expect(extensionSource).toContain('15 * 60 * 1000');
+    });
+
+    it('connects open-state-changed to update stale badges on menu open', () => {
+        expect(extensionSource).toContain('open-state-changed');
+        expect(extensionSource).toContain('_updateStaleBadges');
+    });
+
+    it('defines _updateStaleBadges method', () => {
+        expect(extensionSource).toContain('_updateStaleBadges()');
+    });
+
+    it('disconnects menuOpenId in destroy()', () => {
+        expect(extensionSource).toContain('_menuOpenId');
+        expect(extensionSource).toContain('this.menu.disconnect(this._menuOpenId)');
+    });
+
+    it('clears badge on new result in _setMonitorResult', () => {
+        // When fresh data arrives, the badge must be removed immediately.
+        expect(extensionSource).toContain('entry.nameLabel.label = monitor.name');
+    });
+});
+
 describe('prefs.js GtkEntry monospace — ISSUE 118', () => {
     it('does not pass monospace:true to Gtk.Entry constructors', () => {
         // Gtk.Entry has no monospace property; using it throws at runtime.
