@@ -712,8 +712,10 @@ export default class MonishPreferences extends ExtensionPreferences {
         // group children (which would cause an infinite removal loop).
         let builtRows = buildMonitorRows(monitorsGroup, settings, window, fId => refreshAll(fId));
 
-        const refreshMonitorRows = (focusId) => {
-            // Save scroll position so grab_focus() doesn't jump the view.
+        const refreshMonitorRows = (focusId, scrollToFocused = false) => {
+            // Save scroll position so grab_focus() doesn't jump the view for
+            // move operations.  For edit operations scrollToFocused=true so we
+            // let grab_focus() show the edited row instead.
             const scrollWin = findScrolledWindow(page);
             const scrollPos = scrollWin ? scrollWin.get_vadjustment().get_value() : 0;
 
@@ -723,8 +725,10 @@ export default class MonishPreferences extends ExtensionPreferences {
                 const target = builtRows.find(r => r._monitorId === focusId);
                 if (target) {
                     target.grab_focus();
-                    // Restore scroll position after grab_focus scrolls to the focused row.
-                    if (scrollWin) {
+                    // For move operations: restore pre-rebuild scroll so the view
+                    // stays stable.  For edit operations: let grab_focus() scroll
+                    // to show the edited row.
+                    if (!scrollToFocused && scrollWin) {
                         GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
                             scrollWin.get_vadjustment().set_value(scrollPos);
                             return GLib.SOURCE_REMOVE;
@@ -757,8 +761,8 @@ export default class MonishPreferences extends ExtensionPreferences {
             builtPresetRows = buildPresetRows(presetsGroup, settings, () => refreshAll());
         };
 
-        refreshAll = (focusId) => {
-            refreshMonitorRows(focusId);
+        refreshAll = (focusId, scrollToFocused = false) => {
+            refreshMonitorRows(focusId, scrollToFocused);
             refreshPresetRows();
         };
 
@@ -1055,7 +1059,9 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
         editBtn.connect('clicked', () => {
             showMonitorEditDialog(parentWindow, monitor, (updated) => {
                 mutateMonitor(settings, monitor.id, () => updated);
-                refresh();
+                // scrollToFocused=true: show the edited row instead of restoring
+                // the pre-rebuild scroll position (ISSUE 111).
+                refresh(monitor.id, true);
             });
         });
 

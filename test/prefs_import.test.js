@@ -474,6 +474,16 @@ describe('prefs.js scroll position preservation after up/down — ISSUE 59', () 
     it('scroll restoration sets the adjustment back to the saved value', () => {
         expect(prefsSource).toContain('get_vadjustment().set_value(scrollPos)');
     });
+
+    it('edit callback passes monitor.id and scrollToFocused=true — ISSUE 111', () => {
+        // After saving an edit, the list must show the edited row, not reset to top.
+        expect(prefsSource).toContain('refresh(monitor.id, true)');
+    });
+
+    it('refreshMonitorRows accepts scrollToFocused parameter — ISSUE 111', () => {
+        // scrollToFocused=true skips scroll restoration so grab_focus() keeps the row visible.
+        expect(prefsSource).toContain('scrollToFocused');
+    });
 });
 
 describe('debug logging — ISSUE 30', () => {
