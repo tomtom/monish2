@@ -327,6 +327,13 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('(reset:');
     });
 
+    it('OpenRouter Activity line shows only $ amount, not req count — ISSUE 107', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
+        // Activity output must contain the spend amount but NOT the request count.
+        expect(preset.command).toContain('Activity (30d): $');
+        expect(preset.command).not.toContain('req /');
+    });
+
     it('OpenRouter has AI_AGENT arg with ^(opencode)$ default — ISSUE 95', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
         const arg = (preset.args ?? []).find(a => a.name === 'AI_AGENT');
