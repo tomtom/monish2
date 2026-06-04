@@ -22,7 +22,6 @@ import {
     validateMonitor,
     MonitorType,
     splitInterval,
-    toSeconds,
 } from './lib/monitor.js';
 import {PRESET_MONITORS} from './lib/presets.js';
 
@@ -426,33 +425,13 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         rebuildActionRows();
     });
 
-    // ---- Interval ----
-    // Stored and edited in seconds; 0 = on-demand (no timer, click name to refresh); upper bound is 86400 (one day).
-    // Initialise adjustment at lower bound first, then call set_value() so
-    // GTK clamps correctly — a GJS GObject init-ordering issue leaves the
-    // value unclamped when value is set before lower in the constructor.
-    const intervalSpin = new Gtk.SpinButton({
-        adjustment: new Gtk.Adjustment({
-            value:          0,
-            lower:          0,
-            upper:          86400,
-            step_increment: 1,
-        }),
-        numeric:  true,
-        hexpand:  true,
-    });
-    intervalSpin.set_value(data.intervalSeconds);
-    content.append(labeledRow(_('Interval (s)'), intervalSpin));
-
-    const intervalHint = new Gtk.Label({
-        label:       _('Set to 0 for on-demand (click the monitor name to refresh manually).'),
-        xalign:      0,
-        wrap:        true,
-        css_classes: ['caption', 'dim-label'],
-    });
-    content.append(intervalHint);
-
     // ---- Interval Expression ----
+    // A plain integer (e.g. "60") works as a fixed interval; 0 = on-demand.
+    // When editing a monitor that has no expression, seed the field with the
+    // stored intervalSeconds so the user sees the existing value.
+    const initExpr = data.intervalExpression
+        ? data.intervalExpression
+        : String(data.intervalSeconds ?? 60);
     const exprView = new Gtk.TextView({
         wrap_mode:     Gtk.WrapMode.WORD_CHAR,
         hexpand:       true,
@@ -462,7 +441,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
         top_margin:    4,
         bottom_margin: 4,
     });
-    exprView.get_buffer().set_text(data.intervalExpression ?? '', -1);
+    exprView.get_buffer().set_text(initExpr, -1);
     const exprScroll = new Gtk.ScrolledWindow({
         hexpand:            true,
         min_content_height: 48,
@@ -474,7 +453,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     content.append(labeledRow(_('Interval Expr'), exprFrame));
 
     const exprHint = new Gtk.Label({
-        label:       _('Optional JS expression. Must print() an interval in seconds. Access arguments as const NAME. Return 0 to skip this poll (re-checked every 60 s).'),
+        label:       _('Seconds (plain number, e.g. 60), 0 for on-demand, or a JS expression that print()s the interval. Return 0 from expression to skip this poll (re-checks every 60 s).'),
         xalign:      0,
         wrap:        true,
         css_classes: ['caption', 'dim-label'],
@@ -528,10 +507,17 @@ function showMonitorEditDialog(parent, monitor, onSave) {
             const buf = cmdView.get_buffer();
             const cmd = buf.get_text(buf.get_start_iter(), buf.get_end_iter(), false).trim();
 
-            const totalSec = toSeconds(intervalSpin.get_value_as_int(), 'seconds');
-
             const exprBuf  = exprView.get_buffer();
             const exprText = exprBuf.get_text(exprBuf.get_start_iter(), exprBuf.get_end_iter(), false).trim();
+
+            // Derive intervalSeconds from the expression field.
+            // Plain integer: use directly.  Complex JS: keep existing fallback so
+            // expression monitors (e.g. AI-agent smart scheduling) retain their
+            // intervalSeconds fallback.  Empty: 0 = on-demand.
+            const numericMatch = /^\s*(\d+)\s*$/.exec(exprText);
+            const intervalSeconds = numericMatch
+                ? parseInt(numericMatch[1], 10)
+                : exprText ? (data.intervalSeconds ?? 60) : 0;
 
             const updated = {
                 ...data,
@@ -539,12 +525,12 @@ function showMonitorEditDialog(parent, monitor, onSave) {
                 description:          descEntry.get_text().trim(),
                 command:              cmd,
                 type:                 MONITOR_TYPE_VALUES[typeDropDown.get_selected()] ?? MonitorType.SHELL,
-                intervalSeconds:      totalSec,
+                intervalSeconds,
                 intervalExpression:   exprText,
                 outputRegex:          regexEntry.get_text().trim(),
                 cautionPatterns:      splitPatterns(cautionEntry.get_text()),
                 dangerPatterns:       splitPatterns(dangerEntry.get_text()),
-                onDemand:             totalSec === 0,
+                onDemand:             intervalSeconds === 0,
                 actions:              data.actions ?? [],
                 showSparkline:        sparklineSwitch.active,
             };

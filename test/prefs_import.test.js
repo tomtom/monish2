@@ -221,11 +221,10 @@ describe('GSettings schema defaults', () => {
         expect(schemaSource).toContain('<default>5</default>');
     });
 
-    it('splitInterval and toSeconds are imported from lib/monitor.js in prefs', () => {
-        // Guards that the refactored interval helpers are imported from the
-        // shared module, not redefined locally in prefs.js.
+    it('splitInterval is imported from lib/monitor.js in prefs', () => {
+        // Guards that the interval helper is imported from the shared module.
+        // toSeconds was removed together with the interval spinner (ISSUE 108).
         expect(prefsSource).toContain('splitInterval');
-        expect(prefsSource).toContain('toSeconds');
     });
 });
 
@@ -240,8 +239,10 @@ describe('prefs.js interval UI (seconds-only) — ISSUE 27', () => {
         expect(prefsSource).not.toContain('unitDropDown');
     });
 
-    it('labels the interval field with (s) to indicate seconds', () => {
-        expect(prefsSource).toContain('\'Interval (s)\'');
+    it('interval label updated to Interval Expr after spinner removal — ISSUE 108', () => {
+        // Interval (s) spinner removed; expression field is the sole interval input.
+        expect(prefsSource).not.toContain('\'Interval (s)\'');
+        expect(prefsSource).toContain('\'Interval Expr\'');
     });
 });
 
@@ -263,26 +264,24 @@ describe('prefs.js jitter persistence — ISSUE 29', () => {
     });
 });
 
-describe('prefs.js interval spinner safe init — ISSUE 29 re-open', () => {
-    it('interval spinner Adjustment starts at lower bound (1), not data.intervalSeconds', () => {
-        // GJS GObject property init sets value before lower; if intervalSeconds
-        // is 0 (old stored data) the Adjustment is left unclamped (value=0 with
-        // lower=1).  Fix: start at 1 then call set_value() so GTK clamps correctly.
-        expect(prefsSource).not.toContain('value:          data.intervalSeconds');
+describe('prefs.js interval expression replaces interval spinner — ISSUE 108', () => {
+    it('interval spinner removed — no intervalSpin widget in edit dialog', () => {
+        // ISSUE 108: Interval (s) field removed; expression field is sole input.
+        expect(prefsSource).not.toContain('intervalSpin');
     });
 
-    it('interval spinner calls set_value(data.intervalSeconds) after construction', () => {
-        expect(prefsSource).toContain('intervalSpin.set_value(data.intervalSeconds)');
+    it('expression field pre-populated from intervalSeconds when expression is empty', () => {
+        // When editing an old monitor with no expression, seed the field with the
+        // current intervalSeconds so the user sees the existing interval.
+        expect(prefsSource).toContain('data.intervalSeconds');
     });
 });
 
 describe('interval 0 = on-demand — ISSUE 31 / ISSUE 45', () => {
-    it('interval Adjustment lower bound is 0 (allows on-demand monitors)', () => {
-        expect(prefsSource).toContain('lower:          0,');
-    });
-
-    it('edit dialog shows a hint that 0 means on-demand', () => {
-        expect(prefsSource).toContain('Set to 0 for on-demand');
+    it('edit dialog expression hint explains 0 means on-demand — ISSUE 108', () => {
+        // ISSUE 108: Interval (s) spinner removed; expression field is the sole
+        // interval input.  Hint must explain that 0 means on-demand.
+        expect(prefsSource).toContain('on-demand');
     });
 
     it('buildMonitorRows shows "on-demand" subtitle for intervalSeconds === 0', () => {
