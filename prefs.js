@@ -60,13 +60,15 @@ const EXTERNAL_PRESET_DIRS = [
 function showMonitorEditDialog(parent, monitor, onSave) {
     const isNew = !monitor;
     // Deep-copy mutable fields so edits don't affect the caller's object if
-    // the dialog is cancelled.
+    // the dialog is cancelled.  Action objects are spread individually so that
+    // the changed-event handlers in buildActionRow mutate the copy, not the
+    // original monitor's actions (which would persist even after Cancel).
     const data  = monitor
         ? {
             ...monitor,
             args:      [...(monitor.args ?? [])],
             argValues: {...(monitor.argValues ?? {})},
-            actions:   [...(monitor.actions ?? [])],
+            actions:   (monitor.actions ?? []).map(a => ({...a})),
         }
         : createMonitor();
 
@@ -81,12 +83,25 @@ function showMonitorEditDialog(parent, monitor, onSave) {
     const saveBtn = dialog.add_button(_('Save'), Gtk.ResponseType.OK);
     saveBtn.add_css_class('suggested-action');
 
-    const content = dialog.get_content_area();
-    content.margin_top    = 12;
-    content.margin_bottom = 12;
-    content.margin_start  = 16;
-    content.margin_end    = 16;
-    content.spacing       = 8;
+    // Wrap the content in a ScrolledWindow so the dialog height is capped even
+    // for monitors with many actions.  Without this, the error label at the
+    // bottom of the content area is invisible when the dialog overflows the screen.
+    const contentScroll = new Gtk.ScrolledWindow({
+        hscrollbar_policy:        Gtk.PolicyType.NEVER,
+        vscrollbar_policy:        Gtk.PolicyType.AUTOMATIC,
+        propagate_natural_height: true,
+        max_content_height:       640,
+    });
+    const content = new Gtk.Box({
+        orientation:   Gtk.Orientation.VERTICAL,
+        spacing:       8,
+        margin_top:    12,
+        margin_bottom: 12,
+        margin_start:  16,
+        margin_end:    16,
+    });
+    contentScroll.set_child(content);
+    dialog.get_content_area().append(contentScroll);
 
     // ---- Name ----
     const nameEntry = new Gtk.Entry({
@@ -692,7 +707,7 @@ export default class MonishPreferences extends ExtensionPreferences {
         // Track rows built by buildMonitorRows so refreshMonitorRows can
         // remove exactly those rows without touching libadwaita's internal
         // group children (which would cause an infinite removal loop).
-        let builtRows = buildMonitorRows(monitorsGroup, settings, window, fId => refreshAll(fId));
+        let builtRows = buildMonitorRows(monitorsGroup, settings, window, (fId, scrollToFocused) => refreshAll(fId, scrollToFocused));
 
         const refreshMonitorRows = (focusId, scrollToFocused = false) => {
             // Save scroll position so grab_focus() doesn't jump the view for
@@ -702,7 +717,7 @@ export default class MonishPreferences extends ExtensionPreferences {
             const scrollPos = scrollWin ? scrollWin.get_vadjustment().get_value() : 0;
 
             builtRows.forEach(row => monitorsGroup.remove(row));
-            builtRows = buildMonitorRows(monitorsGroup, settings, window, fId => refreshAll(fId));
+            builtRows = buildMonitorRows(monitorsGroup, settings, window, (fId, scrollToFocused) => refreshAll(fId, scrollToFocused));
             if (focusId) {
                 const target = builtRows.find(r => r._monitorId === focusId);
                 if (target) {
@@ -977,11 +992,12 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             const unitLabel = magnitude === 1 ? unit.slice(0, -1) : unit;
             intervalStr = `every ${magnitude} ${unitLabel}`;
         }
+        const normalSubtitle = monitor.description
+            ? `${monitor.description}\n${intervalStr} — ${cmdPreview}`
+            : `${intervalStr} — ${cmdPreview}`;
         const row = new Adw.ActionRow({
             title:    monitor.name,
-            subtitle: monitor.description
-                ? `${monitor.description}\n${intervalStr} — ${cmdPreview}`
-                : `${intervalStr} — ${cmdPreview}`,
+            subtitle: normalSubtitle,
         });
         if (!monitor.enabled)
             row.opacity = 0.5;
@@ -1039,12 +1055,22 @@ function buildMonitorRows(group, settings, parentWindow, refresh) {
             tooltip_text: _('Edit'),
         });
         editBtn.connect('clicked', () => {
-            showMonitorEditDialog(parentWindow, monitor, (updated) => {
-                mutateMonitor(settings, monitor.id, () => updated);
-                // scrollToFocused=true: show the edited row instead of restoring
-                // the pre-rebuild scroll position (ISSUE 111).
-                refresh(monitor.id, true);
-            });
+            // Clear any error from a previous failed edit attempt.
+            row.subtitle = normalSubtitle;
+            try {
+                showMonitorEditDialog(parentWindow, monitor, (updated) => {
+                    try {
+                        mutateMonitor(settings, monitor.id, () => updated);
+                        // scrollToFocused=true: show the edited row instead of restoring
+                        // the pre-rebuild scroll position (ISSUE 111).
+                        refresh(monitor.id, true);
+                    } catch (e) {
+                        row.subtitle = `⚠ ${String(e.message ?? e)}`;
+                    }
+                });
+            } catch (e) {
+                row.subtitle = `⚠ ${String(e.message ?? e)}`;
+            }
         });
 
         // Duplicate button — inserts a copy immediately after this row

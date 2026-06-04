@@ -491,6 +491,35 @@ describe('prefs.js scroll position preservation after up/down — ISSUE 59', () 
     });
 });
 
+describe('prefs.js Gnome RDP edit fix — ISSUE 114', () => {
+    it('deep-copies action objects to prevent shared mutation on cancel', () => {
+        // Shallow array copy leaves action objects shared between the dialog data
+        // and the original monitor, so guard/label changes persist after Cancel.
+        expect(prefsSource).toContain('(monitor.actions ?? []).map(a => ({...a}))');
+    });
+
+    it('dialog content is in a ScrolledWindow so error label is always visible', () => {
+        // For monitors with many actions (e.g. Gnome RDP with 2 actions + guards)
+        // the dialog content can exceed screen height, making the error label
+        // at the bottom invisible.  max_content_height caps the dialog and enables scroll.
+        expect(prefsSource).toContain('propagate_natural_height');
+        expect(prefsSource).toContain('max_content_height');
+    });
+
+    it('buildMonitorRows refresh lambda passes scrollToFocused — ISSUE 111 fix', () => {
+        // Original lambda fId => refreshAll(fId) discarded scrollToFocused=true
+        // passed from the edit callback, so edited rows were never scrolled into view.
+        expect(prefsSource).toContain('(fId, scrollToFocused) => refreshAll(fId, scrollToFocused)');
+    });
+
+    it('edit button handler catches exceptions and displays error in row subtitle', () => {
+        // Errors from showMonitorEditDialog or onSave are caught and shown in
+        // the monitor row subtitle in Prefs, below the monitor entry.
+        expect(prefsSource).toContain('row.subtitle = `⚠ ${String(e.message ?? e)}`');
+        expect(prefsSource).toContain('normalSubtitle');
+    });
+});
+
 describe('debug logging — ISSUE 30', () => {
     it('schema defines a debug-logging boolean key', () => {
         expect(schemaSource).toContain('name="debug-logging" type="b"');
@@ -534,8 +563,10 @@ describe('action commands — ISSUE 50', () => {
         expect(prefsSource).toContain('\'Actions\'');
     });
 
-    it('prefs deep-copies actions on dialog open', () => {
-        expect(prefsSource).toContain('[...(monitor.actions');
+    it('prefs deep-copies action objects on dialog open — ISSUE 114', () => {
+        // Spreading each action object (not just the array) prevents shared mutation:
+        // changed-event handlers in buildActionRow won't touch the original monitor.
+        expect(prefsSource).toContain('(monitor.actions ?? []).map(a => ({...a}))');
     });
 
     it('prefs save handler includes actions from data', () => {

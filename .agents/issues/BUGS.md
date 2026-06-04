@@ -6,7 +6,6 @@ Next number: 116
 ## Current
 
 113. Change the indicator icon for on-demand monitors (i.e., Interval == 0) to a square.
-114. Editing the Gnome RDP preset still fails. It is the only monitor with actions and action guards. Make sure any error on Edit Monitor is displayed somewhere - in Prefs (best just below the monitor entry)
 
 
 ## Open
