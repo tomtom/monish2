@@ -1,9 +1,11 @@
 node_modules/
 .agents/
+.claude/
 graphify-out/
 AGENTS.md
 BUGS.md
 meta/
+tmp/
 
 # Claude Code ctags index
 .claude/tags

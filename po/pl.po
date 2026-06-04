@@ -212,7 +212,7 @@ msgid "No monitors yet"
 msgstr "Brak monitorów"
 
 msgid "Use \"Add Monitor\" or a preset below."
-msgstr "Użyj „Dodaj monitor" lub ustawienia wstępnego poniżej."
+msgstr "Użyj „Dodaj monitor“ lub ustawienia wstępnego poniżej."
 
 msgid "Move up"
 msgstr "Przesuń w górę"
