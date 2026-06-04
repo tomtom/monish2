@@ -400,6 +400,11 @@ class MonishIndicator extends PanelMenu.Button {
     async _resolveInterval(monitor) {
         const expr = (monitor.intervalExpression ?? '').trim();
         if (!expr) return monitor.intervalSeconds;
+        // Plain-number fast path: avoid spawning a GJS subprocess for trivial
+        // expressions like "60" or "0".  This is the common case after ISSUE 108
+        // (expression field is the sole interval input and defaults to a number).
+        const fast = parseFloat(expr);
+        if (isFinite(fast) && fast >= 0 && /^\s*\d+(\.\d+)?\s*$/.test(expr)) return fast;
         try {
             const code   = injectArgs(expr, MonitorType.JAVASCRIPT, monitor.args ?? [], monitor.argValues ?? {});
             const result = await executeJavaScript(code, 10);

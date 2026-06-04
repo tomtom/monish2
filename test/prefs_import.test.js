@@ -838,6 +838,13 @@ describe('extension.js interval expression \u2014 ISSUE 93', () => {
         expect(prefsSource).toContain('intervalExpression');
         expect(prefsSource).toContain('Interval Expr');
     });
+
+    it('_resolveInterval has plain-number fast path (no subprocess) \u2014 ISSUE 109', () => {
+        // Avoids spawning a GJS subprocess for trivial expressions like "60" or "0",
+        // which is the common case after ISSUE 108 (expression field defaults to number).
+        expect(extensionSource).toContain('parseFloat(expr)');
+        expect(extensionSource).not.toContain('parseFloat(expr);\n        try {');
+    });
 });
 
 describe('i18n \u2014 translation infrastructure', () => {
