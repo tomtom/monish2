@@ -37,3 +37,4 @@
 118. WRT to the edit Gnome RDP issue (see git log): Error No property monospace on GtkEntry. #closed/2026-06-04
 119. In the Claude usage preset: for the reset also include the date ... or simply include the whole info as provided, e.g., "resets Thu 04 Jun 11:00". #closed/2026-06-04
 115. Issue 110 (and related) still isn't fixed. The monitor value's age still isn't shown in the monitor list/menu. If the monitor value's age is > 15m, then add a Questionable badge (as unicode character) to the monitor name. #closed/2026-06-04
+120. In Claude Usage and OpenRouter presets: Remove the obsolete "AI Agent regexp" argument. #closed/2026-06-04

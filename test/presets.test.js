@@ -300,11 +300,10 @@ describe('PRESET_MONITORS', () => {
         }
     });
 
-    it('Claude Usage has AI_AGENT arg with ^(claude)$ default — ISSUE 94', () => {
+    it('Claude Usage has no AI_AGENT arg — removed as obsolete in ISSUE 120', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
         const arg = (preset.args ?? []).find(a => a.name === 'AI_AGENT');
-        expect(arg).toBeDefined();
-        expect(arg.default).toBe('^(claude)$');
+        expect(arg).toBeUndefined();
     });
 
     it('Claude Usage has no intervalExpression — ISSUE 112 removed expression scheduling', () => {
@@ -345,11 +344,10 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).not.toContain('Activity (30d)');
     });
 
-    it('OpenRouter has AI_AGENT arg with ^(opencode)$ default — ISSUE 95', () => {
+    it('OpenRouter has no AI_AGENT arg — removed as obsolete in ISSUE 120', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
         const arg = (preset.args ?? []).find(a => a.name === 'AI_AGENT');
-        expect(arg).toBeDefined();
-        expect(arg.default).toBe('^(opencode)$');
+        expect(arg).toBeUndefined();
     });
 
     it('OpenRouter has no intervalExpression — ISSUE 112 removed expression scheduling', () => {

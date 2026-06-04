@@ -5,7 +5,6 @@ Next number: 123
 
 ## Current
 
-120. In Claude Usage and OpenRouter presets: Remove the obsolete "AI Agent regexp" argument.
 121. In Monitor edit: clicking on "Setup instructions" does nothing.
 122. In Claude Usage: Change the format for the reset date to "%a %d %H:%M". Or even better: make it a monitor argument and use that argument for formatting.
 
