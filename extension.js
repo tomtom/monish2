@@ -207,7 +207,24 @@ class MonishIndicator extends PanelMenu.Button {
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-        const settingsItem = new PopupMenu.PopupMenuItem(_('Settings'));
+        // Build Settings row to match monitor rows: same icon box + same name style.
+        const settingsItem = new PopupMenu.PopupBaseMenuItem();
+        const settingsIconBox = new St.Widget({
+            layout_manager: new Clutter.BinLayout(),
+            style_class:    `${CSS_PREFIX}-status-icon`,
+            y_align:        Clutter.ActorAlign.CENTER,
+        });
+        settingsIconBox.add_child(new St.Icon({
+            icon_name: 'preferences-system-symbolic',
+            icon_size: 16,
+        }));
+        const settingsLabel = new St.Label({
+            text:        _('Settings'),
+            style_class: `${CSS_PREFIX}-monitor-name`,
+            y_align:     Clutter.ActorAlign.CENTER,
+        });
+        settingsItem.add_child(settingsIconBox);
+        settingsItem.add_child(settingsLabel);
         settingsItem.connect('activate', () => {
             this.menu.close();
             this._openPrefs();

@@ -1,3 +1,4 @@
+131. In the monitor-value list/menu: Prefix "Settings" with an appropriate icon. Make the settings menu item be horizontally aligned with the monitors. Use the same font/color for Settings as for monitor names. #closed/2026-06-04
 130. For on-demand monitors, change the handling of stale values. Replace the indicator icon with the current stale badge "↻". #closed/2026-06-04
 129. Warning in make shexli: EGO-M-005 session-modes should be omitted when only containing "user". #closed/2026-06-04
 127. In Prefs / Edit Monitor with Actions: Explain how the guard expressions work (provide a simple help page). Are there any other operators than "matches"? #closed/2026-06-04

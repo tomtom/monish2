@@ -5,7 +5,6 @@ Next number: 138
 
 ## Current
 
-131. In the monitor-value list/menu: Prefix "Settings" with an appropriate icon. Make the settings menu item be horizontally aligned with the monitors. Use the same font/color for Settings as for monitor names.
 132. Did I understand you correctly that there is a 30s time running no matter what? Only if this is the case: trigger monitors only when such a 30s timer fires. Never update a scheduled monitor outside of such a 30s window. Manual updates are triggered immediately. On startup, randomly assign active monitors to the next 2 30s timer events. Remove the jitter logic, the jitter-related option in Prefs, and related code.
 133. In Prefs: Do we still need the "On-demand time display" option or could it be removed?
 134. In Prefs: Remove the debug log file, when debug logging is turned off.
