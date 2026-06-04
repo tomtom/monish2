@@ -187,6 +187,22 @@ describe('extension.js on-demand monitors', () => {
         expect(extensionSource).toContain('monitor-name-on-demand');
         expect(extensionSource).toContain('monitor.onDemand');
     });
+
+    it('stale badge is a separate St.Label so the underline never covers it — ISSUE 124', () => {
+        // Appending the badge to nameLabel.label caused the underline to extend to the icon.
+        expect(extensionSource).toContain('staleBadgeLabel');
+        expect(extensionSource).toContain('monitor-stale-badge');
+    });
+
+    it('stale badge uses a clock icon, not the questionable mark — ISSUE 124', () => {
+        expect(extensionSource).toContain("STALE_BADGE = '⏰'");
+        expect(extensionSource).not.toContain("STALE_BADGE = ' ❓'");
+    });
+
+    it('_updateStaleBadges toggles staleBadgeLabel.visible instead of mutating nameLabel.label — ISSUE 124', () => {
+        expect(extensionSource).toContain('staleBadgeLabel.visible = stale');
+        expect(extensionSource).not.toContain('STALE_BADGE : \'\'');
+    });
 });
 
 describe('extension.js multi-line output', () => {
@@ -984,9 +1000,9 @@ describe('extension.js stale badge — ISSUE 115', () => {
         expect(extensionSource).toContain('this.menu.disconnect(this._menuOpenId)');
     });
 
-    it('clears badge on new result in _setMonitorResult', () => {
-        // When fresh data arrives, the badge must be removed immediately.
-        expect(extensionSource).toContain('entry.nameLabel.label = monitor.name');
+    it('clears badge on new result in _setMonitorResult — ISSUE 124', () => {
+        // Badge is now a separate St.Label; hidden immediately when fresh data arrives.
+        expect(extensionSource).toContain('entry.staleBadgeLabel.visible = false');
     });
 });
 

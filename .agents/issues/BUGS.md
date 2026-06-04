@@ -5,7 +5,6 @@ Next number: 126
 
 ## Current
 
-124. For on-demand monitors: The questionable badge (for outdated values) must not be underlined. Only the name itself should be underlined. In any case, replace the STALE badge with a clock/time icon. The STALE badge should have the same color as the monitor name.
 125. AI_AGENT_INTERVAL_JS is still defined. We don't need it anymore since intervalExpression is gone. Also remove any code related to intervalExpression.
 
 

@@ -41,3 +41,4 @@
 121. In Monitor edit: clicking on "Setup instructions" does nothing. #closed/2026-06-04
 122. In Claude Usage: Change the format for the reset date to "%a %d %H:%M". Or even better: make it a monitor argument and use that argument for formatting. #closed/2026-06-04
 123. In Prefs: Add a reset-to-preset button for monitors whose command diverged from their preset definition. #closed/2026-06-04
+124. For on-demand monitors: render stale badge as a separate label so the name underline does not extend to it; replace ❓ with ⏰. #closed/2026-06-04
