@@ -932,3 +932,20 @@ describe('i18n \u2014 translation infrastructure', () => {
         expect(poFiles.length).toBeGreaterThanOrEqual(5);
     });
 });
+
+describe('prefs.js GtkEntry monospace — ISSUE 118', () => {
+    it('does not pass monospace:true to Gtk.Entry constructors', () => {
+        // Gtk.Entry has no monospace property; using it throws at runtime.
+        // Use css_classes:["monospace"] instead.
+        const entryBlocks = prefsSource.match(/new Gtk\.Entry\(\{[^}]*\}\)/gs) ?? [];
+        for (const block of entryBlocks) {
+            expect(block).not.toContain('monospace:');
+        }
+    });
+
+    it('action cmdEntry and guardEntry use css_classes monospace', () => {
+        // The command and guard fields in buildActionRow should render monospace
+        // via the CSS class, not a non-existent GtkEntry property.
+        expect(prefsSource).toContain("css_classes:      ['monospace']");
+    });
+});

@@ -396,7 +396,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
             text:             action.command ?? '',
             placeholder_text: _('Command or script'),
             hexpand:          true,
-            monospace:        true,
+            css_classes:      ['monospace'],
         });
         cmdEntry.connect('changed', () => {
             action.command = cmdEntry.get_text();
@@ -408,7 +408,7 @@ function showMonitorEditDialog(parent, monitor, onSave) {
             text:             action.guard ?? '',
             placeholder_text: _("JS condition on value (e.g. value === 'disabled')"),
             hexpand:          true,
-            monospace:        true,
+            css_classes:      ['monospace'],
         });
         guardEntry.connect('changed', () => {
             action.guard = guardEntry.get_text();
