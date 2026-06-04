@@ -11,6 +11,13 @@ import {describe, it, expect} from '@jest/globals';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(join(__dirname, '..', 'stylesheet.css'), 'utf8');
 
+describe('stylesheet.css — action buttons', () => {
+    // Regression: addendum to ISSUE 141 — action buttons must have rounded corners.
+    it('action button has border-radius', () => {
+        expect(css).toMatch(/\.monish-action-button\s*\{[^}]*border-radius\s*:/);
+    });
+});
+
 describe('stylesheet.css — status value colours', () => {
     // Regression: ISSUE 81 — status is indicated by icon colour (inline style) and
     // value label colour (CSS).  Guard the CSS value-label rules so they are not

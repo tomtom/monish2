@@ -1,3 +1,5 @@
+141. Remove border from action buttons; white text, grey hover background matching GNOME menu items. #closed/2026-06-04
+Ad 141. Add rounded corners (border-radius: 4px) to action buttons. #closed/2026-06-04
 140. In monitor-values menu: Actions are currently formatted in blue as hyperlinks. Could these be formatted as white text and as buttons? #closed/2026-06-04
 139. Startup timing log had only a single entry; add per-phase checkpoints. #closed/2026-06-04
 138. Single shared 60s stale-check timer for on-demand monitors. #closed/2026-06-04 #SHELVED
