@@ -34,3 +34,4 @@
 113. For on-demand monitors (i.e., Interval == 0) always underline the monitor name. #closed/2026-06-04
 116. In Claude Usage preset: Change the value's format to "50% (reset: DATETIME)". #closed/2026-06-04
 117. In OpenRouter preset: Show just the $ amount as the Activity value's, remove the "(30d): " prefix. #closed/2026-06-04
+118. WRT to the edit Gnome RDP issue (see git log): Error No property monospace on GtkEntry. #closed/2026-06-04

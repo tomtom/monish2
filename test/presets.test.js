@@ -320,6 +320,12 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('(reset:');
     });
 
+    it('Claude Usage reset includes date (day-of-week, day, month) — ISSUE 119', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
+        // Format must include %a %d %b so the user sees e.g. "Thu 04 Jun 11:00".
+        expect(preset.command).toContain('%a %d %b %H:%M');
+    });
+
     it('Claude Usage output format is "5h: PCT% (reset: …)" — ISSUE 116', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
         // PCT leads, reset time trails — first token "5h:" is the label so the

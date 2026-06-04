@@ -5,7 +5,6 @@ Next number: 120
 
 ## Current
 
-118. WRT to the edit Gnome RDP issue (see git log): Error No property monospace on GtkEntry.
 119. In the Claude usage preset: for the reset also include the date ... or simply include the whole info as provided, e.g., "resets Thu 04 Jun 11:00".
 
 
