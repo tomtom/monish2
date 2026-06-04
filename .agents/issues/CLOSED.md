@@ -1,3 +1,4 @@
+140. In monitor-values menu: Actions are currently formatted in blue as hyperlinks. Could these be formatted as white text and as buttons? #closed/2026-06-04
 139. Startup timing log had only a single entry; add per-phase checkpoints. #closed/2026-06-04
 138. Single shared 60s stale-check timer for on-demand monitors. #closed/2026-06-04 #SHELVED
 137. Debug logging: Log to system journal instead of file; remove DEBUG_ONLY stripping from ZIP build. #closed/2026-06-04

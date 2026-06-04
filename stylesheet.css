@@ -68,15 +68,16 @@
 }
 
 .monish-action-button {
-    background: none;
-    border: none;
-    padding: 2px 0;
-    color: #729fcf;
-    text-decoration: underline;
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    padding: 3px 10px;
+    color: white;
 }
 
 .monish-action-button:hover {
-    color: #3465a4;
+    background-color: rgba(255, 255, 255, 0.22);
+    color: white;
 }
 
 /* Stale-data badge replacing the status icon for on-demand monitors. */
