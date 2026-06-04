@@ -5,7 +5,6 @@ Next number: 118
 
 ## Current
 
-117. In OpenRouter preset: Show just the $ amount as the Activity value's, remove the "(30d): " prefix.
 
 
 ## Open

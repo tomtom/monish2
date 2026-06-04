@@ -33,3 +33,4 @@
 114. Editing the Gnome RDP preset still fails. It is the only monitor with actions and action guards. Make sure any error on Edit Monitor is displayed somewhere - in Prefs (best just below the monitor entry) #closed/2026-06-04
 113. For on-demand monitors (i.e., Interval == 0) always underline the monitor name. #closed/2026-06-04
 116. In Claude Usage preset: Change the value's format to "50% (reset: DATETIME)". #closed/2026-06-04
+117. In OpenRouter preset: Show just the $ amount as the Activity value's, remove the "(30d): " prefix. #closed/2026-06-04
