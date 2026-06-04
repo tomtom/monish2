@@ -319,10 +319,15 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('(reset:');
     });
 
-    it('Claude Usage reset includes date (day-of-week, day, month) — ISSUE 119', () => {
+    it('Claude Usage reset format is controlled by DATE_FMT arg — ISSUE 122', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
-        // Format must include %a %d %b so the user sees e.g. "Thu 04 Jun 11:00".
-        expect(preset.command).toContain('%a %d %b %H:%M');
+        // Format string moved to a user-configurable arg so the literal is no
+        // longer hardcoded in the command; command references DATE_FMT variable.
+        expect(preset.command).toContain('DATE_FMT');
+        expect(preset.command).not.toContain('%a %d %b %H:%M');
+        const arg = (preset.args ?? []).find(a => a.name === 'DATE_FMT');
+        expect(arg).toBeDefined();
+        expect(arg.default).toBe('%a %d %H:%M');
     });
 
     it('Claude Usage output format is "5h: PCT% (reset: …)" — ISSUE 116', () => {
