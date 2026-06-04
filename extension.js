@@ -175,7 +175,7 @@ class MonishIndicator extends PanelMenu.Button {
      *
      * When debug-logging is enabled, logs the wall time of this call and the
      * per-monitor widget-creation loop to the GNOME journal.  Check with:
-     *   journalctl -b --no-pager | grep '\[monish2\]'
+     *   journalctl -b --no-pager | grep monish2
      *
      * @param {number} [firstRunDelay=0] - Milliseconds to wait before the first
      *   monitor poll. Pass STARTUP_GRACE_MS on initial build; use 0 for reloads

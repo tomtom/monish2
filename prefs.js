@@ -815,7 +815,7 @@ export default class MonishPreferences extends ExtensionPreferences {
         // ---- Debug logging toggle ----
         const debugRow = new Adw.ActionRow({
             title:    _('Debug Logging'),
-            subtitle: 'Log command executions to debug.log; also logs startup timing to the journal (journalctl -b | grep [monish2])',
+            subtitle: 'Log command executions to debug.log; also logs startup timing to the journal (journalctl -b | grep monish2)',
         });
         const debugToggle = new Gtk.Switch({
             active: settings.get_boolean('debug-logging'),
