@@ -147,6 +147,17 @@ class MonishIndicator extends PanelMenu.Button {
             () => this._reloadMonitors(),
         );
 
+        // Delete the log file when debug logging is turned off.
+        /* DEBUG_ONLY_BEGIN */
+        this._debugLogChangedId = this._settings.connect(
+            `changed::${DEBUG_LOG_KEY}`,
+            () => {
+                if (this._settings.get_boolean(DEBUG_LOG_KEY)) return;
+                try { Gio.File.new_for_path(this._debugLogPath).delete(null); } catch (_) {}
+            },
+        );
+        /* DEBUG_ONLY_END */
+
         // Update stale badges whenever the menu is opened.
         this._menuOpenId = this.menu.connect('open-state-changed', (_menu, isOpen) => {
             if (!isOpen) return;
@@ -828,6 +839,12 @@ class MonishIndicator extends PanelMenu.Button {
             this._settings.disconnect(this._jitterChangedId);
             this._jitterChangedId = null;
         }
+        /* DEBUG_ONLY_BEGIN */
+        if (this._debugLogChangedId) {
+            this._settings.disconnect(this._debugLogChangedId);
+            this._debugLogChangedId = null;
+        }
+        /* DEBUG_ONLY_END */
         if (this._menuOpenId) {
             this.menu.disconnect(this._menuOpenId);
             this._menuOpenId = null;

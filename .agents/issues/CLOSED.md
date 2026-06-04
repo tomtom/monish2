@@ -1,3 +1,4 @@
+134. In Prefs: Remove the debug log file, when debug logging is turned off. #closed/2026-06-04
 133. In Prefs: Do we still need the "On-demand time display" option or could it be removed? #closed/2026-06-04
 132. 30s timer scheduling redesign — premise was false; no platform-level 30s tick exists in GNOME Shell. #closed/2026-06-04 #SHELVED
 131. In the monitor-value list/menu: Prefix "Settings" with an appropriate icon. Make the settings menu item be horizontally aligned with the monitors. Use the same font/color for Settings as for monitor names. #closed/2026-06-04

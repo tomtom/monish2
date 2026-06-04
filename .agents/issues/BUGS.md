@@ -5,7 +5,6 @@ Next number: 138
 
 ## Current
 
-134. In Prefs: Remove the debug log file, when debug logging is turned off.
 135. In Prefs: The text below "Debug Logging" says "journalctl -b | grep [monish2]". This is wrong, because "[monish2]" prints all lines matching at least one of these characters. I assume you meant "journalctl -b | grep monish2". That said the logging of startup timing is useless in its present form since the log contains just a single entry.
 136. In Prefs: Replace "Schedule Settings" with "Options".
 137. Debug logging: Don't use a log file but log to the system's journal (as it is done for "startup timing". Remove the code that removes the logging from the production version in the ZIP file.
