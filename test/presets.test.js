@@ -118,15 +118,15 @@ describe('PRESET_MONITORS', () => {
         const cautionRe = new RegExp(p.cautionPatterns[0]);
         const dangerRe  = new RegExp(p.dangerPatterns[0]);
         // CAUTION: ≥75%
-        expect(cautionRe.test('Rolling: 75%\nWeekly: 50%')).toBe(true);
-        expect(cautionRe.test('Rolling: 80%\nWeekly: 60%')).toBe(true);
-        expect(cautionRe.test('Rolling: 74%\nWeekly: 74%')).toBe(false);
+        expect(cautionRe.test('Session: 75%\nWeekly: 50%')).toBe(true);
+        expect(cautionRe.test('Session: 80%\nWeekly: 60%')).toBe(true);
+        expect(cautionRe.test('Session: 74%\nWeekly: 74%')).toBe(false);
         // DANGER: ≥90%
-        expect(dangerRe.test('Rolling: 90%\nWeekly: 50%')).toBe(true);
-        expect(dangerRe.test('Rolling: 100%\nWeekly: 50%')).toBe(true);
-        expect(dangerRe.test('Rolling: 89%\nWeekly: 89%')).toBe(false);
-        // ISSUE 126: "Rolling:" label must not cause false CAUTION via parseFloat
-        expect(cautionRe.test('Rolling: 14% (reset: Thu 04 16:00)\nWeekly: 14% (reset: Thu 11 16:00)')).toBe(false);
+        expect(dangerRe.test('Session: 90%\nWeekly: 50%')).toBe(true);
+        expect(dangerRe.test('Session: 100%\nWeekly: 50%')).toBe(true);
+        expect(dangerRe.test('Session: 89%\nWeekly: 89%')).toBe(false);
+        // ISSUE 126: "Session:" label must not cause false CAUTION via parseFloat
+        expect(cautionRe.test('Session: 14% (reset: Thu 04 16:00)\nWeekly: 14% (reset: Thu 11 16:00)')).toBe(false);
     });
 
     it('OpenRouter preset exists with correct structure — ISSUE 87', () => {
@@ -332,12 +332,12 @@ describe('PRESET_MONITORS', () => {
         expect(arg.default).toBe('%a %d %H:%M');
     });
 
-    it('Claude Usage output format is "Rolling: PCT% (reset: …)" — ISSUE 116/126', () => {
+    it('Claude Usage output format is "Session: PCT% (reset: …)" — ISSUE 116/126', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
-        // "Rolling:"/"Weekly:" labels start with a letter so parseFloat of the full
+        // "Session:"/"Weekly:" labels start with a letter so parseFloat of the full
         // multi-line value returns NaN, preventing numeric patterns from using the
         // label digit ("5" from old "5h:") as the comparison value (ISSUE 126).
-        expect(preset.command).toContain("print('Rolling: ' + pct(five)");
+        expect(preset.command).toContain("print('Session: ' + pct(five)");
         expect(preset.command).toContain("print('Weekly: '  + pct(seven)");
         // Old column-alignment padding must be gone.
         expect(preset.command).not.toContain('padEnd');
