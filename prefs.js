@@ -23,6 +23,8 @@ import {
     MonitorType,
     splitInterval,
     toSeconds,
+    parseGuard,
+    serializeGuard,
 } from './lib/monitor.js';
 import {PRESET_MONITORS} from './lib/presets.js';
 
@@ -35,6 +37,10 @@ const _ = (str) => GLib.dgettext('monish2@thm.link', str);
 /** Monitor type labels shown in the Type dropdown (index matches MonitorType values). */
 const MONITOR_TYPE_LABELS = [_('Shell'), _('JavaScript')];
 const MONITOR_TYPE_VALUES = [MonitorType.SHELL, MonitorType.JAVASCRIPT];
+
+/** Guard operator values and labels for the action guard dropdown. */
+const GUARD_OP_VALUES  = ['', 'matches', 'not matches', 'matches-re', 'not matches-re'];
+const GUARD_OP_LABELS  = [_('always'), _('matches'), _('not matches'), _('matches regex'), _('not matches regex')];
 
 /**
  * Directories scanned for additional preset definition files (JSON).
@@ -398,21 +404,39 @@ function showMonitorEditDialog(parent, monitor, onSave) {
             action.command = cmdEntry.get_text();
         });
 
-        // Optional JS condition evaluated against the current monitor value.
-        // Empty = always show the button.
-        const guardEntry = new Gtk.Entry({
-            text:             action.guard ?? '',
-            placeholder_text: _("JS condition on value (e.g. value === 'disabled')"),
+        // Guard: operator dropdown + pattern entry. Empty op = always show button.
+        const {op: initOp, pattern: initPattern} = parseGuard(action.guard ?? '');
+
+        const guardOpDropDown = new Gtk.DropDown({
+            model: Gtk.StringList.new(GUARD_OP_LABELS),
+        });
+        const initOpIdx = GUARD_OP_VALUES.indexOf(initOp);
+        guardOpDropDown.set_selected(initOpIdx >= 0 ? initOpIdx : 0);
+
+        const guardPatternEntry = new Gtk.Entry({
+            text:             initPattern,
+            placeholder_text: _('Pattern'),
             hexpand:          true,
             css_classes:      ['monospace'],
+            visible:          initOp !== '',
         });
-        guardEntry.connect('changed', () => {
-            action.guard = guardEntry.get_text();
-        });
+
+        function syncGuard() {
+            const op      = GUARD_OP_VALUES[guardOpDropDown.get_selected()] ?? '';
+            const pattern = guardPatternEntry.get_text();
+            guardPatternEntry.set_visible(op !== '');
+            action.guard = serializeGuard(op, pattern);
+        }
+        guardOpDropDown.connect('notify::selected', syncGuard);
+        guardPatternEntry.connect('changed', syncGuard);
+
+        const guardRow = new Gtk.Box({spacing: 4, hexpand: true});
+        guardRow.append(guardOpDropDown);
+        guardRow.append(guardPatternEntry);
 
         row.append(topRow);
         row.append(cmdEntry);
-        row.append(guardEntry);
+        row.append(guardRow);
         return row;
     }
 

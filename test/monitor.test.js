@@ -28,6 +28,8 @@ import {
     injectArgs,
     countAlertStatuses,
     formatAge,
+    parseGuard,
+    serializeGuard,
 } from '../lib/monitor.js';
 
 import {describe, it, expect} from '@jest/globals';
@@ -930,6 +932,12 @@ describe('evaluateGuard', () => {
         expect(evaluateGuard('matches /[invalid/', 'value')).toBe(true);
     });
 
+    it('evaluateGuard round-trips through serializeGuard+parseGuard', () => {
+        const guard = serializeGuard('matches', 'disabled');
+        expect(evaluateGuard(guard, 'disabled')).toBe(true);
+        expect(evaluateGuard(guard, 'enabled')).toBe(false);
+    });
+
     it('Gnome RDP Enable guard: show when disabled', () => {
         expect(evaluateGuard("matches 'disabled'", 'disabled')).toBe(true);
         expect(evaluateGuard("matches 'disabled'", 'enabled')).toBe(false);
@@ -938,6 +946,90 @@ describe('evaluateGuard', () => {
     it('Gnome RDP Disable guard: show when enabled', () => {
         expect(evaluateGuard("matches 'enabled'", 'enabled')).toBe(true);
         expect(evaluateGuard("matches 'enabled'", 'disabled')).toBe(false);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// parseGuard / serializeGuard — ISSUE 127
+// ---------------------------------------------------------------------------
+
+describe('parseGuard', () => {
+    it('empty/null/undefined → op=""', () => {
+        expect(parseGuard('')).toEqual({op: '', pattern: ''});
+        expect(parseGuard(null)).toEqual({op: '', pattern: ''});
+        expect(parseGuard(undefined)).toEqual({op: '', pattern: ''});
+    });
+
+    it("matches 'str' → op='matches'", () => {
+        expect(parseGuard("matches 'disabled'")).toEqual({op: 'matches', pattern: 'disabled'});
+        expect(parseGuard('matches "off"')).toEqual({op: 'matches', pattern: 'off'});
+    });
+
+    it("not matches 'str' → op='not matches'", () => {
+        expect(parseGuard("not matches 'enabled'")).toEqual({op: 'not matches', pattern: 'enabled'});
+    });
+
+    it('matches /pat/ → op="matches-re"', () => {
+        expect(parseGuard('matches /^disabled$/')).toEqual({op: 'matches-re', pattern: '^disabled$'});
+    });
+
+    it('not matches /pat/ → op="not matches-re"', () => {
+        expect(parseGuard('not matches /^active$/')).toEqual({op: 'not matches-re', pattern: '^active$'});
+    });
+
+    it('matches /pat/flags — flags dropped', () => {
+        expect(parseGuard('matches /disabled/i')).toEqual({op: 'matches-re', pattern: 'disabled'});
+    });
+
+    it("legacy value === 'str' → op='matches'", () => {
+        expect(parseGuard("value === 'disabled'")).toEqual({op: 'matches', pattern: 'disabled'});
+    });
+
+    it("legacy value !== 'str' → op='not matches'", () => {
+        expect(parseGuard("value !== 'enabled'")).toEqual({op: 'not matches', pattern: 'enabled'});
+    });
+
+    it('unrecognised → op=""', () => {
+        expect(parseGuard('some_random_expr()')).toEqual({op: '', pattern: ''});
+    });
+});
+
+describe('serializeGuard', () => {
+    it('op="" → empty string', () => {
+        expect(serializeGuard('', 'anything')).toBe('');
+    });
+
+    it('empty pattern → empty string', () => {
+        expect(serializeGuard('matches', '')).toBe('');
+        expect(serializeGuard('matches-re', '   ')).toBe('');
+    });
+
+    it("matches → matches 'str'", () => {
+        expect(serializeGuard('matches', 'disabled')).toBe("matches 'disabled'");
+    });
+
+    it("not matches → not matches 'str'", () => {
+        expect(serializeGuard('not matches', 'enabled')).toBe("not matches 'enabled'");
+    });
+
+    it('matches-re → matches /pat/', () => {
+        expect(serializeGuard('matches-re', '^disabled$')).toBe('matches /^disabled$/');
+    });
+
+    it('not matches-re → not matches /pat/', () => {
+        expect(serializeGuard('not matches-re', '^active$')).toBe('not matches /^active$/');
+    });
+
+    it('round-trips with parseGuard', () => {
+        const cases = [
+            {op: 'matches',        pattern: 'off'},
+            {op: 'not matches',    pattern: 'on'},
+            {op: 'matches-re',     pattern: '^(off|disabled)$'},
+            {op: 'not matches-re', pattern: '^active$'},
+        ];
+        for (const {op, pattern} of cases) {
+            expect(parseGuard(serializeGuard(op, pattern))).toEqual({op, pattern});
+        }
     });
 });
 

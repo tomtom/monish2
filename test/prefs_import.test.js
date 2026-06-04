@@ -713,12 +713,12 @@ describe('prefs.js monitor export/import — ISSUE 65', () => {
 });
 
 describe('action button guard — ISSUE 64', () => {
-    it('prefs buildActionRow includes a guard entry for JS condition', () => {
+    it('prefs buildActionRow reads and writes action.guard', () => {
         expect(prefsSource).toContain('action.guard');
     });
 
-    it('prefs guard entry has a meaningful placeholder', () => {
-        expect(prefsSource).toContain('JS condition');
+    it('prefs uses GUARD_OP_VALUES dropdown for guard operator — ISSUE 127', () => {
+        expect(prefsSource).toContain('GUARD_OP_VALUES');
     });
 
     it('extension stores actionBtns in _menuItems for per-button visibility control', () => {
