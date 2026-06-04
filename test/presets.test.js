@@ -319,6 +319,14 @@ describe('PRESET_MONITORS', () => {
         expect(preset.intervalExpression).toContain('900');
     });
 
+    it('Claude Usage command includes reset time in output — ISSUE 106', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
+        // Command must read reset timestamp from the API response.
+        expect(preset.command).toMatch(/resets_at|reset_at|resetsAt/);
+        // Output line must include "(reset: …)" so the user sees when quota refreshes.
+        expect(preset.command).toContain('(reset:');
+    });
+
     it('OpenRouter has AI_AGENT arg with ^(opencode)$ default — ISSUE 95', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
         const arg = (preset.args ?? []).find(a => a.name === 'AI_AGENT');
