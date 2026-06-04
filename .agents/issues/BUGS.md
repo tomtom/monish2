@@ -5,9 +5,6 @@ Next number: 120
 
 ## Current
 
-119. In the Claude usage preset: for the reset also include the date ... or simply include the whole info as provided, e.g., "resets Thu 04 Jun 11:00".
-
-
 ## Open
 
 115. Issue 110 (and related) still isn't fixed. The monitor value's age still isn't shown in the 

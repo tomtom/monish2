@@ -35,3 +35,4 @@
 116. In Claude Usage preset: Change the value's format to "50% (reset: DATETIME)". #closed/2026-06-04
 117. In OpenRouter preset: Show just the $ amount as the Activity value's, remove the "(30d): " prefix. #closed/2026-06-04
 118. WRT to the edit Gnome RDP issue (see git log): Error No property monospace on GtkEntry. #closed/2026-06-04
+119. In the Claude usage preset: for the reset also include the date ... or simply include the whole info as provided, e.g., "resets Thu 04 Jun 11:00". #closed/2026-06-04
