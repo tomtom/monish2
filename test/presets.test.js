@@ -449,6 +449,12 @@ describe('preset GJS scripts: GLib.file_get_contents error handling', () => {
         }
     });
 
+    it('Gnome RDP preset has showSparkline false — ISSUE 142', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Gnome RDP');
+        expect(preset).toBeDefined();
+        expect(preset.showSparkline).toBe(false);
+    });
+
     it('Battery Level guards each per-entry read with inner try/catch (AC has no capacity file)', () => {
         // The outer try/catch alone was swallowing the error before BAT0 was reached.
         // The inner try/catch must be present so non-battery entries are skipped.
