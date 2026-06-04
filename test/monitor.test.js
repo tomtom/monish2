@@ -680,17 +680,6 @@ describe('injectArgs', () => {
 // createMonitor args defaults
 // ---------------------------------------------------------------------------
 
-describe('createMonitor intervalExpression default', () => {
-    it('defaults intervalExpression to empty string', () => {
-        expect(createMonitor().intervalExpression).toBe('');
-    });
-
-    it('preserves intervalExpression override', () => {
-        const m = createMonitor({intervalExpression: 'print(300)'});
-        expect(m.intervalExpression).toBe('print(300)');
-    });
-});
-
 describe('createMonitor args / argValues defaults', () => {
     it('initialises args to empty array', () => {
         expect(createMonitor().args).toEqual([]);
@@ -780,11 +769,6 @@ describe('normalizeMonitor', () => {
         expect(m.intervalSeconds).toBe(60);
     });
 
-    it('fills missing intervalExpression with empty string', () => {
-        const m = normalizeMonitor({id: 'x', name: 'Foo', command: 'echo hi'});
-        expect(m.intervalExpression).toBe('');
-    });
-
     it('fills missing args with empty array', () => {
         const m = normalizeMonitor({id: 'x', name: 'Foo', command: 'echo hi'});
         expect(m.args).toEqual([]);
@@ -858,12 +842,6 @@ describe('deserializeMonitors migration — ISSUE 99', () => {
         const json = JSON.stringify([{id: 'x', name: 'Old Monitor'}]);
         const monitors = deserializeMonitors(json);
         expect(monitors[0].command).toBe('');
-    });
-
-    it('fills in missing intervalExpression for pre-ISSUE-93 monitors', () => {
-        const json = JSON.stringify([{id: 'x', name: 'Old', command: 'echo hi', intervalSeconds: 60}]);
-        const monitors = deserializeMonitors(json);
-        expect(monitors[0].intervalExpression).toBe('');
     });
 
     it('normalizes action guard missing from old stored monitor', () => {

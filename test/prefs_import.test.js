@@ -321,11 +321,7 @@ describe('prefs.js interval spinner restored — ISSUE 112', () => {
         expect(prefsSource).not.toContain('intervalExpression:   exprText');
     });
 
-    it('save handler clears intervalExpression to empty string', () => {
-        // Saving via spinner always resets any stored expression so old AI-agent
-        // monitors no longer carry a stale expression after editing.
-        expect(prefsSource).toContain("intervalExpression: ''");
-    });
+
 });
 
 describe('interval 0 = on-demand — ISSUE 31 / ISSUE 45', () => {

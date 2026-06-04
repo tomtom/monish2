@@ -5,7 +5,6 @@ Next number: 126
 
 ## Current
 
-125. AI_AGENT_INTERVAL_JS is still defined. We don't need it anymore since intervalExpression is gone. Also remove any code related to intervalExpression.
 
 
 ## Open

@@ -519,7 +519,6 @@ function showMonitorEditDialog(parent, monitor, onSave) {
                 command:            cmd,
                 type:               MONITOR_TYPE_VALUES[typeDropDown.get_selected()] ?? MonitorType.SHELL,
                 intervalSeconds:    totalSec,
-                intervalExpression: '',
                 outputRegex:        regexEntry.get_text().trim(),
                 cautionPatterns:    splitPatterns(cautionEntry.get_text()),
                 dangerPatterns:     splitPatterns(dangerEntry.get_text()),
