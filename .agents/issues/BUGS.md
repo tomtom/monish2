@@ -5,7 +5,6 @@ Next number: 138
 
 ## Current
 
-132. Did I understand you correctly that there is a 30s time running no matter what? Only if this is the case: trigger monitors only when such a 30s timer fires. Never update a scheduled monitor outside of such a 30s window. Manual updates are triggered immediately. On startup, randomly assign active monitors to the next 2 30s timer events. Remove the jitter logic, the jitter-related option in Prefs, and related code.
 133. In Prefs: Do we still need the "On-demand time display" option or could it be removed?
 134. In Prefs: Remove the debug log file, when debug logging is turned off.
 135. In Prefs: The text below "Debug Logging" says "journalctl -b | grep [monish2]". This is wrong, because "[monish2]" prints all lines matching at least one of these characters. I assume you meant "journalctl -b | grep monish2". That said the logging of startup timing is useless in its present form since the log contains just a single entry.

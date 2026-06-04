@@ -753,12 +753,17 @@ class MonishIndicator extends PanelMenu.Button {
                     // Cancel any previous age-update timer for this monitor.
                     const prev = this._ageTimers.get(id);
                     if (prev !== undefined) GLib.source_remove(prev);
-                    // Refresh label every 30 s until the monitor expires.
-                    const ageId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 30_000, () => {
+                    // Refresh label every 60 s; stop once the value goes stale.
+                    const ageId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 60_000, () => {
                         const res = this._results.get(id);
                         const ageLbl = this._menuItems.get(id)?.ageLabel;
                         if (!res?.collectedAt || !ageLbl) {
                             this._ageTimers.delete(id);
+                            return GLib.SOURCE_REMOVE;
+                        }
+                        if (Date.now() - res.collectedAt >= STALE_THRESHOLD_MS) {
+                            this._ageTimers.delete(id);
+                            this._updateStaleBadges();
                             return GLib.SOURCE_REMOVE;
                         }
                         ageLbl.text = formatAge(Date.now() - res.collectedAt);
