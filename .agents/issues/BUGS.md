@@ -5,7 +5,6 @@ Next number: 118
 
 ## Current
 
-116. In Claude Usage preset: Change the value's format to "50% (reset: DATETIME)".
 117. In OpenRouter preset: Show just the $ amount as the Activity value's, remove the "(30d): " prefix.
 
 

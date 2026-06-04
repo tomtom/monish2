@@ -320,6 +320,16 @@ describe('PRESET_MONITORS', () => {
         expect(preset.command).toContain('(reset:');
     });
 
+    it('Claude Usage output format is "5h: PCT% (reset: …)" — ISSUE 116', () => {
+        const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
+        // PCT leads, reset time trails — first token "5h:" is the label so the
+        // menu split logic shows "5h:" on the left and "PCT% (reset: …)" on the right.
+        expect(preset.command).toContain("print('5h: ' + pct(five)");
+        expect(preset.command).toContain("print('7d: ' + pct(seven)");
+        // Old column-alignment padding must be gone.
+        expect(preset.command).not.toContain('padEnd');
+    });
+
     it('OpenRouter Activity line shows only $ amount, not req count — ISSUE 107', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
         // Activity output must contain the spend amount but NOT the request count.
