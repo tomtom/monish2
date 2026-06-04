@@ -602,8 +602,11 @@ describe('prefs.js help dialog for setup instructions — ISSUE 68', () => {
         expect(prefsSource).toContain('data.helpText');
     });
 
-    it('help link uses activate-link signal to intercept the click', () => {
-        expect(prefsSource).toContain('activate-link');
+    it('help link is a flat Gtk.Button so clicks are reliable — ISSUE 121', () => {
+        // Gtk.Label activate-link with href="#" is unreliable in GTK4; a flat
+        // button with a clicked handler is simpler and always fires.
+        expect(prefsSource).not.toContain('activate-link');
+        expect(prefsSource).toContain("helpBtn.connect('clicked'");
     });
 });
 

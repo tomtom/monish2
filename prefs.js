@@ -121,17 +121,13 @@ function showMonitorEditDialog(parent, monitor, onSave) {
 
     // ---- Setup link (only for monitors that ship setup instructions) ----
     if (data.helpText) {
-        const helpLink = new Gtk.Label({
-            label:       `<a href="#">${_('Setup instructions…')}</a>`,
-            use_markup:  true,
-            xalign:      0,
-            css_classes: ['caption', 'dim-label'],
+        const helpBtn = new Gtk.Button({
+            label:       _('Setup instructions…'),
+            css_classes: ['caption', 'flat'],
+            halign:      Gtk.Align.START,
         });
-        helpLink.connect('activate-link', () => {
-            showHelpDialog(dialog, data.helpText);
-            return true; // prevent default URI handling
-        });
-        content.append(helpLink);
+        helpBtn.connect('clicked', () => showHelpDialog(dialog, data.helpText));
+        content.append(helpBtn);
     }
 
     // ---- Command ----
