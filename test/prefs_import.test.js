@@ -157,6 +157,12 @@ describe('extension.js on-demand monitors', () => {
         expect(extensionSource).toContain('monitor?.onDemand');
         expect(extensionSource).toContain('showSpark');
     });
+
+    it('adds on-demand CSS class to nameLabel so the name is always underlined — ISSUE 113', () => {
+        // On-demand monitors show a permanent underline so users know the name is clickable.
+        expect(extensionSource).toContain('monitor-name-on-demand');
+        expect(extensionSource).toContain('monitor.onDemand');
+    });
 });
 
 describe('extension.js multi-line output', () => {

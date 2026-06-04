@@ -44,6 +44,11 @@
     text-decoration: underline;
 }
 
+/* On-demand monitors are permanently underlined to signal they are clickable. */
+.monish-monitor-name-on-demand {
+    text-decoration: underline;
+}
+
 .monish-monitor-value {
     font-family: monospace;
     color: #9a9996;

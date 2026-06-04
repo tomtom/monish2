@@ -1,11 +1,12 @@
-Next number: 116
+Next number: 118
 
 
 # Bugs & Feature Request
 
 ## Current
 
-113. Change the indicator icon for on-demand monitors (i.e., Interval == 0) to a square.
+116. In Claude Usage preset: Change the value's format to "50% (reset: DATETIME)".
+117. In OpenRouter preset: Show just the $ amount as the Activity value's, remove the "(30d): " prefix.
 
 
 ## Open

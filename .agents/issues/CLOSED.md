@@ -31,3 +31,4 @@
 111. In Prefs: When a monitor is edited and the changes are saved, the list is reset and the edited monitor could be out of view. Make sure the edited monitor is visible after saving the changes. #closed/2026-06-04
 112. Remove the IntervalExpr (field and functionality) and replace it with the previously used "Interval (s)" field. The Claude and OpenRouter presets default to 0. #closed/2026-06-04
 114. Editing the Gnome RDP preset still fails. It is the only monitor with actions and action guards. Make sure any error on Edit Monitor is displayed somewhere - in Prefs (best just below the monitor entry) #closed/2026-06-04
+113. For on-demand monitors (i.e., Interval == 0) always underline the monitor name. #closed/2026-06-04

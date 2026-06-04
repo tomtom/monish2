@@ -261,6 +261,9 @@ class MonishIndicator extends PanelMenu.Button {
             x_align:     Clutter.ActorAlign.START,
             x_expand:    true,
         });
+        // On-demand monitors are always underlined so users know the name is clickable.
+        if (monitor.onDemand)
+            nameLabel.add_style_class_name(`${CSS_PREFIX}-monitor-name-on-demand`);
         nameLabel.connect('clicked', () => this._triggerMonitor(monitor));
 
         // Vertical box: header row (name + value) + optional multi-line value label
