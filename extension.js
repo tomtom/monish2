@@ -71,7 +71,8 @@ const CSS_PREFIX = 'monish';
 const STARTUP_GRACE_MS = 10_000;
 
 /** Icon shown next to an on-demand monitor name when its last value is stale. */
-const STALE_BADGE = '⏰';
+// const STALE_BADGE = '⏰';
+const STALE_BADGE = '↻';
 
 /** Age threshold (ms) above which an on-demand monitor's value is considered stale. */
 const STALE_THRESHOLD_MS = 15 * 60 * 1000;
