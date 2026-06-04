@@ -71,7 +71,6 @@ const CSS_PREFIX = 'monish';
 const STARTUP_GRACE_MS = 10_000;
 
 /** Icon shown next to an on-demand monitor name when its last value is stale. */
-// const STALE_BADGE = '⏰';
 const STALE_BADGE = '↻';
 
 /** Age threshold (ms) above which an on-demand monitor's value is considered stale. */
@@ -264,6 +263,16 @@ class MonishIndicator extends PanelMenu.Button {
             icon_size: 16,
         });
         iconBox.add_child(statusIcon);
+        // For on-demand monitors: stale state replaces the icon with the stale badge.
+        let staleIconLabel = null;
+        if (monitor.onDemand) {
+            staleIconLabel = new St.Label({
+                text:        STALE_BADGE,
+                style_class: `${CSS_PREFIX}-monitor-stale-badge`,
+                visible:     false,
+            });
+            iconBox.add_child(staleIconLabel);
+        }
         const statusIconWidget = iconBox;
 
         // Name is a button so it receives clicks, changes cursor, and handles hover.
@@ -279,20 +288,10 @@ class MonishIndicator extends PanelMenu.Button {
             nameLabel.add_style_class_name(`${CSS_PREFIX}-monitor-name-on-demand`);
         nameLabel.connect('clicked', () => this._triggerMonitor(monitor));
 
-        // Separate label for the stale badge so the underline on nameLabel never
-        // extends to the icon (toggling visibility avoids mutating nameLabel.label).
-        const staleBadgeLabel = new St.Label({
-            text:        STALE_BADGE,
-            style_class: `${CSS_PREFIX}-monitor-stale-badge`,
-            visible:     false,
-        });
-
         // Vertical box: header row (name + value) + optional multi-line value label
         const textBox = new St.BoxLayout({vertical: true, x_expand: true});
         const headerBox = new St.BoxLayout({x_expand: true});
         headerBox.add_child(nameLabel);
-        if (monitor.onDemand)
-            headerBox.add_child(staleBadgeLabel);
 
         // Inline value — right side; hidden for on-demand until first run
         const inlineValueLabel = new St.Label({
@@ -378,7 +377,7 @@ class MonishIndicator extends PanelMenu.Button {
         item.add_child(textBox);
 
         this.menu.addMenuItem(item);
-        this._menuItems.set(monitor.id, {item, statusIcon, nameLabel, staleBadgeLabel, inlineValueLabel, mlValueLabel, mlBox, sparklineLabel, ageLabel, actionsBox, actionBtns});
+        this._menuItems.set(monitor.id, {item, statusIcon, staleIconLabel, nameLabel, inlineValueLabel, mlValueLabel, mlBox, sparklineLabel, ageLabel, actionsBox, actionBtns});
     }
 
     // -----------------------------------------------------------------------
@@ -631,9 +630,11 @@ class MonishIndicator extends PanelMenu.Button {
         if (entry) {
             const monitor = this._monitors.find(m => m.id === id);
 
-            // Clear stale badge immediately when fresh data arrives.
-            if (monitor?.onDemand && entry.staleBadgeLabel)
-                entry.staleBadgeLabel.visible = false;
+            // Restore status icon immediately when fresh data arrives.
+            if (monitor?.onDemand && entry.staleIconLabel) {
+                entry.staleIconLabel.visible = false;
+                entry.statusIcon.visible = true;
+            }
 
             // Sparklines are meaningless for on-demand monitors (single data point per click).
             const showSpark = !monitor?.onDemand && monitor?.showSparkline !== false;
@@ -808,8 +809,10 @@ class MonishIndicator extends PanelMenu.Button {
             const res = this._results.get(monitor.id);
             if (!res?.collectedAt) continue;
             const stale = (now - res.collectedAt) >= STALE_THRESHOLD_MS;
-            if (entry.staleBadgeLabel)
-                entry.staleBadgeLabel.visible = stale;
+            if (entry.staleIconLabel) {
+                entry.staleIconLabel.visible = stale;
+                entry.statusIcon.visible = !stale;
+            }
         }
     }
 

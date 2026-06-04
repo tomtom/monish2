@@ -79,11 +79,9 @@
     color: #3465a4;
 }
 
-/* Stale-data icon shown beside the on-demand monitor name (separate from the
-   name label so the underline does not extend to the badge). */
+/* Stale-data badge replacing the status icon for on-demand monitors. */
 .monish-monitor-stale-badge {
     font-weight: bold;
-    margin-left: 4px;
 }
 
 /* Age / timestamp shown beneath on-demand monitor values */
