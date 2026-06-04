@@ -5,7 +5,6 @@ Next number: 138
 
 ## Current
 
-137. Debug logging: Don't use a log file but log to the system's journal (as it is done for "startup timing". Remove the code that removes the logging from the production version in the ZIP file.
 
 
 ## Open

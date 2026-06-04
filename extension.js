@@ -52,10 +52,8 @@ const SETTINGS_KEY = 'monitors';
 /** Settings key that holds the global schedule jitter percentage. */
 const JITTER_KEY = 'jitter-percent';
 
-/* DEBUG_ONLY_BEGIN */
 /** Settings key for the debug-logging toggle. */
 const DEBUG_LOG_KEY = 'debug-logging';
-/* DEBUG_ONLY_END */
 
 /** CSS class prefix applied to indicator and menu items for status colouring. */
 const CSS_PREFIX = 'monish';
@@ -113,7 +111,6 @@ class MonishIndicator extends PanelMenu.Button {
         this._menuItems     = new Map();   // monitorId -> {item, statusIcon, nameLabel, inlineValueLabel, mlValueLabel}
         this._history       = new Map();   // monitorId -> number[] ring buffer (max SPARKLINE_MAX_VALUES)
         this._appHistory    = new Map();   // monitorId -> Map<appName, number[]> for multi-line per-app sparklines
-        /* DEBUG_ONLY_BEGIN */ this._debugLogPath  = GLib.build_filenamev([extensionPath, 'debug.log']); /* DEBUG_ONLY_END */
         this._stateFileDir  = GLib.build_filenamev([GLib.get_user_runtime_dir(), 'monish2']);
         this._stateFilePath = GLib.build_filenamev([this._stateFileDir, 'state.json']);
 
@@ -147,17 +144,6 @@ class MonishIndicator extends PanelMenu.Button {
             () => this._reloadMonitors(),
         );
 
-        // Delete the log file when debug logging is turned off.
-        /* DEBUG_ONLY_BEGIN */
-        this._debugLogChangedId = this._settings.connect(
-            `changed::${DEBUG_LOG_KEY}`,
-            () => {
-                if (this._settings.get_boolean(DEBUG_LOG_KEY)) return;
-                try { Gio.File.new_for_path(this._debugLogPath).delete(null); } catch (_) {}
-            },
-        );
-        /* DEBUG_ONLY_END */
-
         // Update stale badges whenever the menu is opened.
         this._menuOpenId = this.menu.connect('open-state-changed', (_menu, isOpen) => {
             if (!isOpen) return;
@@ -173,8 +159,8 @@ class MonishIndicator extends PanelMenu.Button {
      * (Re)build the popup menu from the current monitor configuration.
      * Destroys existing menu items and GLib timers first.
      *
-     * When debug-logging is enabled, logs the wall time of this call and the
-     * per-monitor widget-creation loop to the GNOME journal.  Check with:
+     * When debug-logging is enabled, logs timing and per-monitor results to the
+     * GNOME journal.  Check with:
      *   journalctl -b --no-pager | grep monish2
      *
      * @param {number} [firstRunDelay=0] - Milliseconds to wait before the first
@@ -182,10 +168,8 @@ class MonishIndicator extends PanelMenu.Button {
      *   triggered by settings changes so new values appear immediately.
      */
     _buildMenu(firstRunDelay = 0) {
-        /* DEBUG_ONLY_BEGIN */
         const _dbg    = this._settings.get_boolean(DEBUG_LOG_KEY);
         const _tStart = _dbg ? GLib.get_monotonic_time() : 0;
-        /* DEBUG_ONLY_END */
 
         this._stopAllTimers();
         this.menu.removeAll();
@@ -244,12 +228,10 @@ class MonishIndicator extends PanelMenu.Button {
 
         this._updatePanelIcon();
 
-        /* DEBUG_ONLY_BEGIN */
         if (_dbg) {
             const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
             log(`[monish2] _buildMenu(): ${ms} ms, ${enabled.length} enabled monitor(s)`);
         }
-        /* DEBUG_ONLY_END */
     }
 
     /**
@@ -493,11 +475,11 @@ class MonishIndicator extends PanelMenu.Button {
             const value  = parseValue(stdout, monitor.outputRegex);
             const status = evaluateStatus(value, monitor.cautionPatterns, monitor.dangerPatterns);
             this._setMonitorResult(monitor.id, value, status);
-            /* DEBUG_ONLY_BEGIN */ this._appendDebugLog(monitor, value); /* DEBUG_ONLY_END */
+            this._debugLog(monitor, value);
         } catch (e) {
             const errStr = formatError(e);
             this._setMonitorResult(monitor.id, errStr, MonitorStatus.ERROR);
-            /* DEBUG_ONLY_BEGIN */ this._appendDebugLog(monitor, `error: ${errStr}`); /* DEBUG_ONLY_END */
+            this._debugLog(monitor, `error: ${errStr}`);
         }
     }
 
@@ -518,26 +500,17 @@ class MonishIndicator extends PanelMenu.Button {
         await this._runMonitor(monitor);
     }
 
-    /* DEBUG_ONLY_BEGIN */
     /**
-     * Append one log entry to the debug log file when debug logging is enabled.
-     * No-ops when the setting is off or on any write failure.
+     * Log one monitor execution to the system journal when debug logging is enabled.
+     * No-ops when the setting is off.
      *
      * @param {object} monitor - Monitor config object (name and type fields used).
      * @param {string} value   - Display value or 'error: …' string from the run.
      */
-    _appendDebugLog(monitor, value) {
+    _debugLog(monitor, value) {
         if (!this._settings.get_boolean(DEBUG_LOG_KEY)) return;
-        try {
-            const ts     = new Date().toISOString();
-            const line   = `${ts}\t${monitor.name}\t${monitor.type}\t${value}\n`;
-            const file   = Gio.File.new_for_path(this._debugLogPath);
-            const stream = file.append_to(Gio.FileCreateFlags.NONE, null);
-            stream.write_all(new TextEncoder().encode(line), null);
-            stream.close(null);
-        } catch (_) {}
+        log(`[monish2] ${new Date().toISOString()}\t${monitor.name}\t${monitor.type}\t${value}`);
     }
-    /* DEBUG_ONLY_END */
 
     // -----------------------------------------------------------------------
     // State persistence (/run/user/$UID/monish2/state.json, RAM-backed tmpfs)
@@ -839,12 +812,6 @@ class MonishIndicator extends PanelMenu.Button {
             this._settings.disconnect(this._jitterChangedId);
             this._jitterChangedId = null;
         }
-        /* DEBUG_ONLY_BEGIN */
-        if (this._debugLogChangedId) {
-            this._settings.disconnect(this._debugLogChangedId);
-            this._debugLogChangedId = null;
-        }
-        /* DEBUG_ONLY_END */
         if (this._menuOpenId) {
             this.menu.disconnect(this._menuOpenId);
             this._menuOpenId = null;
@@ -862,22 +829,18 @@ export default class MonishExtension extends Extension {
     enable() {
         this.initTranslations('monish2@thm.link');
         this._settings  = this.getSettings();
-        /* DEBUG_ONLY_BEGIN */
         const _dbg    = this._settings.get_boolean(DEBUG_LOG_KEY);
         const _tStart = _dbg ? GLib.get_monotonic_time() : 0;
-        /* DEBUG_ONLY_END */
         this._indicator = new MonishIndicator(
             this._settings,
             () => this.openPreferences(),
             this.path,
         );
         Main.panel.addToStatusArea(this.uuid, this._indicator);
-        /* DEBUG_ONLY_BEGIN */
         if (_dbg) {
             const ms = Math.round((GLib.get_monotonic_time() - _tStart) / 1000);
             log(`[monish2] enable(): ${ms} ms total, ${this._indicator._monitors.length} monitor(s) configured`);
         }
-        /* DEBUG_ONLY_END */
     }
 
     disable() {

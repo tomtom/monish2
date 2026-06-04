@@ -43,14 +43,10 @@ install: compile-schemas compile-translations
 	@echo "Restart GNOME Shell (Alt+F2 → 'r') or log out to activate."
 
 # Build a ZIP suitable for upload to extensions.gnome.org.
-# Debug-only code (/* DEBUG_ONLY_BEGIN */ … /* DEBUG_ONLY_END */) is stripped
-# from extension.js so the distribution build has no log() calls.
 zip: compile-schemas compile-translations
 	rm -f $(UUID).shell-extension.zip
 	$(eval DISTDIR := $(shell mktemp -d))
-	sed '/\/\* DEBUG_ONLY_BEGIN \*\//,/\/\* DEBUG_ONLY_END \*\//d' \
-		extension.js > $(DISTDIR)/extension.js
-	cp metadata.json prefs.js stylesheet.css $(DISTDIR)/
+	cp extension.js metadata.json prefs.js stylesheet.css $(DISTDIR)/
 	cp -r lib icons schemas locale $(DISTDIR)/
 	rm -f $(DISTDIR)/schemas/gschemas.compiled
 	cd $(DISTDIR) && zip -r $(CURDIR)/$(UUID).shell-extension.zip \

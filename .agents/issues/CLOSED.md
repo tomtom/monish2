@@ -1,3 +1,4 @@
+137. Debug logging: Log to system journal instead of file; remove DEBUG_ONLY stripping from ZIP build. #closed/2026-06-04
 136. In Prefs: Replace "Schedule Settings" with "Options". #closed/2026-06-04
 135. In Prefs: Fix journalctl grep hint — [monish2] was a character class, not a literal string. #closed/2026-06-04
 134. In Prefs: Remove the debug log file, when debug logging is turned off. #closed/2026-06-04
