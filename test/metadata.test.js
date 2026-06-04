@@ -32,8 +32,8 @@ describe('metadata.json', () => {
         }
     });
 
-    it('declares session-modes: ["user"] — ISSUE 104', () => {
-        // Prevents EGO validator warning about unset session-modes.
-        expect(metadata['session-modes']).toEqual(['user']);
+    it('omits session-modes — ISSUE 129', () => {
+        // EGO-M-005: field must be omitted when it only contains "user" (the default).
+        expect(metadata['session-modes']).toBeUndefined();
     });
 });

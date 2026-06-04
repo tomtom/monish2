@@ -1,3 +1,4 @@
+129. Warning in make shexli: EGO-M-005 session-modes should be omitted when only containing "user". #closed/2026-06-04
 127. In Prefs / Edit Monitor with Actions: Explain how the guard expressions work (provide a simple help page). Are there any other operators than "matches"? #closed/2026-06-04
 126. In Claude Usage: The patterns for CAUTION/DANGER don't work. "(5h):  14% (reset: Thu 04 16:00)" is marked as CAUTION although the value is just 14%, much below the CAUTION threshold. #closed/2026-06-04
 80. In Prefs: Define two directories (/usr/share/monish and ~/.local/share/monish), from where monish reads json predefined monitor definitions (in addition to those provided by the extension itself). These definitions should have the same format as the export file. Add a version number to the export file format. #closed/2026-06-03
