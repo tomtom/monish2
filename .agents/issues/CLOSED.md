@@ -1,3 +1,4 @@
+136. In Prefs: Replace "Schedule Settings" with "Options". #closed/2026-06-04
 135. In Prefs: Fix journalctl grep hint — [monish2] was a character class, not a literal string. #closed/2026-06-04
 134. In Prefs: Remove the debug log file, when debug logging is turned off. #closed/2026-06-04
 133. In Prefs: Do we still need the "On-demand time display" option or could it be removed? #closed/2026-06-04

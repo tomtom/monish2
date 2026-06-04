@@ -782,9 +782,9 @@ export default class MonishPreferences extends ExtensionPreferences {
             refreshPresetRows();
         };
 
-        // ---- Schedule Settings group ----
+        // ---- Options group ----
         const scheduleGroup = new Adw.PreferencesGroup({
-            title:       _('Schedule Settings'),
+            title:       _('Options'),
             description: _('Applied globally to all scheduled monitors.'),
         });
         page.add(scheduleGroup);

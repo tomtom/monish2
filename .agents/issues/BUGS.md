@@ -5,7 +5,6 @@ Next number: 138
 
 ## Current
 
-136. In Prefs: Replace "Schedule Settings" with "Options".
 137. Debug logging: Don't use a log file but log to the system's journal (as it is done for "startup timing". Remove the code that removes the logging from the production version in the ZIP file.
 
 
