@@ -105,7 +105,7 @@ describe('PRESET_MONITORS', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
         expect(preset).toBeDefined();
         expect(preset.type).toBe(MonitorType.JAVASCRIPT);
-        expect(preset.intervalSeconds).toBe(900);
+        expect(preset.intervalSeconds).toBe(0);
         expect(preset.showSparkline).toBe(false);
         expect(preset.command).toContain('.credentials.json');
         expect(preset.command).toContain('api.anthropic.com');
@@ -131,7 +131,7 @@ describe('PRESET_MONITORS', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
         expect(preset).toBeDefined();
         expect(preset.type).toBe(MonitorType.JAVASCRIPT);
-        expect(preset.intervalSeconds).toBe(900);
+        expect(preset.intervalSeconds).toBe(0);
         expect(preset.showSparkline).toBe(false);
         expect(preset.command).toContain('openrouter.ai');
         expect(preset.command).toContain('/credits');
@@ -154,17 +154,13 @@ describe('PRESET_MONITORS', () => {
         expect(dangerRe.test('Balance: $9.99\nActivity (30d): 10 req / $2.00')).toBe(false);
     });
 
-    it('Claude Usage and OpenRouter use smart scheduling via intervalExpression — ISSUE 88/94/95', () => {
-        // ISSUE 88 made these on-demand; ISSUE 94/95 upgraded to dynamic scheduling:
-        // poll every 15 min when the agent process is running, skip otherwise.
+    it('Claude Usage and OpenRouter are on-demand — ISSUE 112', () => {
+        // ISSUE 112: expression-based scheduling removed; presets set to on-demand (intervalSeconds 0).
         for (const name of ['Claude Usage', 'OpenRouter']) {
             const preset = PRESET_MONITORS.find(p => p.name === name);
             expect(preset).toBeDefined();
-            expect(preset.intervalSeconds).toBe(900);
-            expect(typeof preset.intervalExpression).toBe('string');
-            expect(preset.intervalExpression.trim().length).toBeGreaterThan(0);
-            expect(preset.intervalExpression).toContain('AI_AGENT');
-            expect(preset.intervalExpression).toContain('print');
+            expect(preset.intervalSeconds).toBe(0);
+            expect(preset.intervalExpression ?? '').toBe('');
         }
     });
 
@@ -311,12 +307,9 @@ describe('PRESET_MONITORS', () => {
         expect(arg.default).toBe('^(claude)$');
     });
 
-    it('Claude Usage intervalExpression checks /proc comm against AI_AGENT — ISSUE 94', () => {
+    it('Claude Usage has no intervalExpression — ISSUE 112 removed expression scheduling', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'Claude Usage');
-        expect(preset.intervalExpression).toContain('/proc');
-        expect(preset.intervalExpression).toContain('comm');
-        expect(preset.intervalExpression).toContain('AI_AGENT');
-        expect(preset.intervalExpression).toContain('900');
+        expect(preset.intervalExpression ?? '').toBe('');
     });
 
     it('Claude Usage command includes reset time in output — ISSUE 106', () => {
@@ -341,12 +334,9 @@ describe('PRESET_MONITORS', () => {
         expect(arg.default).toBe('^(opencode)$');
     });
 
-    it('OpenRouter intervalExpression checks /proc comm against AI_AGENT — ISSUE 95', () => {
+    it('OpenRouter has no intervalExpression — ISSUE 112 removed expression scheduling', () => {
         const preset = PRESET_MONITORS.find(p => p.name === 'OpenRouter');
-        expect(preset.intervalExpression).toContain('/proc');
-        expect(preset.intervalExpression).toContain('comm');
-        expect(preset.intervalExpression).toContain('AI_AGENT');
-        expect(preset.intervalExpression).toContain('900');
+        expect(preset.intervalExpression ?? '').toBe('');
     });
 });
 

@@ -221,10 +221,11 @@ describe('GSettings schema defaults', () => {
         expect(schemaSource).toContain('<default>5</default>');
     });
 
-    it('splitInterval is imported from lib/monitor.js in prefs', () => {
-        // Guards that the interval helper is imported from the shared module.
-        // toSeconds was removed together with the interval spinner (ISSUE 108).
+    it('splitInterval and toSeconds are imported from lib/monitor.js in prefs', () => {
+        // Guards that interval helpers are imported from the shared module.
+        // toSeconds restored with the interval spinner (ISSUE 112).
         expect(prefsSource).toContain('splitInterval');
+        expect(prefsSource).toContain('toSeconds');
     });
 });
 
@@ -239,10 +240,10 @@ describe('prefs.js interval UI (seconds-only) — ISSUE 27', () => {
         expect(prefsSource).not.toContain('unitDropDown');
     });
 
-    it('interval label updated to Interval Expr after spinner removal — ISSUE 108', () => {
-        // Interval (s) spinner removed; expression field is the sole interval input.
-        expect(prefsSource).not.toContain('\'Interval (s)\'');
-        expect(prefsSource).toContain('\'Interval Expr\'');
+    it('interval label is Interval (s) — ISSUE 112 restored spinner, removed Interval Expr (ISSUE 108)', () => {
+        // ISSUE 112: Interval Expr field removed; Interval (s) spinner is the sole interval input.
+        expect(prefsSource).toContain('\'Interval (s)\'');
+        expect(prefsSource).not.toContain('\'Interval Expr\'');
     });
 });
 
@@ -252,6 +253,9 @@ describe('prefs.js interval spinner init — ISSUE 28', () => {
         // of the raw intervalSeconds (60) caused preset intervals to show wrong
         // values and be silently overwritten on save.
         expect(prefsSource).not.toContain('value:       magnitude');
+        // ISSUE 112: spinner restored; confirm it is seeded from data.intervalSeconds.
+        expect(prefsSource).toContain('intervalSpin');
+        expect(prefsSource).toContain('data.intervalSeconds');
     });
 });
 
@@ -264,16 +268,17 @@ describe('prefs.js jitter persistence — ISSUE 29', () => {
     });
 });
 
-describe('prefs.js interval expression replaces interval spinner — ISSUE 108', () => {
-    it('interval spinner removed — no intervalSpin widget in edit dialog', () => {
-        // ISSUE 108: Interval (s) field removed; expression field is sole input.
-        expect(prefsSource).not.toContain('intervalSpin');
+describe('prefs.js interval spinner restored — ISSUE 112', () => {
+    it('intervalSpin widget present in edit dialog (Interval Expr removed)', () => {
+        // ISSUE 112: Interval (s) spinner restored; expression field removed.
+        expect(prefsSource).toContain('intervalSpin');
+        expect(prefsSource).not.toContain('intervalExpression:   exprText');
     });
 
-    it('expression field pre-populated from intervalSeconds when expression is empty', () => {
-        // When editing an old monitor with no expression, seed the field with the
-        // current intervalSeconds so the user sees the existing interval.
-        expect(prefsSource).toContain('data.intervalSeconds');
+    it('save handler clears intervalExpression to empty string', () => {
+        // Saving via spinner always resets any stored expression so old AI-agent
+        // monitors no longer carry a stale expression after editing.
+        expect(prefsSource).toContain("intervalExpression: ''");
     });
 });
 
@@ -831,22 +836,23 @@ describe('prefs.js external preset directories — ISSUE 80', () => {
     });
 });
 
-describe('extension.js interval expression \u2014 ISSUE 93', () => {
-    it('defines _resolveInterval method', () => {
-        expect(extensionSource).toContain('_resolveInterval');
+describe('extension.js interval expression removed \u2014 ISSUE 112', () => {
+    it('does not define _resolveInterval (removed \u2014 ISSUE 112)', () => {
+        // ISSUE 112: interval expression functionality dropped; intervalSeconds used directly.
+        expect(extensionSource).not.toContain('_resolveInterval');
     });
 
-    it('defines EXPR_RECHECK_MS constant', () => {
-        expect(extensionSource).toContain('EXPR_RECHECK_MS');
+    it('does not define EXPR_RECHECK_MS (removed \u2014 ISSUE 112)', () => {
+        expect(extensionSource).not.toContain('EXPR_RECHECK_MS');
     });
 
-    it('_scheduleNextRun calls _resolveInterval', () => {
-        expect(extensionSource).toContain('_resolveInterval(monitor)');
+    it('_scheduleNextRun uses monitor.intervalSeconds directly', () => {
+        expect(extensionSource).toContain('monitor.intervalSeconds');
+        expect(extensionSource).not.toContain('_resolveInterval(monitor)');
     });
 
-    it('prefs edit dialog includes interval expression field', () => {
-        expect(prefsSource).toContain('intervalExpression');
-        expect(prefsSource).toContain('Interval Expr');
+    it('prefs edit dialog does not include Interval Expr field', () => {
+        expect(prefsSource).not.toContain('Interval Expr');
     });
 
     it('_setMonitorResult preserves collectedAt when skipHistory is true \u2014 ISSUE 110', () => {
@@ -856,13 +862,6 @@ describe('extension.js interval expression \u2014 ISSUE 93', () => {
         expect(extensionSource).toContain('skipHistory');
         // The fix: use existing collectedAt when restoring, Date.now() otherwise.
         expect(extensionSource).toMatch(/skipHistory.*collectedAt|collectedAt.*skipHistory/s);
-    });
-
-    it('_resolveInterval has plain-number fast path (no subprocess) \u2014 ISSUE 109', () => {
-        // Avoids spawning a GJS subprocess for trivial expressions like "60" or "0",
-        // which is the common case after ISSUE 108 (expression field defaults to number).
-        expect(extensionSource).toContain('parseFloat(expr)');
-        expect(extensionSource).not.toContain('parseFloat(expr);\n        try {');
     });
 });
 

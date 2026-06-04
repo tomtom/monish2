@@ -61,12 +61,6 @@ const DEBUG_LOG_KEY = 'debug-logging';
 /** Settings key for on-demand monitor time display mode. */
 const ON_DEMAND_TIME_KEY = 'on-demand-time-display';
 
-/**
- * Re-check interval (ms) used when a monitor's intervalExpression returns 0.
- * The expression is re-evaluated after this delay without running the monitor.
- */
-const EXPR_RECHECK_MS = 60_000;
-
 /** CSS class prefix applied to indicator and menu items for status colouring. */
 const CSS_PREFIX = 'monish';
 
@@ -387,58 +381,15 @@ class MonishIndicator extends PanelMenu.Button {
     }
 
     /**
-     * Evaluate the monitor's intervalExpression (if set) and return the
-     * resolved interval in seconds.  Falls back to monitor.intervalSeconds
-     * when the expression is absent, fails, or returns a non-finite value.
-     *
-     * The expression is run as a GJS script with argValues injected as
-     * const declarations.  It must call print() with the desired interval.
-     *
-     * @param {object} monitor
-     * @returns {Promise<number>} Interval in seconds (≥ 0).
-     */
-    async _resolveInterval(monitor) {
-        const expr = (monitor.intervalExpression ?? '').trim();
-        if (!expr) return monitor.intervalSeconds;
-        // Plain-number fast path: avoid spawning a GJS subprocess for trivial
-        // expressions like "60" or "0".  This is the common case after ISSUE 108
-        // (expression field is the sole interval input and defaults to a number).
-        const fast = parseFloat(expr);
-        if (isFinite(fast) && fast >= 0 && /^\s*\d+(\.\d+)?\s*$/.test(expr)) return fast;
-        try {
-            const code   = injectArgs(expr, MonitorType.JAVASCRIPT, monitor.args ?? [], monitor.argValues ?? {});
-            const result = await executeJavaScript(code, 10);
-            const n      = parseFloat(result.trim());
-            if (isFinite(n) && n >= 0) return n;
-        } catch (_) {}
-        return monitor.intervalSeconds;
-    }
-
-    /**
      * Schedule the next timed poll for a regular (non-on-demand) monitor.
-     * Evaluates intervalExpression (if set) to determine the actual interval.
-     * When the expression returns 0: skips the poll and re-checks after
-     * EXPR_RECHECK_MS.  Otherwise jitters the resolved interval and runs.
+     * Jitters monitor.intervalSeconds and arms a one-shot GLib timer.
      * Resamples jitter on every call so successive intervals are independent.
      *
      * @param {object} monitor
      */
-    async _scheduleNextRun(monitor) {
-        const intervalSec   = await this._resolveInterval(monitor);
+    _scheduleNextRun(monitor) {
         const jitterPercent = this._settings.get_int(JITTER_KEY);
-
-        if (intervalSec <= 0) {
-            // Expression returned 0: skip this poll, re-evaluate after EXPR_RECHECK_MS.
-            const sourceId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, EXPR_RECHECK_MS, () => {
-                this._timers.delete(monitor.id);
-                this._scheduleNextRun(monitor);
-                return GLib.SOURCE_REMOVE;
-            });
-            this._timers.set(monitor.id, sourceId);
-            return;
-        }
-
-        const ms       = jitteredInterval(Math.max(1000, intervalSec * 1000), jitterPercent);
+        const ms       = jitteredInterval(Math.max(1000, monitor.intervalSeconds * 1000), jitterPercent);
         const sourceId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, ms, () => {
             this._timers.delete(monitor.id);
             this._runMonitor(monitor);

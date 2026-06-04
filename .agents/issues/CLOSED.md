@@ -22,3 +22,11 @@
 102. Ad **3. Conditional `log()` in the Shell process**: Strip debug logging code from the zip. Ad **4. Debug log written to extension install directory**: irrelevant once stripped. #closed/2026-06-03
 103. Ad **7. `gettext-domain` set but unused**: Add placeholder `po/` directory; add localizations for all important European languages; change code to pick up language setting. #closed/2026-06-03
 104. Add `"session-modes": ["user"]` to metadata.json. #closed/2026-06-03
+105. Add `extension.js` and `prefs.js` to the lint script. Note: current config sets `"env": {"node": true}`; GJS gi:// imports need a GNOME ESLint plugin or `globals` overrides to avoid false positives. #closed/2026-06-03
+106. In Claude Usage preset: Also display when the quota resets. Format like `5h (reset: ...)      90%`. #closed/2026-06-04
+107. In OpenRouter preset: In Activity, just display the $ amount. #closed/2026-06-04
+108. In Prefs: Remove the "Interval (s)" field; use JS interval expression as sole interval input. Adjust help string and presets accordingly. #closed/2026-06-04
+109. Startup still slow with Claude Usage and OpenRouter enabled. Add plain-number fast path in _resolveInterval to avoid subprocess spawning for trivial "60"-style expressions. #closed/2026-06-04
+110. Issue 89 wasn't solved. With on-demand monitors, the value's age should be shown in the monitors list/menu. It is not. #closed/2026-06-04
+111. In Prefs: When a monitor is edited and the changes are saved, the list is reset and the edited monitor could be out of view. Make sure the edited monitor is visible after saving the changes. #closed/2026-06-04
+112. Remove the IntervalExpr (field and functionality) and replace it with the previously used "Interval (s)" field. The Claude and OpenRouter presets default to 0. #closed/2026-06-04
