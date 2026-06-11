@@ -43,7 +43,7 @@ GNOME Shell 45 – 50.
 
 Copy the extension directory to
 `~/.local/share/gnome-shell/extensions/monish2@thm.link` and restart GNOME
-Shell (Alt+F2, type `r`, Enter).
+Shell.
 
 ## License
 
